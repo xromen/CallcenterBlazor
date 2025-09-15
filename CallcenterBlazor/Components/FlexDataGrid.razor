@@ -1,0 +1,51 @@
+﻿@typeparam T
+
+<style>
+    .selected {
+        background-color: #1E88E5 !important;
+    }
+    .selected > td {
+        color: white !important;
+    }
+    .selected > td .mud-input {
+        color: white !important;
+    }
+
+    .mud-table {
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+        height: 100%;
+    }
+    
+    .mud-table-pagination {
+        flex: 0 0 auto; 
+    }
+
+    .grid-container {
+        height: 100%;
+        max-height: 70vh;
+    }
+</style>
+
+<MudStack Class="grid-container mx-2">
+    <MudDataGrid T="T" 
+                 Class="flex-grid"
+                 RowClassFunc="SelectedRowClassFunc" 
+                 RowClick="RowClick" 
+                 RowClass="cursor-pointer"
+                 Hover="true" 
+                 Filterable="true" 
+                 ServerData="ServerData" 
+                 @ref="_mudDataGrid"
+                 Height="100%"
+                 FixedHeader="true"
+                 Striped="true">
+        <Columns>
+            @Columns
+        </Columns>
+        <PagerContent>
+            @PagerContent
+        </PagerContent>
+    </MudDataGrid>
+</MudStack>

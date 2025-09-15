@@ -1,0 +1,110 @@
+﻿@page "/Profile"
+
+<style>
+    .profile-icon {
+        height: 100%;
+        width: auto;
+        max-width: 60px;
+        color: #81848d;
+        background-color: var(--mud-palette-dark);
+        padding: 10px;
+    }
+</style>
+
+<PageTitle>Профиль</PageTitle>
+
+<MudTabs Color="Color.Dark">
+    <MudTabPanel Text="Мой профиль">
+        <MudPaper Class="ma-4">
+            <MudGrid Spacing="0">
+                <MudItem xs="1">
+                    <MudIcon Class="profile-icon" Icon="@Icons.Material.Filled.Person"/>
+                </MudItem>
+                <MudItem xs="2" Class="d-flex align-center justify-start ms-3">
+                    <MudText>Полное имя:</MudText>
+                </MudItem>
+                <MudItem xs="6" Class="d-flex align-center justify-start ms-3">
+                    <MudText>Попов Денис Александрович</MudText>
+                </MudItem>
+            </MudGrid>
+        </MudPaper>
+        <MudPaper Class="ma-4">
+            <MudGrid Spacing="0">
+                <MudItem xs="1">
+                    <MudIcon Class="profile-icon" Icon="@Icons.Material.Filled.Work"/>
+                </MudItem>
+                <MudItem xs="2" Class="d-flex align-center justify-start ms-3">
+                    <MudText>Набор прав:</MudText>
+                </MudItem>
+                <MudItem xs="6" Class="d-flex align-center justify-start ms-3">
+                    <MudText>Администратор КЦ</MudText>
+                </MudItem>
+            </MudGrid>
+        </MudPaper>
+        <MudPaper Class="ma-4">
+            <MudGrid Spacing="0">
+                <MudItem xs="1">
+                    <MudIcon Class="profile-icon" Icon="@Icons.Material.Filled.Home"/>
+                </MudItem>
+                <MudItem xs="2" Class="d-flex align-center justify-start ms-3">
+                    <MudText>Структурное подразделение:</MudText>
+                </MudItem>
+                <MudItem xs="6" Class="d-flex align-center justify-start ms-3">
+                    <MudText>ХКФОМС</MudText>
+                </MudItem>
+            </MudGrid>
+        </MudPaper>
+        <MudPaper Class="ma-4">
+            <MudGrid Spacing="0">
+                <MudItem xs="1">
+                    <MudIcon Class="profile-icon" Icon="@Icons.Material.Filled.FormatListBulleted"/>
+                </MudItem>
+                <MudItem xs="2" Class="d-flex align-center justify-start ms-3">
+                    <MudText>Название организации:</MudText>
+                </MudItem>
+                <MudItem xs="6" Class="d-flex align-center justify-start ms-3">
+                    <MudText>Хабаровский краевой фонд обязательного медицинского страхования</MudText>
+                </MudItem>
+            </MudGrid>
+        </MudPaper>
+        <MudPaper Class="ma-4">
+            <MudGrid Spacing="0">
+                <MudItem xs="1">
+                    <MudIcon Class="profile-icon" Icon="@Icons.Material.Filled.CalendarMonth"/>
+                </MudItem>
+                <MudItem xs="2" Class="d-flex align-center justify-start ms-3">
+                    <MudText>Дата добавления в систему:</MudText>
+                </MudItem>
+                <MudItem xs="6" Class="d-flex align-center justify-start ms-3">
+                    <MudText>27.06.2016 16:01:13</MudText>
+                </MudItem>
+            </MudGrid>
+        </MudPaper>
+    </MudTabPanel>
+    <MudTabPanel Text="Изменить">
+        <MudPaper Class="ma-4">
+            <MudGrid Spacing="0">
+                <MudItem xs="1">
+                    <MudIcon Class="profile-icon" Icon="@Icons.Material.Filled.Lock"/>
+                </MudItem>
+                <MudItem xs="2" Class="d-flex align-center justify-start ms-3">
+                    <MudText>Пароль:</MudText>
+                </MudItem>
+                <MudItem xs="6" Class="d-flex align-center justify-start">
+                    <MudTextField Variant="Variant.Outlined"
+                                  InputType="_passwordInputType"
+                                  Adornment="Adornment.End"
+                                  AdornmentIcon="@_passwordInputIcon"
+                                  OnAdornmentClick="PasswordShowToggle"
+                                  AdornmentAriaLabel="Показать пароль"
+                                  Style="max-height: 40px; max-width: 400px"
+                                  T="string"/>
+                </MudItem>
+            </MudGrid>
+        </MudPaper>
+        <MudButton Class="ma-4"
+                   Variant="Variant.Filled"
+                   Color="Color.Success">Сохранить
+        </MudButton>
+    </MudTabPanel>
+</MudTabs>

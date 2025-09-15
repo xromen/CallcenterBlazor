@@ -1,0 +1,403 @@
+﻿@page "/Declaration/{id:long}"
+@page "/Declaration/Add"
+
+<style>
+    .truncate-select {
+        min-width: 0;
+    }
+
+    .mud-select {
+        min-width: 0;
+    }
+
+    .truncate-select .mud-input-slot {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .mud-button-label {
+        white-space: nowrap;
+    }
+
+    .form-obr-select {
+        min-width: 90px;
+    }
+    
+    .mud-input{
+        background-color: white;
+    }
+</style>
+
+<MudTabs HeaderPosition="TabHeaderPosition.After" Color="Color.Dark">
+    <ChildContent>
+        <MudTabPanel Text="Информация">
+            <MudStack Class="ms-8 mt-4">
+                <MudGrid Class="mud-width-full">
+                    <MudItem lg="3">
+                        <MudStack>
+                            <MudTextField T="string"
+                                          Label="Статус"
+                                          Variant="Variant.Outlined"
+                                          Value="@("В обработке")"
+                                          Margin="Margin.Dense"
+                                          ReadOnly/>
+                            <MudTextField T="string"
+                                          Variant="Variant.Outlined"
+                                          Label="Код обращения"
+                                          Value="@("ХКФОМС")"
+                                          Margin="Margin.Dense"
+                                          ReadOnly/>
+                            <MudSelect T="string"
+                                       Variant="Variant.Outlined"
+                                       Label="Вид обращения"
+                                       Margin="Margin.Dense"
+                                       Modal="false">
+                                <MudSelectItem Value="@("Консультация")">Консультация</MudSelectItem>
+                                <MudSelectItem Value="@("Жалоба")">Жалоба</MudSelectItem>
+                                <MudSelectItem Value="@("Обращение")">Обращение</MudSelectItem>
+                            </MudSelect>
+                            <MudSelect T="string"
+                                       Variant="Variant.Outlined"
+                                       Label="Источник поступления"
+                                       Margin="Margin.Dense"
+                                       Modal="false">
+                                <MudSelectItem Value="@("Консультация")">Консультация</MudSelectItem>
+                                <MudSelectItem Value="@("Жалоба")">Жалоба</MudSelectItem>
+                                <MudSelectItem Value="@("Обращение")">Обращение</MudSelectItem>
+                            </MudSelect>
+                            <MudNumericField T="int?"
+                                             Variant="Variant.Outlined"
+                                             Label="Номер ЭЖОГ"
+                                             Margin="Margin.Dense"/>
+                            <MudTextField T="string"
+                                          Variant="Variant.Outlined"
+                                          Label="Контактный номер поступления"
+                                          Margin="Margin.Dense"/>
+                            <MudContainer Fixed="true" Style="padding: 0 !important;">
+                                <MudStack Row
+                                          AlignItems="AlignItems.Center"
+                                          Style="min-width: 0">
+                                    <MudSelect T="string"
+                                               Variant="Variant.Outlined"
+                                               Margin="Margin.Dense"
+                                               FitContent="true"
+                                               OuterClass="form-obr-select"
+                                               Modal="false">
+                                        <MudSelectItem Value="@("Консультация")">Уст.</MudSelectItem>
+                                        <MudSelectItem Value="@("Жалоба")">Пис.</MudSelectItem>
+                                    </MudSelect>
+                                    <MudSelect T="string"
+                                               Label="Форма обращения"
+                                               Variant="Variant.Outlined"
+                                               Margin="Margin.Dense"
+                                               Class="truncate-select"
+                                               Modal="false">
+                                        <MudSelectItem Value="@("Консультация")">По телефону горячей линии
+                                        </MudSelectItem>
+                                        <MudSelectItem Value="@("Жалоба")">По телефону горячей линии в мо
+                                        </MudSelectItem>
+                                        <MudSelectItem Value="@("Жалоба1")">По телефону единого федерального номера
+                                        </MudSelectItem>
+                                    </MudSelect>
+                                </MudStack>
+                            </MudContainer>
+                            <MudDatePicker Label="Дата поступления обращения в ФОМС"
+                                           ShowToolbar="false"
+                                           Variant="Variant.Outlined"
+                                           Modal="false"
+                                           Margin="Margin.Dense"/>
+                            <MudDatePicker Label="Дата поступления обращения в СМО"
+                                           ShowToolbar="false"
+                                           Variant="Variant.Outlined"
+                                           Modal="false"
+                                           Margin="Margin.Dense"/>
+                        </MudStack>
+                    </MudItem>
+                    <MudItem lg="4">
+                        <MudStack>
+                            <MudSelect T="string"
+                                       Label="Категория граждан"
+                                       Variant="Variant.Outlined"
+                                       Margin="Margin.Dense"
+                                       Modal="false">
+                                <MudSelectItem Value="@("Консультация")">Работающий</MudSelectItem>
+                                <MudSelectItem Value="@("Жалоба")">Неработающий</MudSelectItem>
+                                <MudSelectItem Value="@("Жалоба1")">Ветераны и уВОВ</MudSelectItem>
+                                <MudSelectItem Value="@("Жалоба1")">Инвалиды</MudSelectItem>
+                                <MudSelectItem Value="@("Жалоба1")">Дети инвалиды</MudSelectItem>
+                            </MudSelect>
+                            <MudStack Row>
+                                <MudTextField T="string"
+                                              Variant="Variant.Outlined"
+                                              Label="Фамилия"
+                                              Margin="Margin.Dense"/>
+                                <MudTextField T="string"
+                                              Variant="Variant.Outlined"
+                                              Label="Имя"
+                                              Margin="Margin.Dense"/>
+                                <MudTextField T="string"
+                                              Variant="Variant.Outlined"
+                                              Label="Отчество"
+                                              Margin="Margin.Dense"/>
+                                <MudDatePicker Label="Дата рождения"
+                                               ShowToolbar="false"
+                                               Variant="Variant.Outlined"
+                                               Modal="false"
+                                               Margin="Margin.Dense"
+                                               AdornmentIcon=""/>
+                            </MudStack>
+                            <MudTextField T="string"
+                                          Variant="Variant.Outlined"
+                                          Label="Ф.И.О. представителя ЗЛ"
+                                          Margin="Margin.Dense"/>
+                            <MudStack Row
+                                      Style="margin-top: 8px; margin-bottom: 4px;">
+                                <MudIconButton Icon="@Icons.Material.Filled.Search"
+                                               Variant="Variant.Filled"
+                                               Color="Color.Info"/>
+                                <MudButton Variant="Variant.Filled"
+                                           Color="Color.Success"
+                                           FullWidth="true">Узнать страхового представителя
+                                </MudButton>
+                            </MudStack>
+                            <MudTextField T="string"
+                                          Variant="Variant.Outlined"
+                                          Label="Адрес фактического проживания"
+                                          Margin="Margin.Dense"/>
+                            <MudTextField T="string"
+                                          Variant="Variant.Outlined"
+                                          Label="ЕНП"
+                                          Margin="Margin.Dense"/>
+                            <MudStack Row>
+                                <MudSelect T="string"
+                                           Label="Тип документа"
+                                           Variant="Variant.Outlined"
+                                           Margin="Margin.Dense"
+                                           Modal="false">
+                                    <MudSelectItem Value="@("Консультация")">Паспорт гражданина СССР</MudSelectItem>
+                                    <MudSelectItem Value="@("Жалоба")">Паспорт гражданина России</MudSelectItem>
+                                    <MudSelectItem Value="@("Жалоба1")">Вид на жительство</MudSelectItem>
+                                </MudSelect>
+                                <MudTextField T="string"
+                                              Variant="Variant.Outlined"
+                                              Label="Серия"
+                                              Margin="Margin.Dense"/>
+                                <MudTextField T="string"
+                                              Variant="Variant.Outlined"
+                                              Label="Номер"
+                                              Margin="Margin.Dense"/>
+                            </MudStack>
+                            <MudStack Row>
+                                <MudTextField T="string"
+                                              Variant="Variant.Outlined"
+                                              Label="Контактный телефон"
+                                              Margin="Margin.Dense"/>
+                                <MudTextField T="string"
+                                              Variant="Variant.Outlined"
+                                              Label="e-mail"
+                                              Margin="Margin.Dense"/>
+                            </MudStack>
+                            <MudSelect T="string"
+                                       Label="СМО застрахованного"
+                                       Variant="Variant.Outlined"
+                                       Margin="Margin.Dense"
+                                       Modal="false">
+                                <MudSelectItem Value="@("Консультация")">Хабаровский филиал ао «страховая компания
+                                    «согаз-мед»
+                                </MudSelectItem>
+                                <MudSelectItem Value="@("Жалоба")">хабаровский филиал ооо втб мс</MudSelectItem>
+                                <MudSelectItem Value="@("Жалоба1")">филиал ооо "капитал мс" в хабаровском крае
+                                </MudSelectItem>
+                                <MudSelectItem Value="@("Жалоба1")">филиал "хабаровский" ао "страховая группа "спасские
+                                    ворота-м"
+                                </MudSelectItem>
+                            </MudSelect>
+                            <MudSelect T="string"
+                                       Label="МО застрахованного"
+                                       Variant="Variant.Outlined"
+                                       Margin="Margin.Dense"
+                                       Modal="false">
+                                <MudSelectItem Value="@("Консультация")">Без указания МО</MudSelectItem>
+                            </MudSelect>
+                            <MudStack Row
+                                      AlignItems="AlignItems.Center">
+                                <MudRadioGroup T="string"
+                                               @bind-Value="@_svoStatus">
+                                    <MudRadio Value="@("Radio 1")" Color="Color.Info">Участник СВО</MudRadio>
+                                    <MudRadio Value="@("Radio 2")" Color="Color.Info">Член участника СВО</MudRadio>
+                                </MudRadioGroup>
+                                <MudSpacer/>
+                                <MudIconButton Icon="@Icons.Material.Filled.Close"
+                                               Size="Size.Small"
+                                               Color="Color.Dark"
+                                               Class="me-2"
+                                               Style="border-radius: 50%;"
+                                               Variant="Variant.Filled"
+                                               OnClick="()=> { _svoStatus = null; }"/>
+                            </MudStack>
+                        </MudStack>
+                    </MudItem>
+                    <MudItem lg="5">
+                        <FileUploadComponent Accept="xml"/>
+                    </MudItem>
+                </MudGrid>
+            </MudStack>
+        </MudTabPanel>
+        <MudTabPanel Text="Обращение">
+            <MudStack Class="mx-8 mt-4">
+                <MudSelect T="string"
+                           Label="Тема обращения"
+                           Variant="Variant.Outlined"
+                           Margin="Margin.Dense"
+                           Modal="false">
+                    <MudSelectItem Value="@("Консультация")">4.1 выборе (замене) смо</MudSelectItem>
+                    <MudSelectItem Value="@("Жалоба")">4.2 переоформлении полиса омс, сдаче полиса омс на материальном носителе, о приостановлении действия полиса омс, всего, в том числе:</MudSelectItem>
+                    <MudSelectItem Value="@("Жалоба1")">4.2.1 превышение сроков оформления полиса омс (выписки)</MudSelectItem>
+                    <MudSelectItem Value="@("Жалоба1")">4.3 выборе медицинской организации</MudSelectItem>
+                </MudSelect>
+                
+                <MudTextField T="string"
+                              Variant="Variant.Outlined"
+                              Label="Содержание обращения"
+                              Margin="Margin.Dense"
+                              Lines="5"
+                              MaxLines="15"/>
+                
+                <MudGrid>
+                    <MudItem lg="2">
+                        <MudSelect T="string"
+                                   Label="Состояние исполнения"
+                                   Variant="Variant.Outlined"
+                                   Margin="Margin.Dense"
+                                   Modal="false">
+                            <MudSelectItem Value="@("Консультация")">Промежуточный</MudSelectItem>
+                            <MudSelectItem Value="@("Жалоба")">Окончательный</MudSelectItem>
+                        </MudSelect>
+                    </MudItem>
+                    <MudItem lg="4">
+                        <MudCheckBox T="bool"
+                                     Label="Застрахованный уведомлен о страховом представителе"
+                                     Color="Color.Info"/>
+                    </MudItem>
+                    <MudItem lg="2">
+                        <MudSelect T="string"
+                                   Label="Вид проведенных КЭМ"
+                                   Variant="Variant.Outlined"
+                                   Margin="Margin.Dense"
+                                   Modal="false">
+                            <MudSelectItem Value="@("Консультация")">МЭЭ</MudSelectItem>
+                            <MudSelectItem Value="@("Жалоба")">ЭКМП</MudSelectItem>
+                            <MudSelectItem Value="@("Жалоба1")">Не проводилось</MudSelectItem>
+                        </MudSelect>
+                    </MudItem>
+                </MudGrid>
+                <MudStack Row
+                          AlignItems="AlignItems.Center">
+                    <MudTextField T="string"
+                                  Variant="Variant.Outlined"
+                                  Label="Принятые меры"
+                                  Margin="Margin.Dense"
+                                  Lines="5"
+                                  MaxLines="15"/>
+                    <MudIconButton Variant="Variant.Text"
+                                   Icon="@Icons.Material.Filled.Message"
+                                   Size="Size.Large"/>
+                </MudStack>
+                <MudGrid>
+                    <MudItem lg="3">
+                        <MudDatePicker Label="Дата окончательного ответа"
+                                       ShowToolbar="false"
+                                       Variant="Variant.Outlined"
+                                       Modal="false"
+                                       Margin="Margin.Dense"/>
+                    </MudItem>
+                    <MudItem lg="3">
+                        <MudSelect T="string"
+                                   Label="Результат обращения"
+                                   Variant="Variant.Outlined"
+                                   Margin="Margin.Dense"
+                                   Modal="false">
+                            <MudSelectItem Value="@("Консультация")">дана консультация</MudSelectItem>
+                            <MudSelectItem Value="@("Жалоба")">рассмотрено обращение</MudSelectItem>
+                            <MudSelectItem Value="@("Жалоба1")">заявление удовлетворено</MudSelectItem>
+                            <MudSelectItem Value="@("Жалоба2")">заявление не удовлетворено</MudSelectItem>
+                            <MudSelectItem Value="@("Жалоба3")">рассмотрена жалоба</MudSelectItem>
+                            <MudSelectItem Value="@("Жалоба4")">звонок переадресован</MudSelectItem>
+                            <MudSelectItem Value="@("Жалоба5")">обращение переадресовано в другую организацию</MudSelectItem>
+                        </MudSelect>
+                    </MudItem>
+                    <MudItem lg="3">
+                        <MudDatePicker Label="Дата закрытия администратором"
+                                       ShowToolbar="false"
+                                       Variant="Variant.Outlined"
+                                       Modal="false"
+                                       Margin="Margin.Dense"/>
+                    </MudItem>
+                    <MudFlexBreak/>
+                    <MudItem lg="3">
+                        <MudDatePicker Label="Дата закрытия руководителем"
+                                       ShowToolbar="false"
+                                       Variant="Variant.Outlined"
+                                       Modal="false"
+                                       Margin="Margin.Dense"/>
+                    </MudItem>
+                    <MudItem lg="3">
+                        <MudSelect T="string"
+                                   Label="Сведения о жалобе"
+                                   Variant="Variant.Outlined"
+                                   Margin="Margin.Dense"
+                                   Modal="false">
+                            <MudSelectItem Value="@("Консультация")">обоснованная</MudSelectItem>
+                            <MudSelectItem Value="@("Жалоба")">обоснованная, в досудебном порядке</MudSelectItem>
+                            <MudSelectItem Value="@("Жалоба1")">обоснованная, в судебном порядке</MudSelectItem>
+                            <MudSelectItem Value="@("Жалоба2")">необоснованная</MudSelectItem>
+                            <MudSelectItem Value="@("Жалоба3")">нет основания для отнесения к обоснованным или необоснованным</MudSelectItem>
+                        </MudSelect>
+                    </MudItem>
+                    <MudItem lg="3">
+                        <MudDatePicker Label="Дата закрытия руководителем СМО"
+                                       ShowToolbar="false"
+                                       Variant="Variant.Outlined"
+                                       Modal="false"
+                                       Margin="Margin.Dense"/>
+                    </MudItem>
+                    <MudFlexBreak/>
+                    <MudItem lg="3">
+                        <MudSelect T="string"
+                                   Label="Направлено"
+                                   Variant="Variant.Outlined"
+                                   Margin="Margin.Dense"
+                                   Modal="false"
+                                   FullWidth="false">
+                            <MudSelectItem Value="@("Консультация")">в мо субъекта рф</MudSelectItem>
+                            <MudSelectItem Value="@("Жалоба")">в орган исполнительной власти субъекта рф</MudSelectItem>
+                            <MudSelectItem Value="@("Жалоба1")">в иную смо субъекта рф</MudSelectItem>
+                            <MudSelectItem Value="@("Жалоба2")">в организацию другого субъекта рф</MudSelectItem>
+                        </MudSelect>
+                    </MudItem>
+                </MudGrid>
+            </MudStack>
+        </MudTabPanel>
+        <MudTabPanel Text="История">
+            <MudStack Class="mt-4">
+                @foreach (var action in _actions)
+                {
+                    <HistoryRow Action="action"/>
+                }
+            </MudStack>
+        </MudTabPanel>
+    </ChildContent>
+    <Header>
+        <MudButton Color="Color.Success"
+                   Variant="Variant.Filled"
+                   Class="ma-2">
+            Сохранить
+        </MudButton>
+        <MudButton Color="Color.Error"
+                   Variant="Variant.Filled"
+                   Class="ma-2">
+            Закрыть руководителем
+        </MudButton>
+    </Header>
+</MudTabs>

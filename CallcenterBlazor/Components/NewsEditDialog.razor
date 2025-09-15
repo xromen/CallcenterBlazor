@@ -1,0 +1,50 @@
+﻿@using CallcenterBlazor.Pages
+<MudDialog>
+    <TitleContent>
+        @if (NewsObj.Id == null)
+        {
+            @("Создание новости")
+        }
+        else
+        {
+            @("Редактирование новости")
+        }
+    </TitleContent>
+    <DialogContent>
+        <MudStack>
+            <MudTextField @bind-Value="NewsObj.Body"
+                          Label="Тело новости"
+                          Variant="Variant.Outlined"
+                          Margin="Margin.Dense"
+                          Lines="10"
+                          MaxLines="20"/>
+            @foreach (var org in News.Orgs)
+            {
+                <MudCheckBox T="bool"
+                             Value="@NewsObj.Orgs.Contains(org)"
+                             Label="@org"
+                             ValueChanged="(v) => OrgCheckedChanged(v, org)"/>
+            }
+        </MudStack>
+    </DialogContent>
+    <DialogActions>
+        @if (NewsObj.Id != null)
+        {
+            <MudButton Color="Color.Error"
+                       Variant="Variant.Filled"
+                       OnClick="Delete">
+                Удалить
+            </MudButton>
+        }
+        <MudButton Color="Color.Success"
+                   Variant="Variant.Filled"
+                   OnClick="Save">
+            Сохранить
+        </MudButton>
+        <MudButton Color="Color.Info"
+                   Variant="Variant.Filled"
+                   OnClick="Cancel">
+            Закрыть
+        </MudButton>
+    </DialogActions>
+</MudDialog>

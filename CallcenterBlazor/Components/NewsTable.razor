@@ -1,0 +1,11 @@
+﻿<MudSimpleTable Hover Striped Style="overflow-x: hidden;">
+    <tbody>
+    @foreach (var item in NewsDtos)
+    {
+        <tr @onclick="(c) => RowClickEvent(c, item)">
+            <td>@((MarkupString)item.Body)</td>
+            <td>@item.Date.ToString("dd.MM.yyyy")</td>
+        </tr>
+    }
+    </tbody>
+</MudSimpleTable>

@@ -1,0 +1,39 @@
+﻿<style>
+    .declarations-tool-bar{
+        width: 100%;
+        overflow-x: auto;
+        overflow-y: hidden;
+        white-space: nowrap;
+    }
+</style>
+
+<MudStack Class="page-header"
+          AlignItems="AlignItems.Start"
+          Justify="Justify.Center">
+    <MudToolBar Class="declarations-tool-bar">
+        @foreach (var tab in _tabs)
+        {
+            string cl = "mud-tab mud-tab-panel px-8";
+            if (tab.IsActive)
+                cl += " mud-tab-active mud-ripple";
+
+            <div class="@cl"
+                 style="height: 100%; width: auto"
+                 @onclick="(a) => TabClick(tab)">
+                <MudText Style="color:white; font-size:17px">@tab.Name</MudText>
+            </div>
+        }
+        <MudStack Row Style="width: 100%">
+            <MudButton Color="Color.Warning"
+                       Variant="Variant.Filled"
+                       Style="height: 90%"
+                       Class="mx-2"
+                       Href="/Declaration/Add">
+                <MudText Class="px-8">Добавить</MudText>
+            </MudButton>
+            
+            <MudSpacer/>
+            @ChildContent
+        </MudStack>
+    </MudToolBar>
+</MudStack>

@@ -1,0 +1,38 @@
+﻿@page "/Account/Login"
+@layout Layout.AccountLayout;
+
+<style>
+    .login-header-text {
+        font-size: 30px;
+        color: #4074a4;
+    }
+
+    .login-header-text span {
+        color: #ffbd10;
+    }
+</style>
+
+<MudPaper Elevation="4">
+    <MudStack Class="pa-14" Row>
+        <MudImage Src="images/Loghead.png" ObjectFit="ObjectFit.None"/>
+        <MudStack Class="ms-3">
+            <MudText Class="login-header-text">Вход в систему</MudText>
+            <MudText Class="login-header-text">КОНТАКТ-<span>ЦЕНТР</span></MudText>
+        </MudStack>
+    </MudStack>
+</MudPaper>
+<MudPaper Class="mt-8" Elevation="4">
+    <MudStack Class="px-14 py-10">
+        <MudTextField T="string"
+                      Label="Логин"
+                      Variant="Variant.Outlined"
+                      Margin="Margin.Dense"/>
+        <MudTextField T="string"
+                      Label="Пароль"
+                      InputType="InputType.Password"
+                      Variant="Variant.Outlined"
+                      Margin="Margin.Dense"/>
+        <MudButton Color="Color.Primary"
+                   Variant="Variant.Filled">Войти</MudButton>
+    </MudStack>
+</MudPaper>
