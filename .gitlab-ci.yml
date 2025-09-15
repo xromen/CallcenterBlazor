@@ -1,0 +1,28 @@
+stages:
+  - build
+  - deploy
+  
+image: docker/compose:latest
+services: 
+  - name: docker:dind
+  
+variables:
+  IMAGE_NAME: "callcenter-blazor"
+  DOCKERFILE_FOLDER: "CallcenterBlazor"
+
+build:
+  stage: build
+  tags:
+  - maxi
+  script:
+  - docker build -f "$DOCKERFILE_FOLDER/Dockerfile" -t "$IMAGE_NAME" .
+
+deploy:
+  only:
+  - master
+  tags:
+  - maxi
+  stage: deploy
+  script:
+  - docker stop "$IMAGE_NAME" || true && docker rm "$IMAGE_NAME" || true
+  - docker run --restart always --name "$IMAGE_NAME" -p 5003:8080 -d "$IMAGE_NAME"
