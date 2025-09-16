@@ -1,0 +1,101 @@
+﻿@inherits LayoutComponentBase
+
+<style>
+    .layout-root {
+        min-height: 100vh;
+        z-index: 10;
+        background: linear-gradient(to bottom, #4a505c 150px, transparent 150px);
+    }
+
+    @if (_zoomedIn)
+    {
+        @_zoomedInStyle
+    }
+    else
+    {
+        @_zoomedOutStyle
+    }
+
+    .nav-menu {
+        background-color: var(--mud-palette-dark);
+        width: 80px;
+        flex-shrink: 0;
+        height: fit-content;
+        margin-left: -40px
+    }
+
+    .header-bar {
+        background-color: white;
+        flex: 0 0 auto;
+    }
+
+    .header-title {
+        font-size: 23px;
+    }
+
+    .layout-body {
+        flex-grow: 1;
+        min-height: 0;
+        display: flex;
+        flex-direction: column;
+    }
+</style>
+
+<MudThemeProvider Theme="_theme"/>
+<MudPopoverProvider/>
+<MudDialogProvider/>
+<MudSnackbarProvider/>
+
+<MudStack AlignItems="AlignItems.Center"
+          Class="layout-root">
+
+    <MudStack Class="layout-container">
+        <MudPaper Width="100%" Elevation="10" Class="layout-paper">
+            <MudStack Row Spacing="0" Style="width: 100%;">
+                <NavMenu Class="nav-menu"/>
+                
+                <MudStack Spacing="0" Class="flex-grow-1" Style="width:calc(100% - 40px);">
+                    <MudStack Row Class="pt-10 ps-6 pb-2 header-bar relative">
+                        <MudStack Spacing="0">
+                            <MudText Typo="Typo.h4">Попов Денис Александрович</MudText>
+                            <MudText Class="mud-text-disabled">Администратор КЦ</MudText>
+                            <MudText Class="header-title">
+                                хабаровский краевой фонд обязательного медицинского страхования
+                            </MudText>
+                        </MudStack>
+
+                        <MudSpacer/>
+
+                        <MudStack Spacing="0" AlignItems="AlignItems.End" Justify="Justify.FlexEnd">
+                            <MudBadge Content="100"
+                                      Color="Color.Primary"
+                                      Overlap="true"
+                                      Class="mx-6 my-4">
+                                <MudIconButton Icon="@Icons.Material.Filled.Email"
+                                               Size="Size.Large"/>
+                            </MudBadge>
+                        </MudStack>
+                        <MudToggleIconButton ToggledChanged="ZoomToggledChanged"
+                                             Toggled="_zoomedIn"
+                                             Icon="@Icons.Material.Filled.ZoomInMap"
+                                             ToggledIcon="@Icons.Material.Filled.ZoomOutMap"
+                                             Class="absolute"
+                                             Style="right:0;top:0"
+                                             Size="Size.Large"
+                                             title="@(_zoomedIn ? "Увеличить интерфейс" : "Уменьшить интерфейс")" />
+                    </MudStack>
+
+                    <div class="layout-body">
+                        @Body
+                    </div>
+                </MudStack>
+            </MudStack>
+        </MudPaper>
+    </MudStack>
+</MudStack>
+
+<div id="blazor-error-ui">
+    An unhandled error has occurred.
+    <a href="" class="reload">Reload</a>
+    <a class="dismiss">🗙</a>
+</div>

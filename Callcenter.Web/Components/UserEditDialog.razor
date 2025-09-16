@@ -1,0 +1,69 @@
+﻿@using Callcenter.Web.Pages
+<MudDialog>
+    <TitleContent>
+        @if (User.Id == null)
+        {
+            @("Создание пользователя")
+        }
+        else
+        {
+            @("Редактирование пользователя")
+        }
+    </TitleContent>
+    <DialogContent>
+        <MudStack>
+            <MudTextField @bind-Value="User.Fullname"
+                          Variant="Variant.Outlined"
+                          Label="Имя пользователя"/>
+            <MudTextField @bind-Value="User.Username"
+                          Variant="Variant.Outlined"
+                          Label="Логин"/>
+            <MudTextField @bind-Value="User.Password"
+                          Variant="Variant.Outlined"
+                          InputType="InputType.Password"
+                          Label="Пароль"/>
+            <MudSelect @bind-Value="User.Organisation"
+                       Variant="Variant.Outlined"
+                       Label="Организация">
+                @foreach (var org in News.Orgs)
+                {
+                    <MudSelectItem Value="org">@org</MudSelectItem>
+                }
+            </MudSelect>
+            <MudSelect @bind-Value="User.WorkGroup"
+                       Variant="Variant.Outlined"
+                       Label="Рабочая группа">
+                @foreach (var workGroup in Admin.WorkGroups)
+                {
+                    <MudSelectItem Value="workGroup">@workGroup</MudSelectItem>
+                }
+            </MudSelect>
+            <MudTextField @bind-Value="User.SpLevel"
+                          Variant="Variant.Outlined"
+                          Label="Уровень СП"/>
+            <MudCheckBox @bind-Value="User.IsActive"
+                         Color="Color.Info"
+                         Label="Активен"/>
+        </MudStack>
+    </DialogContent>
+    <DialogActions>
+        @if (User.Id != null)
+        {
+            <MudButton Color="Color.Error"
+                       Variant="Variant.Filled"
+                       OnClick="Delete">
+                Удалить
+            </MudButton>
+        }
+        <MudButton Color="Color.Success"
+                   Variant="Variant.Filled"
+                   OnClick="Save">
+            Сохранить
+        </MudButton>
+        <MudButton Color="Color.Info"
+                   Variant="Variant.Filled"
+                   OnClick="Cancel">
+            Закрыть
+        </MudButton>
+    </DialogActions>
+</MudDialog>

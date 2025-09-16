@@ -1,0 +1,52 @@
+﻿<MudFileUpload T="IReadOnlyList<IBrowserFile>"
+               OnFilesChanged="OnInputFileChanged"
+               Hidden="@false"
+               InputClass="cursor-pointer absolute mud-width-full mud-height-full overflow-hidden z-10"
+               InputStyle="opacity:0"
+               UserAttributes="@(new() { { "title", "Файлы загрузятся при сохранении" } })"
+               Accept="@Accept"
+               AppendMultipleFiles="true">
+    <SelectedTemplate>
+        <MudPaper Outlined="true"
+                  Class="relative rounded-lg border-2 border-dashed pa-4 mt-4 mud-width-full mud-height-full">
+            @if (!_files.Any())
+            {
+                <MudStack AlignItems="AlignItems.Center" Justify="Justify.Center" Style="height: 100%">
+                    <MudText Typo="Typo.h6" Align="Align.Center">Перетащите файлы или нажмите для выбора</MudText>
+                    <MudIcon Icon="@Icons.Material.Filled.FileUpload" Size="Size.Large" Color="Color.Primary"/>
+                </MudStack>
+            }
+            else
+            {
+                <MudStack Class="mud-width-full">
+                    @foreach (var file in _files)
+                    {
+                        <MudStack Row
+                                  AlignItems="AlignItems.Center">
+                            <MudIcon Icon="@Icons.Custom.FileFormats.FileDocument"
+                                     Size="Size.Large"/>
+                            <MudText>
+                                @if (file.Name.Length > 50)
+                                {
+                                    @(file.Name.Substring(0, 50) + "... " + Path.GetExtension(file.Name))
+                                }
+                                else
+                                {
+                                    @file.Name
+                                }
+                            </MudText>
+                            <MudSpacer/>
+                            <MudIconButton Icon="@Icons.Material.Filled.Close"
+                                           Size="Size.Small"
+                                           Color="Color.Dark"
+                                           Style="border-radius: 50%;"
+                                           Class="relative z-30"
+                                           Variant="Variant.Filled"
+                                           OnClick="()=> { _files.Remove(file); }"/>
+                        </MudStack>
+                    }
+                </MudStack>
+            }
+        </MudPaper>
+    </SelectedTemplate>
+</MudFileUpload>
