@@ -11,19 +11,19 @@ EXPOSE 8080
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["CallcenterBlazor/CallcenterBlazor.csproj", "CallcenterBlazor/"]
-RUN dotnet restore "./CallcenterBlazor/CallcenterBlazor.csproj"
+COPY ["Callcenter.Web/Callcenter.Web.csproj", "Callcenter.Web/"]
+RUN dotnet restore "./Callcenter.Web/Callcenter.Web.csproj"
 COPY . .
-WORKDIR "/src/CallcenterBlazor"
-RUN dotnet build "./CallcenterBlazor.csproj" -c $BUILD_CONFIGURATION -o /app/build
+WORKDIR "/src/Callcenter.Web"
+RUN dotnet build "./Callcenter.Web.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 # Этот этап используется для публикации проекта службы, который будет скопирован на последний этап
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "./CallcenterBlazor.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "./Callcenter.Web.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
 # Этот этап используется в рабочей среде или при запуске из VS в обычном режиме (по умолчанию, когда конфигурация отладки не используется)
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "CallcenterBlazor.dll"]
+ENTRYPOINT ["dotnet", "Callcenter.Web.dll"]
