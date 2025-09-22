@@ -276,12 +276,13 @@
                                                          Variant="Variant.Outlined"
                                                          Label="МО застрахованного"
                                                          Margin="Margin.Dense"
-                                                         Clearable="true"/>
+                                                         Clearable="true"
+                                                         MaxItems="1000"/>
                                         <MudStack Row
                                                   AlignItems="AlignItems.Center">
                                             <MudRadioGroup @bind-Value="Model.SvoStatusId">
                                                 <MudRadio T="int?" Value="1" Color="Color.Info">Участник СВО</MudRadio>
-                                                <MudRadio T="int?" Value="2" Color="Color.Info">Член участника СВО
+                                                <MudRadio T="int?" Value="2" Color="Color.Info">Член семьи участника СВО
                                                 </MudRadio>
                                             </MudRadioGroup>
                                             <MudSpacer/>

@@ -8,11 +8,10 @@
             {
                 options.AddPolicy("AllowSpecificOrigin",
                     policyBuilder => policyBuilder
-#if DEBUG
-                        .WithOrigins("http://localhost:5249")
-#else
-                    .WithOrigins(config["CORS_ORIGIN"] ?? "http://localhost:5003")
-#endif
+                    .WithOrigins(
+                        "http://localhost:5249", 
+                        "http://localhost:5004",
+                        "http://192.168.1.128:5004")
                         .AllowAnyMethod()
                         .AllowAnyHeader());
             });

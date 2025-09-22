@@ -70,6 +70,7 @@ public class DeclarationService(ApplicationDbContext dbContext, RequestEnvironme
     {
         var declaration = await dbContext.Declarations
             .Include(declaration => declaration.History)
+            .ThenInclude(c => c.User)
             .SingleOrDefaultAsync(c => c.Id == id, cancellationToken);
         
         return declaration?.History.Adapt<List<DeclarationActionDto>>();

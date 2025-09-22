@@ -24,9 +24,9 @@ public class Program
         var builder = WebAssemblyHostBuilder.CreateDefault(args);
         var apiUri =
 #if DEBUG
-            "http://localhost:5240/";
+            "http://localhost:5014/";
 #else
-            "http://192.168.1.17:5003/api/";
+            "http://192.168.1.128:5014/";
 #endif
 
         builder.RootComponents.Add<App>("#app");

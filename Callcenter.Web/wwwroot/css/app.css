@@ -93,3 +93,7 @@ ul {
 .mud-tab-active {
     background-color: #616673 !important;
 }
+
+.mud-input-control label.mud-input-label {
+    color: #9f9f9f !important;
+}

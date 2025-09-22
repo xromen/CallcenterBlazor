@@ -1,15 +1,15 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.14.36401.2 d17.14
+VisualStudioVersion = 17.14.36401.2
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Callcenter.WebServer", "Callcenter.WebServer\Callcenter.WebServer.csproj", "{908B0834-994E-4A0F-8F92-1412E45F8A8B}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Callcenter.Api", "Callcenter.Api\Callcenter.Api.csproj", "{AAF2143C-84DC-4655-B1BA-C38DAE696216}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Callcenter.Shared", "Callcenter.Shared\Callcenter.Shared.csproj", "{986935D3-3294-4905-87B6-987E14C8B4F2}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Callcenter.Web", "Callcenter.Web\Callcenter.Web.csproj", "{58FDD0E1-F304-4DA5-AAC4-9DF49B617706}"
+EndProject
+Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{5D33DD01-EB99-47EC-8D1F-CC3A1B467832}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -17,10 +17,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{908B0834-994E-4A0F-8F92-1412E45F8A8B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{908B0834-994E-4A0F-8F92-1412E45F8A8B}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{908B0834-994E-4A0F-8F92-1412E45F8A8B}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{908B0834-994E-4A0F-8F92-1412E45F8A8B}.Release|Any CPU.Build.0 = Release|Any CPU
 		{AAF2143C-84DC-4655-B1BA-C38DAE696216}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{AAF2143C-84DC-4655-B1BA-C38DAE696216}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AAF2143C-84DC-4655-B1BA-C38DAE696216}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -33,6 +29,10 @@ Global
 		{58FDD0E1-F304-4DA5-AAC4-9DF49B617706}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{58FDD0E1-F304-4DA5-AAC4-9DF49B617706}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{58FDD0E1-F304-4DA5-AAC4-9DF49B617706}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5D33DD01-EB99-47EC-8D1F-CC3A1B467832}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5D33DD01-EB99-47EC-8D1F-CC3A1B467832}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5D33DD01-EB99-47EC-8D1F-CC3A1B467832}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5D33DD01-EB99-47EC-8D1F-CC3A1B467832}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

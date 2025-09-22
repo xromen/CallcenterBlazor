@@ -1,0 +1,21 @@
+version: '3.8'
+
+networks:
+  main_network:
+    driver: bridge
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Callcenter.Api/Dockerfile
+    networks:
+      - main_network
+  web:
+    build:
+      context: .
+      dockerfile: Callcenter.Web/Dockerfile
+    networks:
+      - main_network
+    depends_on:
+      - api

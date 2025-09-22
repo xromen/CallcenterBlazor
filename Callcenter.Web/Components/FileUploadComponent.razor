@@ -9,7 +9,7 @@
     <SelectedTemplate>
         <MudPaper Outlined="true"
                   Class="relative rounded-lg border-2 border-dashed pa-4 mt-4 mud-width-full mud-height-full">
-            @if (!_files.Any() && !DbFiles.Any())
+            @if (!_files.Any() && (DbFiles == null || !DbFiles.Any()))
             {
                 <MudStack AlignItems="AlignItems.Center" Justify="Justify.Center" Style="height: 100%">
                     <MudText Typo="Typo.h6" Align="Align.Center">Перетащите файлы или нажмите для выбора</MudText>
