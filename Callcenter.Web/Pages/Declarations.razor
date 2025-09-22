@@ -1,13 +1,10 @@
 ﻿@page "/Declarations"
+@using Callcenter.Web.Extensions
 
 <style>
     .declaration-panel:hover {
         background-color: #fad993;
     }
-
-    /*.mud-expand-panel:hover {*/
-    /*    background-color: #fad993;*/
-    /*}*/
 
     .declaration-panel.mud-panel-expanded {
         background-color: #fad993;
@@ -28,7 +25,7 @@
                 <MudIcon Icon="@Icons.Material.Filled.Done"
                          Color="Color.Success"
                          Size="Size.Medium"/>
-                <MudText Color="Color.Success">10</MudText>
+                <MudText Color="Color.Success">@_answerSendCount</MudText>
             </MudStack>
         </MudTooltip>
         <MudTooltip Text="На доработке"
@@ -38,7 +35,7 @@
                       AlignItems="AlignItems.Center">
                 <MudIcon Icon="@Icons.Material.Filled.Close"
                          Color="Color.Error"/>
-                <MudText Color="Color.Error">10</MudText>
+                <MudText Color="Color.Error">@_needsReworkCount</MudText>
             </MudStack>
         </MudTooltip>
         <MudTooltip Text="Пришло из ФОМСа"
@@ -48,119 +45,125 @@
                       AlignItems="AlignItems.Center">
                 <MudIcon Icon="@Icons.Material.Filled.Send"
                          Color="Color.Info"/>
-                <MudText Color="Color.Info">10</MudText>
+                <MudText Color="Color.Info">@_smoRedirectCount</MudText>
             </MudStack>
         </MudTooltip>
     </MudStack>
 </DeclarationsToolbar>
 
-<MudStack Style="height: 100%;" Justify="Justify.SpaceBetween">
-    @if (_isLoading)
-    {
-        <MudStack Style="height: 100%" AlignItems="AlignItems.Center" Justify="Justify.FlexStart" Class="mt-4">
-            @for (int i = 0; i < 10; i++)
-            {
-                <MudSkeleton SkeletonType="SkeletonType.Rectangle" Height="7%" Width="97%"
-                             Animation="Animation.Pulse"/>
-            }
-        </MudStack>
-    }
-    else
-    {
-        <MudStack Style="flex: 0 0 auto; max-height: 63vh; overflow-y: auto;">
-            <MudExpansionPanels>
-                @foreach (var declaration in _paginateModel.Items)
+<AuthorizeView>
+
+    <MudStack Style="height: 100%;" Justify="Justify.SpaceBetween">
+        @if (_isLoading)
+        {
+            <MudStack Style="height: 100%" AlignItems="AlignItems.Center" Justify="Justify.FlexStart" Class="mt-4">
+                @for (int i = 0; i < 10; i++)
                 {
-                    <MudExpansionPanel Class="declaration-panel">
-                        <TitleContent>
-                            <MudGrid>
-                                <MudItem lg="2">
-                                    <MudStack Row
-                                              AlignItems="AlignItems.Center">
-                                        <MudBadge Dot
-                                                  Color="Color.Success"/>
-                                        <MudText Class="ms-8">@declaration.Number</MudText>
-                                    </MudStack>
-                                </MudItem>
-                                <MudItem lg="1">
-                                    <MudText>@declaration.Date.ToString("dd.MM.yyyy")</MudText>
-                                </MudItem>
-                                <MudItem lg="7">
-                                    <MudText>@declaration.Theme</MudText>
-                                </MudItem>
-                                <MudItem lg="2">
-                                    <MudText>@declaration.Status</MudText>
-                                </MudItem>
-                            </MudGrid>
-                        </TitleContent>
-                        <ChildContent>
-                            <MudStack StretchItems="StretchItems.None"
-                                      AlignItems="AlignItems.Start"
-                                      Justify="Justify.FlexStart"
-                                      Class="ms-10"
-                                      Row>
-                                <MudButton Variant="Variant.Outlined"
-                                           Color="Color.Dark"
-                                           StartIcon="@Icons.Material.Filled.Edit"
-                                           Href="@("/Declaration/" + declaration.Id)">
-                                    Открыть
-                                </MudButton>
-                                <MudButton Variant="Variant.Outlined"
-                                           Color="Color.Dark"
-                                           StartIcon="@Icons.Material.Filled.Send"
-                                           OnClick="async () => await SendCard(declaration)">
-                                    Переслать
-                                </MudButton>
-                                <MudButton Variant="Variant.Outlined"
-                                           Color="Color.Error"
-                                           StartIcon="@Icons.Material.Filled.Delete">
-                                    Отправить на удаление
-                                </MudButton>
-                            </MudStack>
-                        </ChildContent>
-                    </MudExpansionPanel>
+                    <MudSkeleton SkeletonType="SkeletonType.Rectangle" Height="7%" Width="97%"
+                                 Animation="Animation.Pulse"/>
                 }
-            </MudExpansionPanels>
-        </MudStack>
-    }
-    <MudStack Row
-              Class="mb-6 mud-width-full"
-              AlignItems="AlignItems.Center">
+            </MudStack>
+        }
+        else
+        {
+            <MudStack Style="flex: 0 0 auto; max-height: 63vh; overflow-y: auto;">
+                <MudExpansionPanels>
+                    @foreach (var declaration in _paginateModel.Items)
+                    {
+                        <MudExpansionPanel Class="declaration-panel">
+                            <TitleContent>
+                                <MudGrid>
+                                    <MudItem lg="2">
+                                        <MudStack Row
+                                                  AlignItems="AlignItems.Center">
+                                            <MudBadge Dot
+                                                      Color="@(declaration.IsBad ? Color.Error : Color.Success)"/>
+                                            <MudText Class="ms-8">@declaration.Number</MudText>
+                                        </MudStack>
+                                    </MudItem>
+                                    <MudItem lg="1">
+                                        <MudText>@declaration.DateReg.ToString("dd.MM.yyyy")</MudText>
+                                    </MudItem>
+                                    <MudItem lg="7">
+                                        <MudText>@declaration.Theme</MudText>
+                                    </MudItem>
+                                    <MudItem lg="2">
+                                        <MudText>@declaration.Status</MudText>
+                                    </MudItem>
+                                </MudGrid>
+                            </TitleContent>
+                            <ChildContent>
+                                <MudStack StretchItems="StretchItems.None"
+                                          AlignItems="AlignItems.Start"
+                                          Justify="Justify.FlexStart"
+                                          Class="ms-10"
+                                          Row>
+                                    <MudButton Variant="Variant.Outlined"
+                                               Color="Color.Dark"
+                                               StartIcon="@Icons.Material.Filled.Edit"
+                                               Href="@("/Declaration/" + declaration.Id)">
+                                        Открыть
+                                    </MudButton>
+                                    <MudButton Variant="Variant.Outlined"
+                                               Color="Color.Dark"
+                                               StartIcon="@Icons.Material.Filled.Send"
+                                               OnClick="async () => await SendCard(declaration)">
+                                        Переслать
+                                    </MudButton>
+                                    @if (context.User.IsAdmin())
+                                    {
+                                        <MudButton Variant="Variant.Outlined"
+                                                   Color="Color.Error"
+                                                   StartIcon="@Icons.Material.Filled.Delete">
+                                            Отправить на удаление
+                                        </MudButton>
+                                    }
+                                </MudStack>
+                            </ChildContent>
+                        </MudExpansionPanel>
+                    }
+                </MudExpansionPanels>
+            </MudStack>
+        }
         <MudStack Row
+                  Class="mb-6 mud-width-full"
                   AlignItems="AlignItems.Center">
-            <MudNumericField T="int?"
-                             Label="Номер"
-                             Variant="Variant.Outlined"
-                             Margin="Margin.Dense"
-                             Style="background-color: white; max-width:100px"
-                             Clearable
-                             ValueChanged="SearchNumberChanged"/>
-            <MudButton Color="Color.Dark"
-                       Variant="Variant.Filled"
-                       OnClick="SearchCard">
-                Найти карточку
-            </MudButton>
-        </MudStack>
-        <MudSpacer/>
-        <MudStack Row>
-            <MudText>Строк на странице:</MudText>
-            <MudSelect T="int"
-                       Text="Строк на странице"
-                       SelectedValuesChanged="PageSizeChanged"
-                       MultiSelection="false"
-                       Value="_paginateModel.PageSize"
-                       FullWidth="false"
-                       Style="min-width: 60px;">
-                <MudSelectItem T="int" Value="10">10</MudSelectItem>
-                <MudSelectItem T="int" Value="25">25</MudSelectItem>
-                <MudSelectItem T="int" Value="50">50</MudSelectItem>
-                <MudSelectItem T="int" Value="100">100</MudSelectItem>
-            </MudSelect>
-            <MudPagination BoundaryCount="2"
-                           MiddleCount="3"
-                           Count="@((int)System.Math.Ceiling((double)_paginateModel.ItemsCount / _paginateModel.PageSize))"
-                           SelectedChanged="SelectedPageChanged"
-                           Selected="_paginateModel.Page"/>
+            <MudStack Row
+                      AlignItems="AlignItems.Center">
+                <MudNumericField T="int?"
+                                 Label="Номер"
+                                 Variant="Variant.Outlined"
+                                 Margin="Margin.Dense"
+                                 Style="background-color: white; max-width:100px"
+                                 Clearable
+                                 ValueChanged="SearchNumberChanged"/>
+                <MudButton Color="Color.Dark"
+                           Variant="Variant.Filled"
+                           OnClick="SearchCard">
+                    Найти карточку
+                </MudButton>
+            </MudStack>
+            <MudSpacer/>
+            <MudStack Row>
+                <MudText>Строк на странице:</MudText>
+                <MudSelect T="int"
+                           Text="Строк на странице"
+                           SelectedValuesChanged="PageSizeChanged"
+                           MultiSelection="false"
+                           Value="_paginateModel.PageSize"
+                           FullWidth="false"
+                           Style="min-width: 60px;">
+                    <MudSelectItem T="int" Value="10">10</MudSelectItem>
+                    <MudSelectItem T="int" Value="25">25</MudSelectItem>
+                    <MudSelectItem T="int" Value="50">50</MudSelectItem>
+                    <MudSelectItem T="int" Value="100">100</MudSelectItem>
+                </MudSelect>
+                <MudPagination BoundaryCount="2"
+                               MiddleCount="3"
+                               Count="@((int)System.Math.Ceiling((double)_paginateModel.ItemsCount / _paginateModel.PageSize))"
+                               SelectedChanged="SelectedPageChanged"
+                               Selected="_paginateModel.Page"/>
+            </MudStack>
         </MudStack>
     </MudStack>
-</MudStack>
+</AuthorizeView>

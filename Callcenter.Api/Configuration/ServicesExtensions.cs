@@ -1,0 +1,27 @@
+﻿using Microsoft.EntityFrameworkCore;
+using Serilog;
+using Serilog.Sinks.Grafana.Loki;
+using Callcenter.Api.Data;
+using Callcenter.Api.Models;
+using Callcenter.Api.Services;
+
+namespace Callcenter.Api.Configuration
+{
+    public static class ServicesExtensions
+    {
+        public static IServiceCollection AddAppServices(this IServiceCollection services)
+        {
+            services.AddLocalization();
+            services.AddHttpContextAccessor();
+            services.AddMemoryCache();
+            services.AddScoped<RequestEnvironment>();
+            services.AddScoped<AuthService>();
+            services.AddScoped<AccountsService>();
+            services.AddScoped<DeclarationService>();
+            services.AddScoped<DictionariesService>();
+            services.AddScoped<QuestionsService>();
+
+            return services;
+        }
+    }
+}

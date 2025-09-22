@@ -1,5 +1,7 @@
 ﻿@inherits LayoutComponentBase
 
+@attribute [Authorize]
+
 <style>
     .layout-root {
         min-height: 100vh;
@@ -57,11 +59,9 @@
                 <MudStack Spacing="0" Class="flex-grow-1" Style="width:calc(100% - 40px);">
                     <MudStack Row Class="pt-10 ps-6 pb-2 header-bar relative">
                         <MudStack Spacing="0">
-                            <MudText Typo="Typo.h4">Попов Денис Александрович</MudText>
-                            <MudText Class="mud-text-disabled">Администратор КЦ</MudText>
-                            <MudText Class="header-title">
-                                хабаровский краевой фонд обязательного медицинского страхования
-                            </MudText>
+                            <MudText Typo="Typo.h4">@_userFullName</MudText>
+                            <MudText Class="mud-text-disabled">@_userGroup</MudText>
+                            <MudText Class="header-title">@_userOrganisation</MudText>
                         </MudStack>
 
                         <MudSpacer/>

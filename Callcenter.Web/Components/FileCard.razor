@@ -1,0 +1,23 @@
+﻿<MudStack Row
+          AlignItems="AlignItems.Center">
+    <MudIcon Icon="@Icons.Custom.FileFormats.FileDocument"
+             Size="Size.Large"/>
+    <MudText>
+        @if (Name.Length > 50)
+        {
+            @(Name.Substring(0, 50) + "... " + Path.GetExtension(Name))
+        }
+        else
+        {
+            @Name
+        }
+    </MudText>
+    <MudSpacer/>
+    <MudIconButton Icon="@Icons.Material.Filled.Close"
+                   Size="Size.Small"
+                   Color="Color.Dark"
+                   Style="border-radius: 50%;"
+                   Class="relative z-30"
+                   Variant="Variant.Filled"
+                   OnClick="@DeleteFile"/>
+</MudStack>

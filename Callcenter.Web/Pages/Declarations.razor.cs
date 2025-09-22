@@ -1,4 +1,7 @@
 ﻿using Callcenter.Web.Components;
+using Callcenter.Web.Models;
+using Callcenter.Web.Services;
+using Mapster;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using MudBlazor;
@@ -11,129 +14,24 @@ public partial class Declarations : ComponentBase
     
     [Inject] private ISnackbar Snackbar { get; set; } = null!;
     
+    [Inject] private DeclarationsService Service { get; set; } = null!;
+    
+    [Inject] private ProblemDetailsHandler ProblemDetailsHandler { get; set; } = null!;
+    
     private static Random _rnd = new Random();
+
+    private List<DeclarationListDto> _declarations;
     
-    private List<DeclarationModel> _declarations =
-        [
-            new()
-            {
-                Number = "ХКФОМС-1",
-                Date = new DateOnly(2025, _rnd.Next(1, 12), _rnd.Next(1, 28)),
-                Theme = "3.1.3 на нарушение прав на выбор медицинской организации",
-                Status = "отправлен ответ"
-            },
-            new()
-            {
-                Number = "ХКФОМС-2",
-                Date = new DateOnly(2025, _rnd.Next(1, 12), _rnd.Next(1, 28)),
-                Theme =
-                    "3.1.7.2 при прохождении диспансеризации (за исключением диспансеризации несовершеннолетних), всего, из них:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-                Status = "отправлен ответ"
-            },
-            new()
-            {
-                Number = "ХКФОМС-3",
-                Date = new DateOnly(2025, _rnd.Next(1, 12), _rnd.Next(1, 28)),
-                Theme = "3.1.3 на нарушение прав на выбор медицинской организации",
-                Status = "отправлен ответ"
-            },
-            new()
-            {
-                Number = "ХКФОМС-4",
-                Date = new DateOnly(2025, _rnd.Next(1, 12), _rnd.Next(1, 28)),
-                Theme = "3.1.3 на нарушение прав на выбор медицинской организации",
-                Status = "отправлен ответ"
-            },
-            new()
-            {
-                Number = "ХКФОМС-5",
-                Date = new DateOnly(2025, _rnd.Next(1, 12), _rnd.Next(1, 28)),
-                Theme = "3.1.3 на нарушение прав на выбор медицинской организации",
-                Status = "отправлен ответ"
-            },
-            new()
-            {
-                Number = "ХКФОМС-6",
-                Date = new DateOnly(2025, _rnd.Next(1, 12), _rnd.Next(1, 28)),
-                Theme = "3.1.3 на нарушение прав на выбор медицинской организации",
-                Status = "отправлен ответ"
-            },
-            new()
-            {
-                Number = "ХКФОМС-7",
-                Date = new DateOnly(2025, _rnd.Next(1, 12), _rnd.Next(1, 28)),
-                Theme = "3.1.3 на нарушение прав на выбор медицинской организации",
-                Status = "отправлен ответ"
-            },
-            new()
-            {
-                Number = "ХКФОМС-8",
-                Date = new DateOnly(2025, _rnd.Next(1, 12), _rnd.Next(1, 28)),
-                Theme = "3.1.3 на нарушение прав на выбор медицинской организации",
-                Status = "отправлен ответ"
-            },
-            new()
-            {
-                Number = "ХКФОМС-9",
-                Date = new DateOnly(2025, _rnd.Next(1, 12), _rnd.Next(1, 28)),
-                Theme = "3.1.3 на нарушение прав на выбор медицинской организации",
-                Status = "отправлен ответ"
-            },
-            new()
-            {
-                Number = "ХКФОМС-10",
-                Date = new DateOnly(2025, _rnd.Next(1, 12), _rnd.Next(1, 28)),
-                Theme = "3.1.3 на нарушение прав на выбор медицинской организации",
-                Status = "отправлен ответ"
-            },
-            new()
-            {
-                Number = "ХКФОМС-11",
-                Date = new DateOnly(2025, _rnd.Next(1, 12), _rnd.Next(1, 28)),
-                Theme = "3.1.3 на нарушение прав на выбор медицинской организации",
-                Status = "отправлен ответ"
-            },
-            new()
-            {
-                Number = "ХКФОМС-12",
-                Date = new DateOnly(2025, _rnd.Next(1, 12), _rnd.Next(1, 28)),
-                Theme = "3.1.3 на нарушение прав на выбор медицинской организации",
-                Status = "отправлен ответ"
-            },
-            new()
-            {
-                Number = "ХКФОМС-13",
-                Date = new DateOnly(2025, _rnd.Next(1, 12), _rnd.Next(1, 28)),
-                Theme = "3.1.3 на нарушение прав на выбор медицинской организации",
-                Status = "отправлен ответ"
-            },
-            new()
-            {
-                Number = "ХКФОМС-14",
-                Date = new DateOnly(2025, _rnd.Next(1, 12), _rnd.Next(1, 28)),
-                Theme = "3.1.3 на нарушение прав на выбор медицинской организации",
-                Status = "отправлен ответ"
-            },
-            new()
-            {
-                Number = "ХКФОМС-15",
-                Date = new DateOnly(2025, _rnd.Next(1, 12), _rnd.Next(1, 28)),
-                Theme = "3.1.3 на нарушение прав на выбор медицинской организации",
-                Status = "отправлен ответ"
-            },
-        ];
-    
-    private PaginateModel<DeclarationModel> _paginateModel = new();
+    private PaginateModel<DeclarationListDto> _paginateModel = new();
     
     private bool _isLoading = false;
 
+    private long _answerSendCount = 0;
+    private long _needsReworkCount = 0;
+    private long _smoRedirectCount = 0;
+
     protected override async Task OnInitializedAsync()
     {
-        for (int i = 0; i < _declarations.Count; i++)
-        {
-            _declarations[i].Id = i;
-        }
-        
         await LoadItems();
     }
 
@@ -141,10 +39,22 @@ public partial class Declarations : ComponentBase
     {
         _isLoading = true;
         
-        await Task.Delay(1000);
+        var declarationsResult = await Service.GetList(_paginateModel.PageSize, _paginateModel.Page);
+
+        if (!declarationsResult.Success)
+        {
+            ProblemDetailsHandler.Handle(declarationsResult.Error!);
+            return;
+        }
         
-        _paginateModel.Items = _declarations.OrderByDescending(c => c.Date).Skip(_paginateModel.PageSize * (_paginateModel.Page - 1)).Take(_paginateModel.PageSize).ToList();
-        _paginateModel.ItemsCount = _declarations.Count();
+        var data = declarationsResult.Data!;
+        
+        _paginateModel.Items =  data.Declarations.ToList().Adapt<List<DeclarationListDto>>();
+        _paginateModel.ItemsCount = data.TotalDeclarationsItems;
+
+        _answerSendCount = data.Statistics.SendAnswerCount;
+        _smoRedirectCount = data.Statistics.SmoRedirectCount;
+        _needsReworkCount = data.Statistics.NeedReworkCount;
         
         _isLoading = false;
     }
@@ -162,10 +72,10 @@ public partial class Declarations : ComponentBase
         await LoadItems();
     }
 
-    private async Task SendCard(DeclarationModel declaration)
+    private async Task SendCard(DeclarationListDto declarationList)
     {
         DialogOptions options = new() { MaxWidth = MaxWidth.Medium, FullWidth = true };
-        var parameters = new DialogParameters<SendCardDialog> { { x => x.Declaration, declaration} };
+        var parameters = new DialogParameters<SendCardDialog> { { x => x.Declaration, declarationList} };
         
         await Dialog.ShowAsync<SendCardDialog>("Custom Options Dialog", parameters, options);
     }
@@ -196,21 +106,4 @@ public partial class Declarations : ComponentBase
             await LoadItems();
         }
     }
-}
-
-public class DeclarationModel
-{
-    public long Id { get; set; }
-    public string Number { get; set; }
-    public DateOnly Date { get; set; }
-    public string Theme { get; set; }
-    public string Status { get; set; }
-}
-
-public class PaginateModel<T>
-{
-    public int Page { get; set; } = 1;
-    public int PageSize { get; set; } = 10;
-    public int ItemsCount { get; set; }
-    public List<T> Items { get; set; } = new();
 }

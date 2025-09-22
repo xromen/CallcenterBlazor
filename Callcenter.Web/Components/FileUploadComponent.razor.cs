@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Components;
+﻿using Callcenter.Shared;
+using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
 
 namespace Callcenter.Web.Components
@@ -12,18 +13,17 @@ namespace Callcenter.Web.Components
             set
             {
                 _files = value;
-                UploadFileChanged.InvokeAsync(value);
+                UploadFilesChanged.InvokeAsync(value);
             }
         }
 
         [Parameter]
-        public EventCallback<List<IBrowserFile>> UploadFileChanged { get; set; }
+        public EventCallback<List<IBrowserFile>> UploadFilesChanged { get; set; }
 
         [Parameter]
         public string? Accept { get; set; }
 
-        [Parameter]
-        public string? HelpText { get; set; }
+        [Parameter] public List<FileDto> DbFiles { get; set; } = new();
 
         private List<IBrowserFile> _files = new();
 

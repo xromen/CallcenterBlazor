@@ -1,4 +1,5 @@
-﻿using Callcenter.Web.Pages;
+﻿using Callcenter.Web.Models;
+using Callcenter.Web.Pages;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using MudBlazor;
@@ -7,7 +8,7 @@ namespace Callcenter.Web.Components;
 
 public partial class SendCardDialog : ComponentBase
 {
-    [Parameter] public DeclarationModel Declaration { get; set; }
+    [Parameter] public DeclarationListDto Declaration { get; set; }
     
     [CascadingParameter]
     private IMudDialogInstance MudDialog { get; set; }

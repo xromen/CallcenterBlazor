@@ -1,13 +1,21 @@
 ﻿using Blazored.LocalStorage;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Authorization;
 using MudBlazor;
 
 namespace Callcenter.Web.Layout;
 
 public partial class MainLayout : LayoutComponentBase
 {
+    [CascadingParameter]
+    private Task<AuthenticationState> AuthStateTask { get; set; } = null!;
+    
     [Inject]
     public ILocalStorageService LocalStorageService { get; set; }
+
+    private string? _userFullName;
+    private string? _userGroup;
+    private string? _userOrganisation;
     
     private bool _zoomedIn = false;
 
@@ -39,6 +47,13 @@ public partial class MainLayout : LayoutComponentBase
 
     protected override async Task OnInitializedAsync()
     {
+        var authState = await AuthStateTask;
+
+        _zoomedIn = await LocalStorageService.GetItemAsync<bool?>("zoomed") ?? false;
+        
+        _userFullName = authState.User.FindFirst("FullName")?.Value;
+        _userGroup = authState.User.FindFirst("Group")?.Value;
+        _userOrganisation = authState.User.FindFirst("Organisation")?.Value;
         
         await base.OnInitializedAsync();
     }
@@ -47,7 +62,15 @@ public partial class MainLayout : LayoutComponentBase
     {
         if (firstRender)
         {
-            _zoomedIn = await LocalStorageService.GetItemAsync<bool?>("zoomed") ?? false;
+            // var authState = await AuthStateTask;
+            //
+            // var zoomedInRes = await ProtectedSessionStore.GetAsync<bool?>("zoomed");
+            // _zoomedIn = zoomedInRes.Value ?? false;
+            //
+            // _userFullName = authState.User.FindFirst("FullName")?.Value;
+            // _userGroup = authState.User.FindFirst("Group")?.Value;
+            // _userOrganisation = authState.User.FindFirst("Organisation")?.Value;
+            
             StateHasChanged();
         }
             

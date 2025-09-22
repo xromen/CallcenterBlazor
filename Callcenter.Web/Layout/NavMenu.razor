@@ -1,4 +1,5 @@
-﻿<style>
+﻿@using Callcenter.Web.Extensions
+<style>
     .nav-button{
         width: 80px;
         height: 80px;
@@ -12,32 +13,27 @@
     }
 </style>
 
-<MudPaper Style="@Style" Class="@Class" Elevation="10">
-    <MudStack Spacing="0">
-        <MudTooltip Text="Новости" Arrow="true" Placement="Placement.Left">
-            <MudIconButton Class="nav-button" Variant="Variant.Filled" Href="/" Icon="@Icons.Material.Filled.ListAlt"></MudIconButton>
-        </MudTooltip>
-        <MudTooltip Text="Обращения" Arrow="true" Placement="Placement.Left">
-            <MudIconButton Class="nav-button" Variant="Variant.Filled" Href="/declarations" Icon="@Icons.Material.Filled.Message"></MudIconButton>
-        </MudTooltip>
-        <MudTooltip Text="Профиль" Arrow="true" Placement="Placement.Left">
-            <MudIconButton Class="nav-button" Variant="Variant.Filled" Href="/profile" Icon="@Icons.Material.Filled.Person"></MudIconButton>
-        </MudTooltip>
-        <MudTooltip Text="Раздел администратора" Arrow="true" Placement="Placement.Left">
-            <MudIconButton Class="nav-button" Variant="Variant.Filled" Href="/admin" Icon="@Icons.Material.Filled.Build"></MudIconButton>
-        </MudTooltip>
-        <MudTooltip Text="Выход" Arrow="true" Placement="Placement.Left">
-            <MudIconButton Class="nav-button" Variant="Variant.Filled" Href="/Account/Logout" Icon="@Icons.Material.Filled.Logout"></MudIconButton>
-        </MudTooltip>
-    </MudStack>
-</MudPaper>
-
-@code{
-
-    [Parameter]
-    public string? Style { get; set; }
-    
-    [Parameter]
-    public string? Class { get; set; }
-
-}
+<AuthorizeView>
+    <MudPaper Style="@Style" Class="@Class" Elevation="10">
+        <MudStack Spacing="0">
+            <MudTooltip Text="Новости" Arrow="true" Placement="Placement.Left">
+                <MudIconButton Class="nav-button" Variant="Variant.Filled" Href="/" Icon="@Icons.Material.Filled.ListAlt"></MudIconButton>
+            </MudTooltip>
+            <MudTooltip Text="Обращения" Arrow="true" Placement="Placement.Left">
+                <MudIconButton Class="nav-button" Variant="Variant.Filled" Href="/declarations" Icon="@Icons.Material.Filled.Message"></MudIconButton>
+            </MudTooltip>
+            <MudTooltip Text="Профиль" Arrow="true" Placement="Placement.Left">
+                <MudIconButton Class="nav-button" Variant="Variant.Filled" Href="/profile" Icon="@Icons.Material.Filled.Person"></MudIconButton>
+            </MudTooltip>
+            @if (context.User.IsAdmin())
+            {
+                <MudTooltip Text="Раздел администратора" Arrow="true" Placement="Placement.Left">
+                    <MudIconButton Class="nav-button" Variant="Variant.Filled" Href="/admin" Icon="@Icons.Material.Filled.Build"></MudIconButton>
+                </MudTooltip>
+            }
+            <MudTooltip Text="Выход" Arrow="true" Placement="Placement.Left">
+                <MudIconButton Class="nav-button" Variant="Variant.Filled" Href="/Account/Logout" Icon="@Icons.Material.Filled.Logout"></MudIconButton>
+            </MudTooltip>
+        </MudStack>
+    </MudPaper>
+</AuthorizeView>

@@ -1,0 +1,104 @@
+sp_get_rk_list
+Добавил два необязательных параметра page_size integer DEFAULT NULL::integer, page integer DEFAULT NULL::integer
+Добавил столбец в результивную таблицу total_count bigint
+Новые колонки:
+	count(*) over() as total_count,
+	count(case when dc_status.id = 5 then tbl_rk.id end) over() as send_answer_count,
+	count(case when dc_status.id = 10 then tbl_rk.id end) over() as needs_rework_count,
+	count(case when dc_status.id = 3 then tbl_rk.id end) over() as smo_redirect_count
+
+CREATE FUNCTION sp_get_rk_list(user_id integer, page_size integer DEFAULT NULL::integer, page integer DEFAULT NULL::integer)
+    RETURNS TABLE(id integer, rk_number text, is_bad integer, datereg timestamp without time zone, obr_theme text, statusik text, total_count bigint, send_answer_count bigint, needs_rework_count bigint, smo_redirect_count bigint)
+    LANGUAGE plpgsql
+AS
+$$
+DECLARE
+    group_id_var INTEGER;
+    org_id_var   INTEGER;
+    rk_ids       INTEGER[];
+BEGIN
+    group_id_var := (SELECT group_id FROM tbl_users WHERE tbl_users.id = $1);
+    org_id_var := (SELECT org_id FROM tbl_users WHERE tbl_users.id = $1);
+    IF org_id_var = 5 --ХКФОМС
+    THEN
+        IF group_id_var IN (1, 2, 7, 8, 10, 11) --Операторы 1-2 уровня
+        THEN
+            rk_ids := ARRAY(SELECT rk_id FROM tbl_permissions_rk WHERE tbl_permissions_rk.user_id = $1);
+        ELSIF group_id_var = 6 --руководитель отдела омс
+        THEN
+            rk_ids := ARRAY(SELECT rk_id
+                       FROM tbl_permissions_rk
+                       WHERE tbl_permissions_rk.user_id IN (SELECT DISTINCT id
+                                                            FROM tbl_users
+                                                            WHERE group_id IN (1, 2) --Операторы 1-2 уровня ООМС
+                                                              AND tbl_users.org_id = org_id_var));
+        ELSIF group_id_var = 12 -- Руководитель отдела юо
+        THEN
+            rk_ids := ARRAY(SELECT rk_id
+                       FROM tbl_permissions_rk
+                       WHERE tbl_permissions_rk.user_id IN (SELECT DISTINCT id
+                                                            FROM tbl_users
+                                                            WHERE group_id IN (10, 11) --Операторы 1-2го уровня ЮО
+                                                              AND org_id = org_id_var));
+        ELSIF group_id_var = 9 --Руководитель оккмп
+        THEN
+            rk_ids := ARRAY(SELECT rk_id
+                       FROM tbl_permissions_rk
+                       WHERE tbl_permissions_rk.user_id IN (SELECT DISTINCT id
+                                                            FROM tbl_users
+                                                            WHERE group_id IN (7, 8) --Операторы 1-2го уровня ОККМП
+                                                              AND org_id = org_id_var));
+        ELSIF group_id_var = 4 -- Администратор кц
+        THEN
+            rk_ids := ARRAY(SELECT tbl_rk.id FROM tbl_rk);
+        END IF;
+    ELSE --Для других организаций, не ХКФОМСа
+        IF (SELECT name FROM dc_user_group WHERE dc_user_group.id = group_id_var) LIKE '%рук%'
+        THEN
+            rk_ids := ARRAY(SELECT rk_id
+                       FROM tbl_permissions_rk
+                       WHERE
+                           tbl_permissions_rk.user_id IN (SELECT DISTINCT id FROM tbl_users WHERE org_id = org_id_var));
+        ELSE
+            rk_ids := ARRAY(SELECT rk_id FROM tbl_permissions_rk WHERE tbl_permissions_rk.user_id = $1);
+        END IF;
+    END IF;
+
+    RETURN QUERY
+        SELECT tbl_rk.id,
+               tbl_rk.rk_number,
+               CASE
+                   WHEN date_reg + INTERVAL '1 month' < CURRENT_DATE AND an_status = 0 THEN 1
+                   ELSE 0
+                   END        AS is_bad,
+               CASE
+                   WHEN tbl_rk.rk_number LIKE '%СК%' THEN date_reg_smo
+                   ELSE date_reg
+                   END        AS datereg,
+               tbl_rk.obr_theme,
+               dc_status.name AS statusik,
+               count(*) over() as total_count,
+               count(case when dc_status.id = 5 then tbl_rk.id end) over() as send_answer_count,
+               count(case when dc_status.id = 10 then tbl_rk.id end) over() as needs_rework_count,
+               count(case when dc_status.id = 3 then tbl_rk.id end) over() as smo_redirect_count
+        FROM tbl_rk
+                 INNER JOIN dc_status ON status_id = dc_status.id
+        WHERE tbl_rk.id = ANY (rk_ids)
+          AND (tbl_rk.date_closed = '1900-01-01' OR tbl_rk.date_closed IS NULL)
+          AND tbl_rk.status_id != 9
+        ORDER BY id DESC
+    limit case 
+              when page is not null and page_size is not null 
+                  then page_size 
+              else null 
+          end
+    offset case 
+               when page is not null and page_size is not null 
+                   then (page - 1) * page_size 
+               else 0 
+           end;
+END;
+$$;
+
+ALTER FUNCTION sp_get_rk_list(INTEGER, INTEGER, INTEGER) OWNER TO postgres;
+

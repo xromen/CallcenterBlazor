@@ -1,45 +1,56 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+<Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
 
-  <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
-    <Nullable>enable</Nullable>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <ScopedCssEnabled>true</ScopedCssEnabled>
-    <RootNamespace>Callcenter.Web</RootNamespace>
-    <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
-  </PropertyGroup>
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <ServiceWorkerAssetsManifest>service-worker-assets.js</ServiceWorkerAssetsManifest>
+    </PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Blazored.LocalStorage" Version="4.5.0" />
-    <PackageReference Include="Bogus" Version="35.6.3" />
-    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.21.0" />
-    <PackageReference Include="MudBlazor" Version="8.12.0" />
-    <PackageReference Include="MudBlazor.Translations" Version="2.6.0" />
-  </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="Blazored.LocalStorage" Version="4.5.0" />
+        <PackageReference Include="Mapster" Version="7.4.0" />
+        <PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="8.0.20" />
+        <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="8.0.20" />
+        <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Authentication" Version="8.0.20" />
+        <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="8.0.20" PrivateAssets="all" />
+        <PackageReference Include="Bogus" Version="35.6.3" />
+        <PackageReference Include="CSharpFunctionalExtensions" Version="3.6.0" />
+        <PackageReference Include="CSharpFunctionalExtensions.Analyzers" Version="1.4.1">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.21.0" />
+        <PackageReference Include="MudBlazor" Version="8.12.0" />
+        <PackageReference Include="MudBlazor.Translations" Version="2.6.0" />
+        <PackageReference Include="Refit" Version="8.0.0" />
+        <PackageReference Include="Refit.HttpClientFactory" Version="8.0.0" />
+    </ItemGroup>
 
-  <ItemGroup>
-    <AdditionalFiles Include="Layout\AccountLayout.razor" />
-    <AdditionalFiles Include="Layout\MainLayout.razor" />
-    <AdditionalFiles Include="Layout\NavMenu.razor" />
-    <AdditionalFiles Include="Pages\Account\Login.razor" />
-    <AdditionalFiles Include="Pages\Account\Logout.razor" />
-    <AdditionalFiles Include="Pages\Admin.razor" />
-    <AdditionalFiles Include="Pages\Declarations.razor" />
-    <AdditionalFiles Include="Pages\DeclarationsAll.razor" />
-    <AdditionalFiles Include="Pages\DeclarationsDouble.razor" />
-    <AdditionalFiles Include="Pages\News.razor" />
-    <AdditionalFiles Include="Pages\Profile.razor" />
-  </ItemGroup>
+    <ItemGroup>
+        <ServiceWorker Include="wwwroot\service-worker.js" PublishedContent="wwwroot\service-worker.published.js"/>
+    </ItemGroup>
 
-  <ItemGroup>
-    <_ContentIncludedByDefault Remove="Components\Pages\Account\Login.razor" />
-    <_ContentIncludedByDefault Remove="Components\Pages\Account\Logout.razor" />
-    <_ContentIncludedByDefault Remove="Components\Pages\Admin.razor" />
-    <_ContentIncludedByDefault Remove="Components\Pages\Declarations.razor" />
-    <_ContentIncludedByDefault Remove="Components\Pages\DeclarationsAll.razor" />
-    <_ContentIncludedByDefault Remove="Components\Pages\DeclarationsDouble.razor" />
-    <_ContentIncludedByDefault Remove="Components\Pages\News.razor" />
-    <_ContentIncludedByDefault Remove="Components\Pages\Profile.razor" />
-  </ItemGroup>
+    <ItemGroup>
+      <_ContentIncludedByDefault Remove="Layout\MainLayout.razor" />
+      <_ContentIncludedByDefault Remove="Pages\Home.razor" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <AdditionalFiles Include="Components\DeclarationsToolbar.razor" />
+      <AdditionalFiles Include="Components\FileUploadComponent.razor" />
+      <AdditionalFiles Include="Components\FlexDataGrid.razor" />
+      <AdditionalFiles Include="Components\HistoryRow.razor" />
+      <AdditionalFiles Include="Components\NewsEditDialog.razor" />
+      <AdditionalFiles Include="Components\NewsTable.razor" />
+      <AdditionalFiles Include="Components\RedirectToLogin.razor" />
+      <AdditionalFiles Include="Components\SendCardDialog.razor" />
+      <AdditionalFiles Include="Components\UserEditDialog.razor" />
+      <AdditionalFiles Include="Pages\Declaration.razor" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Callcenter.Shared\Callcenter.Shared.csproj" />
+    </ItemGroup>
 
 </Project>

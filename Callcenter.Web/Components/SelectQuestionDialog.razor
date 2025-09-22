@@ -1,0 +1,103 @@
+﻿@using Callcenter.Shared
+<style>
+    .selected {
+        background-color: #1E88E5 !important;
+    }
+    .selected > td {
+        color: white !important;
+    }
+    .selected > td .mud-input {
+        color: white !important;
+    }
+</style>
+
+<MudDialog Style="height: 100%;">
+    <TitleContent>
+        <MudText Typo="Typo.h6">Типовые вопросы</MudText>
+    </TitleContent>
+    <DialogContent>
+        @if (_isLoading)
+        {
+            <MudProgressCircular/>
+        }
+        else
+        {
+            <MudGrid>
+                <MudItem lg="6">
+                    <MudExpansionPanels>
+                        @foreach (var group in _groups)
+                        {
+                            <MudExpansionPanel>
+                                <TitleContent>
+                                    <MudStack Row>
+                                        <MudText>@group.Name</MudText>
+                                        <MudSpacer/>
+                                        <MudIconButton Icon="@Icons.Material.Filled.Edit"
+                                                       Size="Size.Small"/>
+                                    </MudStack>
+                                </TitleContent>
+                                <ChildContent>
+                                    <MudTable T="QuestionDto"
+                                              Items="@group.Questions"
+                                              Hover="true"
+                                              Breakpoint="Breakpoint.Sm"
+                                              @ref="_mudTable"
+                                              RowClass="cursor-pointer"
+                                              RowClassFunc="@SelectedRowClassFunc"
+                                              OnRowClick="RowClickEvent">
+                                        <RowTemplate>
+                                            <MudTd>@context.Name</MudTd>
+                                        </RowTemplate>
+                                    </MudTable>
+                                </ChildContent>
+                            </MudExpansionPanel>
+                        }
+                    </MudExpansionPanels>
+                </MudItem>
+                <MudItem lg="6">
+                    <MudStack>
+                        <MudTextField @bind-Value="_selectedQuestion.Answer"
+                                      Lines="10"
+                                      AutoGrow="true"
+                                      Variant="Variant.Outlined"
+                                      ReadOnly="!_isAnswerEditing"/>
+                        <MudStack Row
+                                  AlignItems="AlignItems.Center"
+                                  Justify="Justify.FlexEnd"
+                                  Class="mud-width-full">
+                            <MudIconButton Icon="@Icons.Material.Filled.Done"
+                                           Variant="Variant.Filled"
+                                           Color="Color.Success"
+                                           OnClick="() => MudDialog.Close(DialogResult.Ok(_selectedQuestion))"/>
+                            <MudToggleIconButton ToggledChanged="AnswerEditModeChanged"
+                                                 Icon="@Icons.Material.Filled.Edit"
+                                                 ToggledIcon="@Icons.Material.Filled.Save"
+                                                 Variant="Variant.Filled"
+                                                 Color="Color.Warning"
+                                                 ToggledColor="Color.Info"/>
+                            <MudIconButton Icon="@Icons.Material.Filled.Delete"
+                                           Variant="Variant.Filled"
+                                           Color="Color.Error"/>
+                        </MudStack>
+                    </MudStack>
+                </MudItem>
+            </MudGrid>
+            
+        }
+    </DialogContent>
+    <DialogActions>
+        <MudMenu Label="Добавить" 
+                 Variant="Variant.Outlined"
+                 EndIcon="@Icons.Material.Filled.KeyboardArrowUp"
+                 AnchorOrigin="Origin.TopCenter"
+                 TransformOrigin="Origin.BottomCenter">
+            <MudMenuItem Label="Группу" />
+            <MudMenuItem Label="Вопрос" />
+        </MudMenu>
+        <MudButton Color="Color.Info"
+                   Variant="Variant.Filled"
+                   OnClick="Cancel">
+            Закрыть
+        </MudButton>
+    </DialogActions>
+</MudDialog>
