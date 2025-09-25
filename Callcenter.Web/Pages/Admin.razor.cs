@@ -1,5 +1,6 @@
 ﻿using Bogus;
 using Callcenter.Web.Components;
+using Callcenter.Web.Components.Dialogs;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using MudBlazor;

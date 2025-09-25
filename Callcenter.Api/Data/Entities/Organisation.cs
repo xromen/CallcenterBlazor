@@ -13,4 +13,6 @@ public class Organisation
     
     [Column("type_orgs_id")]
     public int TypeOrgsId { get; set; }
+    
+    public OrganisationName OrganisationName { get; set; }
 }

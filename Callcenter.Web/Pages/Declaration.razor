@@ -32,392 +32,409 @@
 </style>
 
 <AuthorizeView>
-
-    <MudForm Model="@Model" @ref="@_form" >
-        <MudTabs HeaderPosition="TabHeaderPosition.After"
-                 Color="Color.Dark"
-                 ActivePanelIndexChanged="TabPanelIndexChanged">
-            <ChildContent>
-                <MudTabPanel Text="Информация">
-                    @if (_isLoading)
-                    {
-                        <MudProgressCircular/>
-                    }
-                    else
-                    {
-                        <MudStack Class="ms-8 mt-4">
-                            <MudGrid Class="mud-width-full" Spacing="4">
-                                <MudItem lg="4">
-                                    <MudStack Spacing="1">
-                                        <MudTextField T="string?"
-                                                      Label="Статус"
-                                                      Variant="Variant.Outlined"
-                                                      Margin="Margin.Dense"
-                                                      Value="@(Model.StatusId == null ? null : Dictionaries.DeclarationStatuses[Model.StatusId.Value])"
-                                                      ReadOnly/>
-                                        <MudTextField T="string"
-                                                      Variant="Variant.Outlined"
-                                                      Label="Код обращения"
-                                                      Value="@(Model.CodeId == null ? null : Dictionaries.OrganisationNames[Model.CodeId.Value])"
-                                                      Margin="Margin.Dense"
-                                                      ReadOnly/>
-                                        <MudSelect @bind-Value="Model.TypeId"
-                                                   For="() => Model.TypeId"
-                                                   Variant="Variant.Outlined"
-                                                   Label="Вид обращения"
-                                                   Margin="Margin.Dense"
-                                                   Modal="false"
-                                                   Immediate="true">
-                                            @foreach (var typeKv in Dictionaries.DeclarationTypes)
-                                            {
-                                                <MudSelectItem T="int?" Value="@typeKv.Key">@typeKv.Value</MudSelectItem>
-                                            }
-                                        </MudSelect>
-                                        <MudSelect @bind-Value="Model.SourceId"
-                                                   For="() => Model.SourceId"
-                                                   Variant="Variant.Outlined"
-                                                   Label="Источник поступления"
-                                                   Margin="Margin.Dense"
-                                                   Modal="false"
-                                                   Immediate="true">
-                                            @foreach (var sourceKv in Dictionaries.DeclarationSources)
-                                            {
-                                                <MudSelectItem T="int?" Value="@sourceKv.Key">@sourceKv.Value</MudSelectItem>
-                                            }
-                                        </MudSelect>
-                                        <MudNumericField @bind-Value="Model.EjogNumber"
-                                                         For="() => Model.EjogNumber"
-                                                         Variant="Variant.Outlined"
-                                                         Label="Номер ЭЖОГ"
-                                                         Margin="Margin.Dense"
-                                                         Clearable="true"/>
-                                        <MudAutocomplete @bind-Value="Model.MoPhone"
-                                                         ToStringFunc="@(p => p.PhoneNumber + " " + p.Name)"
-                                                         SearchFunc="SearchMoPhone"
-                                                         Variant="Variant.Outlined"
-                                                         Label="Контактный номер поступления"
-                                                         Margin="Margin.Dense"
-                                                         Clearable="true"/>
-                                        <MudContainer Fixed="true" Style="padding: 0 !important;">
-                                            <MudStack Row
-                                                      AlignItems="AlignItems.Center"
-                                                      Style="min-width: 0">
-                                                <MudSelect @bind-Value="_typeContactForm"
-                                                           Variant="Variant.Outlined"
-                                                           Margin="Margin.Dense"
-                                                           FitContent="true"
-                                                           OuterClass="form-obr-select"
-                                                           Modal="false">
-                                                    <MudSelectItem T="int?" Value="1">Уст.</MudSelectItem>
-                                                    <MudSelectItem T="int?" Value="2">Пис.</MudSelectItem>
-                                                </MudSelect>
-                                                <MudSelect @bind-Value="Model.ContactFormId"
-                                                           Label="Форма обращения"
-                                                           Variant="Variant.Outlined"
-                                                           Margin="Margin.Dense"
-                                                           Class="truncate-select"
-                                                           MaxHeight="200"
-                                                           DropdownSettings="@(new DropdownSettings() { OverflowBehavior = OverflowBehavior.FlipAlways, })">
-
-                                                    @code{
-                                                        Dictionary<int, string> _contactForms = new();
-                                                    }
-
-                                                    @switch (_typeContactForm)
-                                                    {
-                                                        case 1:
-                                                            _contactForms = Dictionaries.VerbalContactForms;
-                                                            break;
-                                                        case 2:
-                                                            _contactForms = Dictionaries.WritingContactForms;
-                                                            break;
-                                                    }
-                                                    @foreach (var contactFormKv in _contactForms)
-                                                    {
-                                                        <MudSelectItem T="int?"
-                                                                       Value="@contactFormKv.Key">@contactFormKv.Value</MudSelectItem>
-                                                    }
-                                                </MudSelect>
-                                            </MudStack>
-                                        </MudContainer>
-                                        <MudDatePicker @bind-Date="Model.DateRegistered"
-                                                       Label="Дата поступления обращения в ФОМС"
-                                                       ShowToolbar="false"
-                                                       Variant="Variant.Outlined"
-                                                       Modal="false"
-                                                       Margin="Margin.Dense"
-                                                       Disabled="context.User.GetOrgId() <= 4"/>
-                                        <MudDatePicker @bind-Date="Model.DateRegisteredSmo"
-                                                       Label="Дата поступления обращения в СМО"
-                                                       ShowToolbar="false"
-                                                       Variant="Variant.Outlined"
-                                                       Modal="false"
-                                                       Margin="Margin.Dense"
-                                                       Disabled="context.User.GetOrgId() > 4"/>
-                                    </MudStack>
-                                </MudItem>
-                                <MudItem lg="5">
-                                    <MudStack Spacing="1">
-                                        <MudSelect @bind-Value="Model.CitizenCategoryId"
-                                                   Label="Категория граждан"
-                                                   Variant="Variant.Outlined"
-                                                   Margin="Margin.Dense"
-                                                   Modal="false"
-                                                   Clearable="true">
-                                            @foreach (var categoryKv in Dictionaries.CitizenCategories)
-                                            {
-                                                <MudSelectItem T="int?" Value="@categoryKv.Key">@categoryKv.Value</MudSelectItem>
-                                            }
-                                        </MudSelect>
-                                        <MudStack Row>
-                                            <MudTextField @bind-Value="Model.SecName"
-                                                          Variant="Variant.Outlined"
-                                                          Label="Фамилия"
-                                                          Margin="Margin.Dense"
-                                                          Clearable="true"/>
-                                            <MudTextField @bind-Value="Model.FirstName"
-                                                          Variant="Variant.Outlined"
-                                                          Label="Имя"
-                                                          Margin="Margin.Dense"
-                                                          Clearable="true"/>
-                                            <MudTextField @bind-Value="Model.FathName"
-                                                          Variant="Variant.Outlined"
-                                                          Label="Отчество"
-                                                          Margin="Margin.Dense"
-                                                          Clearable="true"/>
-                                            <MudDatePicker @bind-Date="Model.BirthDate"
-                                                           Label="Дата рождения"
-                                                           ShowToolbar="false"
-                                                           Variant="Variant.Outlined"
-                                                           Modal="false"
-                                                           Margin="Margin.Dense"
-                                                           AdornmentIcon=""
-                                                           Clearable="true"/>
-                                        </MudStack>
-                                        <MudTextField @bind-Value="Model.AgentSecName"
-                                                      Variant="Variant.Outlined"
-                                                      Label="Ф.И.О. представителя ЗЛ"
-                                                      Margin="Margin.Dense"
-                                                      Clearable="true"/>
+    <MudTabs HeaderPosition="TabHeaderPosition.After"
+             Color="Color.Dark"
+             ActivePanelIndexChanged="TabPanelIndexChanged"
+             Class="mud-height-full">
+        <ChildContent>
+            <MudTabPanel Text="Информация" Class="mud-height-full">
+                @if (_isLoading)
+                {
+                    <MudSkeleton SkeletonType="SkeletonType.Rectangle" 
+                                 Height="67vh" 
+                                 Width="95%"
+                                 Animation="Animation.Pulse"
+                                 Class="ma-4"/>
+                }
+                else
+                {
+                    <MudStack Class="ms-8 mt-4">
+                        <MudGrid Class="mud-width-full" Spacing="4">
+                            <MudItem lg="4">
+                                <MudStack Spacing="1">
+                                    <MudTextField T="string?"
+                                                  Label="Статус"
+                                                  Variant="Variant.Outlined"
+                                                  Margin="Margin.Dense"
+                                                  Value="@(Model.StatusId == null ? null : Dictionaries.DeclarationStatuses[Model.StatusId.Value])"
+                                                  ReadOnly
+                                                  Disabled="true"/>
+                                    <MudTextField T="string"
+                                                  Variant="Variant.Outlined"
+                                                  Label="Код обращения"
+                                                  Value="@(Model.CodeId == null ? null : Dictionaries.OrganisationNames[Model.CodeId.Value])"
+                                                  Margin="Margin.Dense"
+                                                  ReadOnly
+                                                  Disabled="true"/>
+                                    <MudSelect @bind-Value="Model.TypeId"
+                                               For="() => Model.TypeId"
+                                               Variant="Variant.Outlined"
+                                               Label="Вид обращения"
+                                               Margin="Margin.Dense"
+                                               Modal="false"
+                                               Immediate="true">
+                                        @foreach (var typeKv in Dictionaries.DeclarationTypes)
+                                        {
+                                            <MudSelectItem T="int?" Value="@typeKv.Key">@typeKv.Value</MudSelectItem>
+                                        }
+                                    </MudSelect>
+                                    <MudSelect @bind-Value="Model.SourceId"
+                                               For="() => Model.SourceId"
+                                               Variant="Variant.Outlined"
+                                               Label="Источник поступления"
+                                               Margin="Margin.Dense"
+                                               Modal="false"
+                                               Immediate="true">
+                                        @foreach (var sourceKv in Dictionaries.DeclarationSources)
+                                        {
+                                            <MudSelectItem T="int?" Value="@sourceKv.Key">@sourceKv.Value</MudSelectItem>
+                                        }
+                                    </MudSelect>
+                                    <MudNumericField @bind-Value="Model.EjogNumber"
+                                                     For="() => Model.EjogNumber"
+                                                     Variant="Variant.Outlined"
+                                                     Label="Номер ЭЖОГ"
+                                                     Margin="Margin.Dense"
+                                                     Clearable="true"/>
+                                    <MudAutocomplete @bind-Value="Model.MoPhone"
+                                                     ToStringFunc="@(p => p.PhoneNumber + " " + p.Name)"
+                                                     SearchFunc="SearchMoPhone"
+                                                     Variant="Variant.Outlined"
+                                                     Label="Контактный номер поступления"
+                                                     Margin="Margin.Dense"
+                                                     Clearable="true"
+                                                     MaxItems="1000"/>
+                                    <MudContainer Fixed="true" Style="padding: 0 !important;">
                                         <MudStack Row
-                                                  Style="margin-top: 8px; margin-bottom: 4px;">
-                                            <MudIconButton Icon="@Icons.Material.Filled.Search"
-                                                           Variant="Variant.Filled"
-                                                           Color="Color.Info"/>
-                                            <MudButton Variant="Variant.Filled"
-                                                       Color="Color.Success"
-                                                       FullWidth="true">Узнать страхового представителя
-                                            </MudButton>
+                                                  AlignItems="AlignItems.Center"
+                                                  Style="min-width: 0">
+                                            <MudSelect @bind-Value="_typeContactForm"
+                                                       Variant="Variant.Outlined"
+                                                       Margin="Margin.Dense"
+                                                       FitContent="true"
+                                                       OuterClass="form-obr-select"
+                                                       Modal="false">
+                                                <MudSelectItem T="int?" Value="1">Уст.</MudSelectItem>
+                                                <MudSelectItem T="int?" Value="2">Пис.</MudSelectItem>
+                                            </MudSelect>
+                                            <MudSelect @bind-Value="Model.ContactFormId"
+                                                       Label="Форма обращения"
+                                                       Variant="Variant.Outlined"
+                                                       Margin="Margin.Dense"
+                                                       Class="truncate-select"
+                                                       MaxHeight="200"
+                                                       DropdownSettings="@(new DropdownSettings() { OverflowBehavior = OverflowBehavior.FlipAlways, })">
+
+                                                @code{
+                                                    Dictionary<int, string> _contactForms = new();
+                                                }
+
+                                                @switch (_typeContactForm)
+                                                {
+                                                    case 1:
+                                                        _contactForms = Dictionaries.VerbalContactForms;
+                                                        break;
+                                                    case 2:
+                                                        _contactForms = Dictionaries.WritingContactForms;
+                                                        break;
+                                                }
+                                                @foreach (var contactFormKv in _contactForms)
+                                                {
+                                                    <MudSelectItem T="int?"
+                                                                   Value="@contactFormKv.Key">@contactFormKv.Value</MudSelectItem>
+                                                }
+                                            </MudSelect>
                                         </MudStack>
-                                        <MudTextField @bind-Value="Model.ResidenceAddress"
-                                                      Variant="Variant.Outlined"
-                                                      Label="Адрес фактического проживания"
-                                                      Margin="Margin.Dense"
-                                                      Clearable="true"/>
-                                        <MudTextField @bind-Value="Model.InsuredEnp"
-                                                      Variant="Variant.Outlined"
-                                                      Label="ЕНП"
-                                                      Margin="Margin.Dense"
-                                                      Clearable="true"/>
-                                        <MudGrid Spacing="2">
-                                            <MudItem lg="6">
-                                                <MudSelect @bind-Value="Model.IdentityDocType"
-                                                           Label="Тип документа"
-                                                           Variant="Variant.Outlined"
-                                                           Margin="Margin.Dense"
-                                                           Modal="false"
-                                                           Clearable>
-                                                    @foreach (var typeKv in Dictionaries.IdentityDocumentTypes)
-                                                    {
-                                                        <MudSelectItem Value="@typeKv.Value">@typeKv.Value</MudSelectItem>
-                                                    }
-                                                </MudSelect>
-                                            </MudItem>
-                                            <MudItem lg="3">
-                                                <MudTextField @bind-Value="Model.IdentityDocSeries"
-                                                              Variant="Variant.Outlined"
-                                                              Label="Серия"
-                                                              Margin="Margin.Dense"
-                                                              Clearable/>
-                                            </MudItem>
-                                            <MudItem lg="3">
-                                                <MudTextField @bind-Value="Model.IdentityDocNumber"
-                                                              Variant="Variant.Outlined"
-                                                              Label="Номер"
-                                                              Margin="Margin.Dense"
-                                                              Clearable/>
-                                            </MudItem>
-                                        </MudGrid>
-                                        <MudStack Row>
-                                            <MudTextField @bind-Value="Model.Phone"
-                                                          Variant="Variant.Outlined"
-                                                          Label="Контактный телефон"
-                                                          Margin="Margin.Dense"
-                                                          Clearable/>
-                                            <MudTextField @bind-Value="Model.Email"
-                                                          Variant="Variant.Outlined"
-                                                          Label="e-mail"
-                                                          Margin="Margin.Dense"
-                                                          Clearable/>
-                                        </MudStack>
-                                        <MudSelect @bind-Value="Model.InsuredSmoId"
-                                                   Label="СМО застрахованного"
+                                    </MudContainer>
+                                    <MudDatePicker @bind-Date="Model.DateRegistered"
+                                                   Label="Дата поступления обращения в ФОМС"
+                                                   ShowToolbar="false"
                                                    Variant="Variant.Outlined"
+                                                   Modal="false"
                                                    Margin="Margin.Dense"
-                                                   Modal="false">
-                                            @foreach (var smoKv in Dictionaries.SmoOrganisations)
-                                            {
-                                                <MudSelectItem T="int?" Value="@smoKv.Key">@smoKv.Value</MudSelectItem>
-                                            }
-                                        </MudSelect>
-                                        <MudAutocomplete @bind-Value="Model.InsuredMo"
-                                                         ToStringFunc="@(p => p.MoName)"
-                                                         SearchFunc="SearchInsuredMo"
-                                                         Variant="Variant.Outlined"
-                                                         Label="МО застрахованного"
-                                                         Margin="Margin.Dense"
-                                                         Clearable="true"
-                                                         MaxItems="1000"/>
-                                        <MudStack Row
-                                                  AlignItems="AlignItems.Center">
-                                            <MudRadioGroup @bind-Value="Model.SvoStatusId">
-                                                <MudRadio T="int?" Value="1" Color="Color.Info">Участник СВО</MudRadio>
-                                                <MudRadio T="int?" Value="2" Color="Color.Info">Член семьи участника СВО
-                                                </MudRadio>
-                                            </MudRadioGroup>
-                                            <MudSpacer/>
-                                            <MudIconButton Icon="@Icons.Material.Filled.Close"
-                                                           Size="Size.Small"
-                                                           Color="Color.Dark"
-                                                           Class="me-2"
-                                                           Style="border-radius: 50%;"
-                                                           Variant="Variant.Filled"
-                                                           OnClick="() => { Model.SvoStatusId = null; }"/>
-                                        </MudStack>
-                                    </MudStack>
-                                </MudItem>
-                                <MudItem lg="3">
-                                    <FileUploadComponent UploadFiles="@_uploadedFiles" DbFiles="@Model.Files"/>
-                                </MudItem>
-                            </MudGrid>
-                        </MudStack>
-                    }
-                </MudTabPanel>
-                <MudTabPanel Text="Обращение">
-                    <MudStack Class="mx-8 mt-4">
-                        <MudAutocomplete @bind-Value="Model.Theme"
-                                         SearchFunc="SearchDeclarationTheme"
-                                         Variant="Variant.Outlined"
-                                         Label="Тема обращения"
-                                         Margin="Margin.Dense"
-                                         Clearable="true"/>
-
-                        <MudTextField @bind-Value="Model.Content"
-                                      Variant="Variant.Outlined"
-                                      Label="Содержание обращения"
-                                      Margin="Margin.Dense"
-                                      Lines="5"
-                                      MaxLines="15"
-                                      AutoGrow="true"/>
-
-                        <MudGrid>
-                            <MudItem lg="3">
-                                <MudSelect T="int?"
-                                           ValueChanged="(v) => {
-                                               Model.AnswerStatusId = v;
-                                               if(v == 2)
-                                               {
-                                                   Model.AnswerDate = DateTime.Now;
-                                               }
-                                           }"
-                                           Value="Model.AnswerStatusId"
-                                           Label="Состояние исполнения"
-                                           Variant="Variant.Outlined"
-                                           Margin="Margin.Dense"
-                                           Modal="false">
-                                    @foreach (var statusKv in Dictionaries.AnswerStatuses)
-                                    {
-                                        <MudSelectItem T="int?" Value="@statusKv.Key">@statusKv.Value</MudSelectItem>
-                                    }
-                                </MudSelect>
+                                                   Disabled="context.User.GetOrgId() <= 4"/>
+                                    <MudDatePicker @bind-Date="Model.DateRegisteredSmo"
+                                                   Label="Дата поступления обращения в СМО"
+                                                   ShowToolbar="false"
+                                                   Variant="Variant.Outlined"
+                                                   Modal="false"
+                                                   Margin="Margin.Dense"
+                                                   Disabled="context.User.GetOrgId() > 4"/>
+                                </MudStack>
                             </MudItem>
+                            <MudItem lg="5">
+                                <MudStack Spacing="1">
+                                    <MudSelect @bind-Value="Model.CitizenCategoryId"
+                                               Label="Категория граждан"
+                                               Variant="Variant.Outlined"
+                                               Margin="Margin.Dense"
+                                               Modal="false"
+                                               Clearable="true">
+                                        @foreach (var categoryKv in Dictionaries.CitizenCategories)
+                                        {
+                                            <MudSelectItem T="int?" Value="@categoryKv.Key">@categoryKv.Value</MudSelectItem>
+                                        }
+                                    </MudSelect>
+                                    <MudStack Row>
+                                        <MudTextField @bind-Value="Model.SecName"
+                                                      Variant="Variant.Outlined"
+                                                      Label="Фамилия"
+                                                      Margin="Margin.Dense"
+                                                      Clearable="true"/>
+                                        <MudTextField @bind-Value="Model.FirstName"
+                                                      Variant="Variant.Outlined"
+                                                      Label="Имя"
+                                                      Margin="Margin.Dense"
+                                                      Clearable="true"/>
+                                        <MudTextField @bind-Value="Model.FathName"
+                                                      Variant="Variant.Outlined"
+                                                      Label="Отчество"
+                                                      Margin="Margin.Dense"
+                                                      Clearable="true"/>
+                                        <MudDatePicker @bind-Date="Model.BirthDate"
+                                                       Label="Дата рождения"
+                                                       ShowToolbar="false"
+                                                       Variant="Variant.Outlined"
+                                                       Modal="false"
+                                                       Margin="Margin.Dense"
+                                                       AdornmentIcon=""
+                                                       Clearable="true"/>
+                                    </MudStack>
+                                    <MudTextField @bind-Value="Model.AgentSecName"
+                                                  Variant="Variant.Outlined"
+                                                  Label="Ф.И.О. представителя ЗЛ"
+                                                  Margin="Margin.Dense"
+                                                  Clearable="true"/>
+                                    <MudStack Row
+                                              Style="margin-top: 8px; margin-bottom: 4px;">
+                                        <MudIconButton Icon="@Icons.Material.Filled.Search"
+                                                       Variant="Variant.Filled"
+                                                       Color="Color.Info"
+                                                       Disabled="!_isPersDataFilled"/>
+                                        <MudButton Variant="Variant.Filled"
+                                                   Color="Color.Success"
+                                                   FullWidth="true"
+                                                   Disabled="!_isPersDataFilled">Узнать страхового представителя
+                                        </MudButton>
+                                    </MudStack>
+                                    <MudTextField @bind-Value="Model.ResidenceAddress"
+                                                  Variant="Variant.Outlined"
+                                                  Label="Адрес фактического проживания"
+                                                  Margin="Margin.Dense"
+                                                  Clearable="true"/>
+                                    <MudTextField @bind-Value="Model.InsuredEnp"
+                                                  Variant="Variant.Outlined"
+                                                  Label="ЕНП"
+                                                  Margin="Margin.Dense"
+                                                  Clearable="true"/>
+                                    <MudGrid Spacing="2">
+                                        <MudItem lg="6">
+                                            <MudSelect @bind-Value="Model.IdentityDocType"
+                                                       Label="Тип документа"
+                                                       Variant="Variant.Outlined"
+                                                       Margin="Margin.Dense"
+                                                       Modal="false"
+                                                       Clearable>
+                                                @foreach (var typeKv in Dictionaries.IdentityDocumentTypes)
+                                                {
+                                                    <MudSelectItem Value="@typeKv.Value">@typeKv.Value</MudSelectItem>
+                                                }
+                                            </MudSelect>
+                                        </MudItem>
+                                        <MudItem lg="3">
+                                            <MudTextField @bind-Value="Model.IdentityDocSeries"
+                                                          Variant="Variant.Outlined"
+                                                          Label="Серия"
+                                                          Margin="Margin.Dense"
+                                                          Clearable/>
+                                        </MudItem>
+                                        <MudItem lg="3">
+                                            <MudTextField @bind-Value="Model.IdentityDocNumber"
+                                                          Variant="Variant.Outlined"
+                                                          Label="Номер"
+                                                          Margin="Margin.Dense"
+                                                          Clearable/>
+                                        </MudItem>
+                                    </MudGrid>
+                                    <MudStack Row>
+                                        <MudTextField @bind-Value="Model.Phone"
+                                                      Variant="Variant.Outlined"
+                                                      Label="Контактный телефон"
+                                                      Margin="Margin.Dense"
+                                                      Clearable/>
+                                        <MudTextField @bind-Value="Model.Email"
+                                                      Variant="Variant.Outlined"
+                                                      Label="e-mail"
+                                                      Margin="Margin.Dense"
+                                                      Clearable/>
+                                    </MudStack>
+                                    <MudSelect @bind-Value="Model.InsuredSmoId"
+                                               Label="СМО застрахованного"
+                                               Variant="Variant.Outlined"
+                                               Margin="Margin.Dense"
+                                               Modal="false">
+                                        @foreach (var smoKv in Dictionaries.SmoOrganisations)
+                                        {
+                                            <MudSelectItem T="int?" Value="@smoKv.Key">@smoKv.Value</MudSelectItem>
+                                        }
+                                    </MudSelect>
+                                    <MudAutocomplete @bind-Value="Model.InsuredMoId"
+                                                     ToStringFunc="InsuredMoIdToString"
+                                                     SearchFunc="SearchInsuredMo"
+                                                     Variant="Variant.Outlined"
+                                                     Label="МО застрахованного"
+                                                     Margin="Margin.Dense"
+                                                     Clearable="true"
+                                                     MaxItems="1000"/>
+                                    <MudStack Row
+                                              AlignItems="AlignItems.Center">
+                                        <MudRadioGroup @bind-Value="Model.SvoStatusId">
+                                            <MudRadio T="int?" Value="1" Color="Color.Info">Участник СВО</MudRadio>
+                                            <MudRadio T="int?" Value="2" Color="Color.Info">Член семьи участника СВО
+                                            </MudRadio>
+                                        </MudRadioGroup>
+                                        <MudSpacer/>
+                                        <MudIconButton Icon="@Icons.Material.Filled.Close"
+                                                       Size="Size.Small"
+                                                       Color="Color.Dark"
+                                                       Class="me-2"
+                                                       Style="border-radius: 50%;"
+                                                       Variant="Variant.Filled"
+                                                       OnClick="() => { Model.SvoStatusId = null; }"/>
+                                    </MudStack>
+                                </MudStack>
+                            </MudItem>
+                            <MudItem lg="3">
+                                <FileUploadComponent UploadFiles="@_uploadedFiles" DbFiles="@Model.Files"/>
+                            </MudItem>
+                        </MudGrid>
+                    </MudStack>
+                }
+            </MudTabPanel>
+            <MudTabPanel Text="Обращение">
+                <MudStack Class="mx-8 mt-4">
+                    <MudAutocomplete @bind-Value="Model.Theme"
+                                     SearchFunc="SearchDeclarationTheme"
+                                     Variant="Variant.Outlined"
+                                     Label="Тема обращения"
+                                     Margin="Margin.Dense"
+                                     Clearable="true"
+                                     MaxItems="1000"/>
+
+                    <MudTextField @bind-Value="Model.Content"
+                                  Variant="Variant.Outlined"
+                                  Label="Содержание обращения"
+                                  Margin="Margin.Dense"
+                                  Lines="5"
+                                  MaxLines="15"
+                                  AutoGrow="true"/>
+
+                    <MudGrid>
+                        <MudItem lg="3">
+                            <MudSelect T="int?"
+                                       ValueChanged="(v) => {
+                                           Model.AnswerStatusId = v;
+                                           if(v == 2)
+                                           {
+                                               Model.AnswerDate = DateTime.Now;
+                                           }
+                                       }"
+                                       Value="Model.AnswerStatusId"
+                                       Label="Состояние исполнения"
+                                       Variant="Variant.Outlined"
+                                       Margin="Margin.Dense"
+                                       Modal="false">
+                                @foreach (var statusKv in Dictionaries.AnswerStatuses)
+                                {
+                                    <MudSelectItem T="int?" Value="@statusKv.Key">@statusKv.Value</MudSelectItem>
+                                }
+                            </MudSelect>
+                        </MudItem>
+                        @if (Model?.AnswerStatusId == 1)
+                        {
                             <MudItem lg="4">
                                 <MudCheckBox T="bool"
                                              Label="Застрахованный уведомлен о страховом представителе"
                                              Color="Color.Info"/>
                             </MudItem>
-                            <MudItem lg="3">
-                                <MudSelect @bind-Value="Model.KemTypeId"
-                                           Label="Вид проведенных КЭМ"
+                        }
+                        <MudItem lg="3">
+                            <MudSelect @bind-Value="Model.KemTypeId"
+                                       Label="Вид проведенных КЭМ"
+                                       Variant="Variant.Outlined"
+                                       Margin="Margin.Dense"
+                                       Modal="false">
+                                @foreach (var typeKv in Dictionaries.KemTypes)
+                                {
+                                    <MudSelectItem T="int?" Value="@typeKv.Key">@typeKv.Value</MudSelectItem>
+                                }
+                            </MudSelect>
+                        </MudItem>
+                    </MudGrid>
+                    <MudStack Row
+                              AlignItems="AlignItems.Center">
+                        <MudTextField @bind-Value="Model.WorkDone"
+                                      Variant="Variant.Outlined"
+                                      Label="Принятые меры"
+                                      Margin="Margin.Dense"
+                                      Lines="5"
+                                      MaxLines="15"
+                                      AutoGrow="true"/>
+                        <MudIconButton Variant="Variant.Text"
+                                       Icon="@Icons.Material.Filled.Message"
+                                       Size="Size.Large"
+                                       OnClick="QuestionsDialogOpen"/>
+                    </MudStack>
+                    <MudGrid>
+                        <MudItem lg="3">
+                            <MudDatePicker @bind-Date="Model.AnswerDate"
+                                           Label="Дата окончательного ответа"
+                                           ShowToolbar="false"
                                            Variant="Variant.Outlined"
-                                           Margin="Margin.Dense"
-                                           Modal="false">
-                                    @foreach (var typeKv in Dictionaries.KemTypes)
-                                    {
-                                        <MudSelectItem T="int?" Value="@typeKv.Key">@typeKv.Value</MudSelectItem>
-                                    }
-                                </MudSelect>
-                            </MudItem>
-                        </MudGrid>
-                        <MudStack Row
-                                  AlignItems="AlignItems.Center">
-                            <MudTextField @bind-Value="Model.WorkDone"
-                                          Variant="Variant.Outlined"
-                                          Label="Принятые меры"
-                                          Margin="Margin.Dense"
-                                          Lines="5"
-                                          MaxLines="15"
-                                          AutoGrow="true"/>
-                            <MudIconButton Variant="Variant.Text"
-                                           Icon="@Icons.Material.Filled.Message"
-                                           Size="Size.Large"
-                                           OnClick="QuestionsDialogOpen"/>
-                        </MudStack>
-                        <MudGrid>
-                            <MudItem lg="3">
-                                <MudDatePicker @bind-Date="Model.AnswerDate"
-                                               Label="Дата окончательного ответа"
-                                               ShowToolbar="false"
-                                               Variant="Variant.Outlined"
-                                               Modal="false"
-                                               Margin="Margin.Dense"
-                                               AdornmentIcon=""/>
-                            </MudItem>
-                            <MudItem lg="3">
-                                <MudSelect @bind-Value="Model.ResultId"
-                                           Label="Результат обращения"
-                                           Variant="Variant.Outlined"
-                                           Margin="Margin.Dense"
                                            Modal="false"
-                                           Clearable="true">
-                                    @foreach (var resultKv in Dictionaries.DeclarationResults)
-                                    {
-                                        <MudSelectItem T="int?" Value="@resultKv.Key">@resultKv.Value</MudSelectItem>
-                                    }
-                                </MudSelect>
-                            </MudItem>
-                            <MudItem lg="3">
-                                <MudDatePicker Date="@Model.ClosedDate"
-                                               Label="Дата закрытия администратором"
-                                               ShowToolbar="false"
-                                               Variant="Variant.Outlined"
-                                               Modal="false"
-                                               Margin="Margin.Dense"
-                                               ReadOnly="true"
-                                               AdornmentIcon=""/>
-                            </MudItem>
-                            <MudFlexBreak/>
-                            <MudItem lg="3">
-                                <MudDatePicker Label="Дата закрытия руководителем"
-                                               Date="Model.SupervisorDate"
-                                               ShowToolbar="false"
-                                               Variant="Variant.Outlined"
-                                               Modal="false"
-                                               Margin="Margin.Dense"
-                                               ReadOnly="true"
-                                               AdornmentIcon=""/>
-                            </MudItem>
-                            <MudItem lg="3">
+                                           Margin="Margin.Dense"
+                                           AdornmentIcon=""/>
+                        </MudItem>
+                        <MudItem lg="3">
+                            <MudSelect @bind-Value="Model.ResultId"
+                                       Label="Результат обращения"
+                                       Variant="Variant.Outlined"
+                                       Margin="Margin.Dense"
+                                       Modal="false"
+                                       Clearable="true"
+                                       Disabled="Model?.AnswerStatusId != 2">
+                                @foreach (var resultKv in Dictionaries.DeclarationResults)
+                                {
+                                    <MudSelectItem T="int?" Value="@resultKv.Key">@resultKv.Value</MudSelectItem>
+                                }
+                            </MudSelect>
+                        </MudItem>
+                        <MudItem lg="3">
+                            <MudDatePicker Date="@Model.ClosedDate"
+                                           Label="Дата закрытия администратором"
+                                           ShowToolbar="false"
+                                           Variant="Variant.Outlined"
+                                           Modal="false"
+                                           Margin="Margin.Dense"
+                                           ReadOnly="true"
+                                           Disabled="true"
+                                           AdornmentIcon=""/>
+                        </MudItem>
+                        <MudFlexBreak/>
+                        <MudItem lg="3">
+                            <MudDatePicker Label="Дата закрытия руководителем"
+                                           Date="Model.SupervisorDate"
+                                           ShowToolbar="false"
+                                           Variant="Variant.Outlined"
+                                           Modal="false"
+                                           Margin="Margin.Dense"
+                                           ReadOnly="true"
+                                           Disabled="true"
+                                           AdornmentIcon=""/>
+                        </MudItem>
+                        <MudItem lg="3">
+                            @if (Model?.TypeId == 2)
+                            {
                                 <MudSelect @bind-Value="Model.SvedJalId"
                                            Label="Сведения о жалобе"
                                            Variant="Variant.Outlined"
@@ -428,18 +445,23 @@
                                         <MudSelectItem T="int?" Value="@svedKv.Key">@svedKv.Value</MudSelectItem>
                                     }
                                 </MudSelect>
-                            </MudItem>
-                            <MudItem lg="3">
-                                <MudDatePicker Label="Дата закрытия руководителем СМО"
-                                               Date="Model.SupervisorSmoDate"
-                                               ShowToolbar="false"
-                                               Variant="Variant.Outlined"
-                                               Modal="false"
-                                               Margin="Margin.Dense"
-                                               ReadOnly="true"/>
-                            </MudItem>
-                            <MudFlexBreak/>
-                            <MudItem lg="3">
+                            }
+                        </MudItem>
+                        <MudItem lg="3">
+                            <MudDatePicker Label="Дата закрытия руководителем СМО"
+                                           Adornment="Adornment.None"
+                                           Date="Model.SupervisorSmoDate"
+                                           ShowToolbar="false"
+                                           Variant="Variant.Outlined"
+                                           Modal="false"
+                                           Margin="Margin.Dense"
+                                           ReadOnly="true"
+                                           Disabled="true"/>
+                        </MudItem>
+                        <MudFlexBreak/>
+                        <MudItem lg="3">
+                            @if (Model?.TypeId == 2)
+                            {
                                 <MudSelect @bind-Value="Model.RedirectReasonId"
                                            Label="Направлено"
                                            Variant="Variant.Outlined"
@@ -451,40 +473,54 @@
                                         <MudSelectItem T="int?" Value="@reasonKv.Key">@reasonKv.Value</MudSelectItem>
                                     }
                                 </MudSelect>
-                            </MudItem>
-                        </MudGrid>
+                            }
+                        </MudItem>
+                    </MudGrid>
+                </MudStack>
+            </MudTabPanel>
+            @if (Id.HasValue)
+            {
+                <MudTabPanel Text="История">
+                    <MudStack Class="mt-4">
+                        @if (Actions == null)
+                        {
+                        }
+                        else
+                        {
+                            @foreach (var action in Actions)
+                            {
+                                <HistoryRow Action="action"/>
+                            }
+                        }
                     </MudStack>
                 </MudTabPanel>
-                @if (Id.HasValue)
+            }
+        </ChildContent>
+        <Header Context="HeaderContext">
+            <MudButton Color="Color.Success"
+                       Variant="Variant.Filled"
+                       Class="ma-2"
+                       OnClick="Save"
+                       Disabled="_isSaving">
+                @if (_isSaving)
                 {
-                    <MudTabPanel Text="История">
-                        <MudStack Class="mt-4">
-                            @if (Actions == null)
-                            {
-                            }
-                            else
-                            {
-                                @foreach (var action in Actions)
-                                {
-                                    <HistoryRow Action="action"/>
-                                }
-                            }
-                        </MudStack>
-                    </MudTabPanel>
+                    <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true"/>
+                    <MudText Class="ms-2">Сохранение</MudText>
                 }
-            </ChildContent>
-            <Header Context="HeaderContext">
-                <MudButton Color="Color.Success"
-                           Variant="Variant.Filled"
-                           Class="ma-2">
-                    Сохранить
-                </MudButton>
+                else
+                {
+                    <MudText>Сохранить</MudText>
+                }
+            </MudButton>
+            @if (Id != null && context.User.IsAdmin())
+            {
                 <MudButton Color="Color.Error"
                            Variant="Variant.Filled"
-                           Class="ma-2">
+                           Class="ma-2"
+                           OnClick="SupervisorClose">
                     Закрыть руководителем
                 </MudButton>
-            </Header>
-        </MudTabs>
-    </MudForm>
+            }
+        </Header>
+    </MudTabs>
 </AuthorizeView>

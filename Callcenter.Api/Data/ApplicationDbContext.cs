@@ -1,5 +1,6 @@
 ﻿using Callcenter.Api.Data.Entities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using OpenIddict.EntityFrameworkCore.Models;
 
 namespace Callcenter.Api.Data;
@@ -40,6 +41,8 @@ public class ApplicationDbContext(DbContextOptions options) : DbContext(options)
     
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.ApplyConfigurationsFromAssembly(typeof(ApplicationDbContext).Assembly);
+        
         // Для OpenIddict Authorizations
         modelBuilder.Entity<OpenIddictEntityFrameworkCoreAuthorization>()
             .Property(a => a.CreationDate)
@@ -55,12 +58,12 @@ public class ApplicationDbContext(DbContextOptions options) : DbContext(options)
         modelBuilder.Entity<OpenIddictEntityFrameworkCoreToken>()
             .Property(t => t.RedemptionDate)
             .HasColumnType("timestamp with time zone");
-        
-        modelBuilder.Entity<Declaration>()
-            .HasOne(c => c.MoPhone)
-            .WithMany()
-            .HasPrincipalKey(c => c.PhoneNumber)
-            .HasForeignKey(c => c.MoPhoneNumber);
+
+        // modelBuilder.Entity<User>()
+        //     .HasOne(u => u.OrganisationName)
+        //     .WithMany()
+        //     .HasForeignKey(u => u.OrgId)
+        //     .HasPrincipalKey(o => o.OrganisationId);
     }
 
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)

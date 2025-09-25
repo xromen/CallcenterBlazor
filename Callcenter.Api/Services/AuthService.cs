@@ -164,6 +164,7 @@ public class AuthService(
             .SetClaim("Group", user.Group.Name)
             .SetClaim("Organisation", user.Organisation.Name)
             .SetClaim("OrganisationId", user.Organisation.Id)
+            .SetClaim("OrganisationName", user.Organisation.OrganisationName.Name)
             //.SetClaims(OpenIddictConstants.Claims.Role, [.. await rolesTask])
             ;
 

@@ -38,16 +38,16 @@ public class DeclarationModel
     
     public int? InsuredMoId { get; set; }
 
-    public MoOrganisationModel? InsuredMo
-    {
-        get => _insuredMo;
-        set
-        {
-            _insuredMo = value;
-            InsuredMoId = value == null || string.IsNullOrWhiteSpace(value.MoCode) ? null : Convert.ToInt32(value.MoCode);
-        }
-    }
-    private MoOrganisationModel? _insuredMo;
+    // public MoOrganisationModel? InsuredMo
+    // {
+    //     get => _insuredMo;
+    //     set
+    //     {
+    //         _insuredMo = value;
+    //         InsuredMoId = value == null || string.IsNullOrWhiteSpace(value.MoCode) ? null : Convert.ToInt32(value.MoCode);
+    //     }
+    // }
+    // private MoOrganisationModel? _insuredMo;
 
     public string? Theme { get; set; }
     

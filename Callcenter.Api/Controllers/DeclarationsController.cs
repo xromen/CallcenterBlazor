@@ -1,9 +1,11 @@
-﻿using Callcenter.Api.Services;
+﻿using System.Text.Json;
+using Callcenter.Api.Services;
 using Callcenter.Shared;
 using Callcenter.Shared.Requests;
 using Callcenter.Shared.Responses;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.StaticFiles;
 using OpenIddict.Validation.AspNetCore;
 
 namespace Callcenter.Api.Controllers;
@@ -13,12 +15,22 @@ namespace Callcenter.Api.Controllers;
 [Route("[controller]")]
 public class DeclarationsController(DeclarationService service) : ControllerBase
 {
+    [HttpPost]
+    [ProducesResponseType(typeof(DeclarationDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> Add([FromBody] DeclarationDto dto, CancellationToken cancellationToken)
+    {
+        var result = await service.Add(dto, cancellationToken);
+        
+        return Ok(result);
+    }
+    
     [HttpGet]
     [ProducesResponseType(typeof(GetDeclarationsResponseDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> GetDeclarations([FromQuery] PaginatedRequestDto request, CancellationToken cancellationToken)
     {
-        var result = await service.GetDeclarations(request.Page, request.PageSize, cancellationToken);
+        var result = await service.GetDeclarations(request.Page, request.PageSize, request.Filter, cancellationToken);
         
         return Ok(result);
     }
@@ -47,5 +59,118 @@ public class DeclarationsController(DeclarationService service) : ControllerBase
             return NotFound();
         
         return Ok(result);
+    }
+    
+    [HttpGet("findByFio")]
+    [ProducesResponseType(typeof(List<int>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> GetDeclarationIds([FromQuery] string firstName, [FromQuery] string secName, [FromQuery] DateOnly birthDate, CancellationToken cancellationToken)
+    {
+        var result = await service.GetDeclarationIdsByFio(firstName, secName, birthDate, cancellationToken);
+        
+        if(result == null)
+            return NotFound();
+        
+        return Ok(result);
+    }
+    
+    [HttpGet("findByEjogNumber")]
+    [ProducesResponseType(typeof(DeclarationDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> FindDeclarationByEjog([FromQuery] string ejogNumber, CancellationToken cancellationToken)
+    {
+        var result = await service.FindDeclarationByEjogNumber(ejogNumber, cancellationToken);
+        
+        return Ok(result);
+    }
+    
+    [HttpGet("findByNumber")]
+    [ProducesResponseType(typeof(GetRkListDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> FindDeclarationByNumber([FromQuery] string number, CancellationToken cancellationToken)
+    {
+        var result = await service.FindDeclarationByNumber(number, cancellationToken);
+        
+        return Ok(result);
+    }
+    
+    [HttpPut("{id:int}")]
+    [ProducesResponseType(typeof(GetDeclarationsResponseDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> UpdateDeclaration(int id, DeclarationDto dto, CancellationToken cancellationToken)
+    {
+        var result = await service.Update(id, dto, cancellationToken);
+        
+        if(result == null)
+            return NotFound();
+        
+        return Ok(result);
+    }
+    
+    [HttpPost("{id:int}/send")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> SendDeclaration(int id, SendDeclarationRequestDto dto, CancellationToken cancellationToken)
+    {
+        await service.Send(id, dto, cancellationToken);
+        
+        return Ok();
+    }
+    
+    [HttpPost("{id:int}/file")]
+    [ProducesResponseType(typeof(GetDeclarationsResponseDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> AddDeclarationFile(int id, IFormFile file, CancellationToken cancellationToken)
+    {
+        await service.AddFile(id, file, cancellationToken);
+        
+        return Ok();
+    }
+    
+    [HttpGet("file/{fileId:int}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> DownloadDeclarationFile(int fileId, CancellationToken cancellationToken)
+    {
+        var file = await service.GetFile(fileId, cancellationToken);
+        
+        var provider = new FileExtensionContentTypeProvider();
+
+        if (!provider.TryGetContentType(file.Name, out var contentType))
+        {
+            contentType = "application/octet-stream";
+        }
+        
+        return File(file.Stream, contentType, file.Name);
+    }
+    
+    [HttpPost("{id:int}/supervisorClose")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> SupervisorClose(int id, [FromBody] SupervisorCloseDto dto, CancellationToken cancellationToken)
+    {
+        await service.SupervisorClose(id, dto, cancellationToken);
+
+        return Ok();
+    }
+    
+    [HttpGet("usersToSend")]
+    [ProducesResponseType(typeof(List<UserToSendDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> GetUsersToSend(CancellationToken cancellationToken)
+    {
+        var users = await service.GetUsersToSend( cancellationToken);
+
+        return Ok(users);
+    }
+    
+    [HttpDelete("{id:int}")]
+    [ProducesResponseType( StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> Remove(int id, CancellationToken cancellationToken)
+    {
+        await service.Remove(id, cancellationToken);
+
+        return Ok();
     }
 }

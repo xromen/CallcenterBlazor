@@ -1,0 +1,15 @@
+﻿<MudDialog>
+    <DialogContent>
+        <MudText>Комментарий руководителя (при наличии недоработок):</MudText>
+        <MudTextField @bind-Value="_notes"
+                      Variant="Variant.Outlined"
+                      Clearable="true"
+                      Margin="Margin.Dense"
+                      Lines="5"
+                      AutoGrow="true"/>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="SupervisorClose" Color="Color.Success" Variant="Variant.Filled">Закрыть руководителем</MudButton>
+        <MudButton OnClick="SendNote" Color="Color.Error" Variant="Variant.Filled">Отправить на переработку</MudButton>
+    </DialogActions>
+</MudDialog>

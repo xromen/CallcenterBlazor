@@ -8,5 +8,6 @@ public record ProblemDetails(
     [property: JsonPropertyName("status")] int Status,
     [property: JsonPropertyName("instance")] string Instance,
     [property: JsonPropertyName("requestId")] string RequestId,
-    [property: JsonPropertyName("traceId")] string TraceId
+    [property: JsonPropertyName("traceId")] string TraceId,
+    [property: JsonPropertyName("errors")] Dictionary<string, string[]> Errors
 );

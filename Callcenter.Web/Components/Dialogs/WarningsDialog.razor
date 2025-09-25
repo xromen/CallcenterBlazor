@@ -1,0 +1,21 @@
+﻿<MudDialog Style="background-color: #feffdc; color: #787c12">
+    <DialogContent>
+        <ul>
+            @foreach (var warning in Warnings)
+            {
+                <li>@warning</li>
+            }
+        </ul>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Variant="Variant.Filled"
+                   OnClick="Cancel">
+            Закрыть
+        </MudButton>
+        <MudButton Color="Color.Info"
+                   Variant="Variant.Filled"
+                   OnClick="Save">
+            Сохранить
+        </MudButton>
+    </DialogActions>
+</MudDialog>

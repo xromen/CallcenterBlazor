@@ -9,5 +9,8 @@ public partial class FileCard : ComponentBase
     public string Name { get; set; }
     
     [Parameter]
-    public  EventCallback<MouseEventArgs> DeleteFile { get; set; }
+    public EventCallback<MouseEventArgs> DeleteFile { get; set; }
+    
+    [Parameter]
+    public EventCallback<MouseEventArgs> DownloadFile { get; set; }
 }

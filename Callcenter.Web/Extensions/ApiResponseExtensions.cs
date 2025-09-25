@@ -7,7 +7,7 @@ namespace Callcenter.Web.Extensions;
 
 public static class ApiResponseExtensions
 {
-    public static async Task<ProblemDetails?> GetProblemDetailsAsync<T>(this ApiResponse<T> response)
+    public static async Task<ProblemDetails?> GetProblemDetailsAsync(this IApiResponse response)
     {
         if (response.IsSuccessStatusCode || response.Error == null)
             return null;

@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using MudBlazor;
 
-namespace Callcenter.Web.Components;
+namespace Callcenter.Web.Components.Dialogs;
 
 public partial class NewsEditDialog : ComponentBase
 {

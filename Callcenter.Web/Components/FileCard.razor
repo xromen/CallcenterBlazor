@@ -3,9 +3,9 @@
     <MudIcon Icon="@Icons.Custom.FileFormats.FileDocument"
              Size="Size.Large"/>
     <MudText>
-        @if (Name.Length > 50)
+        @if (Name.Length > 30)
         {
-            @(Name.Substring(0, 50) + "... " + Path.GetExtension(Name))
+            @(Name.Substring(0, 30) + "... " + Path.GetExtension(Name))
         }
         else
         {
@@ -13,6 +13,16 @@
         }
     </MudText>
     <MudSpacer/>
+    @if (DownloadFile.HasDelegate)
+    {
+        <MudIconButton Icon="@Icons.Material.Filled.Download"
+                       Size="Size.Small"
+                       Color="Color.Info"
+                       Style="border-radius: 50%;"
+                       Class="relative z-30"
+                       Variant="Variant.Filled"
+                       OnClick="@DownloadFile"/>
+    }
     <MudIconButton Icon="@Icons.Material.Filled.Close"
                    Size="Size.Small"
                    Color="Color.Dark"

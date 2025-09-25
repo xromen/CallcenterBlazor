@@ -12,6 +12,8 @@ public class AuthMiddleware(RequestDelegate next)
         UserManager<User> userManager,
         RequestEnvironment environment)
     {
+        environment.ClientIp = context.Connection.RemoteIpAddress;
+        
         var userId = context.User.GetClaim(OpenIddictConstants.Claims.Subject);
 
         if (userId != null && int.TryParse(userId, out var id))

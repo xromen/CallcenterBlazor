@@ -1,0 +1,29 @@
+﻿<MudDialog>
+    <DialogContent>
+        <MudSelect @bind-Value="_groupId"
+                   Variant="Variant.Outlined"
+                   Margin="Margin.Dense"
+                   Label="Группа">
+            @foreach (var group in AvailableGroups)
+            {
+                <MudSelectItem T="int?" Value="group.Id">@group.Name</MudSelectItem>
+            }
+        </MudSelect>
+        <MudTextField @bind-Value="_questionName"
+                      Variant="Variant.Outlined"
+                      Clearable="true"
+                      Label="Имя вопроса"
+                      Margin="Margin.Dense"/>
+        <MudTextField @bind-Value="_questionAnswer"
+                      Variant="Variant.Outlined"
+                      Clearable="true"
+                      Label="Ответ"
+                      Margin="Margin.Dense"
+                      Lines="10"
+                      AutoGrow="true"/>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Отменить</MudButton>
+        <MudButton Color="Color.Success" Variant="Variant.Filled" OnClick="Submit">Сохранить</MudButton>
+    </DialogActions>
+</MudDialog>

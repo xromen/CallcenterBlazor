@@ -1,0 +1,13 @@
+﻿<MudDialog>
+    <DialogContent>
+        <MudTextField @bind-Value="QuestionGroupName"
+                      Variant="Variant.Outlined"
+                      Clearable="true"
+                      Label="Имя группы"
+                      Margin="Margin.Dense"/>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Отменить</MudButton>
+        <MudButton Color="Color.Success" Variant="Variant.Filled" OnClick="Submit">Сохранить</MudButton>
+    </DialogActions>
+</MudDialog>

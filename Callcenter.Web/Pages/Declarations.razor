@@ -114,7 +114,8 @@
                                     {
                                         <MudButton Variant="Variant.Outlined"
                                                    Color="Color.Error"
-                                                   StartIcon="@Icons.Material.Filled.Delete">
+                                                   StartIcon="@Icons.Material.Filled.Delete"
+                                                   OnClick="async () => await SendToDelete(declaration.Id)">
                                             Отправить на удаление
                                         </MudButton>
                                     }
@@ -134,7 +135,7 @@
                                  Label="Номер"
                                  Variant="Variant.Outlined"
                                  Margin="Margin.Dense"
-                                 Style="background-color: white; max-width:100px"
+                                 Style="background-color: white; max-width:200px"
                                  Clearable
                                  ValueChanged="SearchNumberChanged"/>
                 <MudButton Color="Color.Dark"

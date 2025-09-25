@@ -4,7 +4,9 @@ public class DeclarationActionDto
 {
     public int Id { get; set; }
     
-    public UserDto User { get; set; }
+    public string UserFullName { get; set; }
+    
+    public string UserGroupName { get; set; }
     
     public string Action { get; set; }
     

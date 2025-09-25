@@ -2,7 +2,7 @@
 
 public class DeclarationDto
 {
-    public int Id { get; set; }
+    public int? Id { get; set; }
     
     public int? StatusId { get; set; }
     
@@ -46,7 +46,7 @@ public class DeclarationDto
     
     public DateOnly? ClosedDate { get; set; }
     
-    public string Number { get; set; }
+    public string? Number { get; set; }
     
     public int? AnswerStatusId { get; set; }
     
@@ -70,6 +70,8 @@ public class DeclarationDto
     
     public int? AnswerOrgId { get; set; }
     
+    public int? AnswerUserId { get; set; }
+    
     public UserDto? AnswerUser { get; set; }
     
     public int? HaveOrgId { get; set; }
@@ -92,5 +94,5 @@ public class DeclarationDto
     
     public string? AgentSecName { get; set; }
 
-    public List<FileDto> Files { get; set; } = new();
+    public List<FileDto>? Files { get; set; } = new();
 }
