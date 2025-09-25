@@ -26,7 +26,7 @@ public class Program
 #if DEBUG
             "http://localhost:5014/";
 #else
-            "http://192.168.1.128:5014/";
+            "http://localhost:5014/";
 #endif
 
         builder.RootComponents.Add<App>("#app");

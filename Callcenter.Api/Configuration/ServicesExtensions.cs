@@ -17,6 +17,7 @@ namespace Callcenter.Api.Configuration
             services.AddScoped<RequestEnvironment>();
             services.AddScoped<AuthService>();
             services.AddScoped<AccountsService>();
+            services.AddScoped<FileStorageService>();
             services.AddScoped<DeclarationService>();
             services.AddScoped<DictionariesService>();
             services.AddScoped<QuestionsService>();

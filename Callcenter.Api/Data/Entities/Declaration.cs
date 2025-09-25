@@ -76,9 +76,9 @@ public class Declaration
     
     [Column("work_done")]
     public string? WorkDone { get; set; }
-    
+
     [Column("date_answer")]
-    public DateOnly? AnswerDate { get; set; }
+    public DateOnly? AnswerDate {get; set; }
     
     [Column("result_id")]
     public int? ResultId { get; set; }

@@ -1,17 +1,20 @@
 ﻿using Callcenter.Api.Data;
+using Callcenter.Api.Data.Entities;
+using Callcenter.Api.Extensions;
 using Callcenter.Api.Models;
 using Callcenter.Api.Models.Exceptions;
 using Callcenter.Shared;
 using Callcenter.Shared.Responses;
+using Dapper;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
 using OpenIddict.EntityFrameworkCore.Models;
 
 namespace Callcenter.Api.Services;
 
-public class DeclarationService(ApplicationDbContext dbContext, RequestEnvironment environment)
+public class DeclarationService(ApplicationDbContext dbContext, RequestEnvironment environment, FileStorageService fileStorageService)
 {
-    public async Task<GetDeclarationsResponseDto> GetDeclarations(int page, int pageSize, CancellationToken cancellationToken = default)
+    public async Task<GetDeclarationsResponseDto> GetDeclarations(int page, int pageSize, string? filter, CancellationToken cancellationToken = default)
     {
         if (environment.AuthUser == null)
         {
@@ -19,7 +22,7 @@ public class DeclarationService(ApplicationDbContext dbContext, RequestEnvironme
         }
         
         var listModels = await dbContext.Database
-            .SqlQueryRaw<GetRkListModel>("select * from sp_get_rk_list({0}, {1}, {2})", environment.AuthUser!.Id, pageSize, page)
+            .SqlQueryRaw<GetRkListModel>("select * from sp_get_rk_list({0}, {1}, {2}, {3})", environment.AuthUser!.Id, pageSize, page, filter)
             .ToListAsync(cancellationToken);
 
         var listDto = listModels.Adapt<List<GetRkListDto>>();
@@ -68,11 +71,292 @@ public class DeclarationService(ApplicationDbContext dbContext, RequestEnvironme
 
     public async Task<List<DeclarationActionDto>?> GetDeclarationHistory(int id, CancellationToken cancellationToken)
     {
-        var declaration = await dbContext.Declarations
-            .Include(declaration => declaration.History)
-            .ThenInclude(c => c.User)
-            .SingleOrDefaultAsync(c => c.Id == id, cancellationToken);
+        var histories = await dbContext.DeclarationHistories
+            .Include(d => d.User)
+            .ThenInclude(c => c.Group)
+            .Where(c => c.DeclarationId == id)
+            .ToListAsync(cancellationToken);
         
-        return declaration?.History.Adapt<List<DeclarationActionDto>>();
+        return histories.Adapt<List<DeclarationActionDto>>();
+    }
+
+    public async Task<DeclarationDto> Update(int id, DeclarationDto dto, CancellationToken cancellationToken)
+    {
+        if (environment.AuthUser == null)
+        {
+            throw new PermissionException("Не авторизованный доступ");
+        }
+        
+        var exists = await dbContext.Declarations.AnyAsync(d => d.Id == id, cancellationToken);
+
+        if (!exists)
+        {
+            throw new EntityNotFoundException();
+        }
+        
+        dto.Id = id;
+        
+        if (dto.AnswerStatusId == 1) //Если промежуточный ответ
+        {
+            dto.StatusId = 4; //отправлен промежуточный ответ
+        }
+        if (dto.AnswerStatusId == 2) //Если окончательный ответ
+        {
+            dto.StatusId = 5; //отправлен ответ
+        }
+
+        int answerSmo = 0;
+        if (dto.AnswerStatusId == 2) //Если окончательный ответ
+        {
+            if (dto.CodeId > 4 && environment.AuthUser.OrgId < 5)
+            {
+                answerSmo = environment.AuthUser.OrgId;
+            }
+
+            dto.AnswerUserId ??= environment.AuthUser.Id;
+        }
+        else
+        {
+            dto.AnswerUserId = null;
+        }
+        
+        var conn = dbContext.Database.GetDbConnection();
+
+        var declarations = await conn.QueryAsync<Declaration>(@$"select * from sp_update_rk({environment.AuthUser.Id},
+            @Id,
+            @StatusId,
+            @TypeId,
+            @ContactFormId,
+            @CitizenCategoryId,
+            @DateRegistered,
+            @DateRegisteredSmo,
+            '', --fio
+            @FirstName,
+            @SecName,
+            @FathName,
+            @BirthDate,
+            @ResidenceAddress,
+            @Phone,
+            @Email,
+            @InsuredSmoId,
+            @InsuredMoId,
+            @Theme,
+            @WorkDone,
+            @AnswerDate,
+            @ResultId,
+            @ClosedDate,
+            @AnswerStatusId,
+            @SourceId,
+            @Content,
+            @InsuredEnp,
+            @IdentityDocType,
+            @IdentityDocSeries,
+            @IdentityDocNumber,
+            @SvedJalId,
+            @SupervisorDate,
+            @AnswerOrgId,
+            @AnswerUserId,
+            @SupervisorSmoDate,
+            @MpTypeId,
+            @RedirectReasonId,
+            @MoPhoneNumber,
+            @KemTypeId,
+            @EjogNumber,
+            @SvoStatusId,
+            @AgentSecName)", dto);
+        
+        var entity = await dbContext.Declarations
+            .Include(d => d.Files)
+            .SingleAsync(d => d.Id == dto.Id, cancellationToken);
+        
+        entity.Files = dto.Files.Adapt<List<DeclarationFile>>();
+        
+        dbContext.Declarations.Update(entity);
+        
+        await dbContext.SaveChangesAsync(cancellationToken);
+        
+        return declarations.First().Adapt<DeclarationDto>();
+    }
+
+    public async Task<DeclarationDto> Add(DeclarationDto dto, CancellationToken cancellationToken)
+    {
+        if (environment.AuthUser == null)
+        {
+            throw new PermissionException("Не авторизованный доступ");
+        }
+
+        dto.AnswerUserId = 0;
+
+        if (dto.AnswerStatusId == 1) //Если промежуточный ответ
+        {
+            dto.StatusId = 4; //отправлен промежуточный ответ
+        }
+        if (dto.AnswerStatusId == 2) //Если окончательный ответ
+        {
+            dto.StatusId = 5; //отправлен ответ
+            dto.AnswerUserId = environment.AuthUser.Id;
+        }
+        
+        dto.CodeId = environment.AuthUser.Organisation.OrganisationName.Id;
+        
+        var conn = dbContext.Database.GetDbConnection();
+
+        var declarations = await conn.QueryAsync<Declaration>(@$"select * from sp_add_rk({environment.AuthUser.Id},
+            @StatusId,
+            @CodeId,
+            @TypeId,
+            @ContactFormId,
+            @CitizenCategoryId,
+            @DateRegistered,
+            @DateRegisteredSmo,
+            null, --fio
+            @FirstName,
+            @SecName,
+            @FathName,
+            @BirthDate,
+            @ResidenceAddress,
+            @Phone,
+            @Email,
+            @InsuredSmoId,
+            @InsuredMoId,
+            @Theme,
+            @WorkDone,
+            @AnswerDate,
+            @ResultId,
+            @ClosedDate,
+            @AnswerStatusId,
+            @SourceId,
+            @Content,
+            @InsuredEnp,
+            @IdentityDocType,
+            @IdentityDocSeries,
+            @IdentityDocNumber,
+            @SvedJalId,
+            @SupervisorDate,
+            {environment.AuthUser.Id}, --creatorId
+            @AnswerUserId,
+            @SupervisorSmoDate,
+            @MpTypeId,
+            @RedirectReasonId,
+            @MoPhoneNumber,
+            @KemTypeId,
+            @EjogNumber,
+            @SvoStatusId,
+            @AgentSecName)", dto);
+        
+        return declarations.First().Adapt<DeclarationDto>();
+    }
+
+    public async Task AddFile(int declarationId, IFormFile file, CancellationToken cancellationToken)
+    {
+        if (environment.AuthUser == null)
+        {
+            throw new PermissionException("Не авторизованный доступ");
+        }
+        
+        var uniqFileName = Guid.NewGuid().ToString("N") + Path.GetExtension(file.FileName);
+        
+        using (var stream = new MemoryStream())
+        {
+            await file.CopyToAsync(stream, cancellationToken);
+            
+            stream.Position = 0;
+            
+            await fileStorageService.UploadFileAsync(uniqFileName, stream, cancellationToken);
+        }
+
+        await dbContext.Database.ExecuteSqlRawAsync("select * from sp_add_file({0}, {1}, {2}, {3})", 
+            file.FileName, 
+            environment.AuthUser.Id,
+            declarationId,
+            uniqFileName);
+    }
+
+    public async Task<FileModel> GetFile(int fileId, CancellationToken cancellationToken)
+    {
+        var fileEntity = await dbContext.Files.SingleOrDefaultAsync(c => c.Id == fileId, cancellationToken);
+
+        if (fileEntity == null)
+        {
+            throw new EntityNotFoundException();
+        }
+        
+        var fileStream = await fileStorageService.GetFileAsync(fileEntity.NameReal, cancellationToken);
+        
+        return new()
+        {
+            Name = fileEntity.Name,
+            Stream = fileStream,
+        };
+    }
+
+    public async Task<IEnumerable<int>> GetDeclarationIdsByFio(string firstName, string secName, DateOnly birthDate, CancellationToken cancellationToken)
+    {
+        var ids = await dbContext.Declarations
+            .Where(c => 
+                EF.Functions.ILike(c.FirstName, firstName) && 
+                EF.Functions.ILike(c.SecName, secName) && 
+                c.BirthDate == birthDate)
+            .Select(c => c.Id)
+            .ToListAsync(cancellationToken);
+        
+        return ids;
+    }
+
+    public async Task<DeclarationDto?> FindDeclarationByEjogNumber(string ejogNumber, CancellationToken cancellationToken)
+    {
+        var declaration = await dbContext.Declarations
+            .FirstOrDefaultAsync(c => c.EjogNumber == ejogNumber, cancellationToken);
+        
+        return declaration.Adapt<DeclarationDto?>();
+    }
+
+    public async Task SupervisorClose(int declarationId, SupervisorCloseDto dto, CancellationToken cancellationToken)
+    {
+        if (environment.AuthUser == null)
+        {
+            throw new PermissionException("Не авторизованный доступ");
+        }
+        
+        await dbContext.Database
+            .ExecuteSqlRawAsync("select sp_close_ruk({0}, {1}, {2}, {3})", environment.AuthUser.Id, declarationId, dto.Notes, dto.IsBad ? 1 : 0);
+    }
+
+    public async Task<List<UserToSendDto>> GetUsersToSend(CancellationToken cancellationToken)
+    {
+        var users = await dbContext.Users
+            .Include(c => c.Group)
+            .Include(c => c.Organisation)
+            .Where(c => c.Group.Name.Contains("1") || c.Group.Name.Contains("2"))
+            .ToListAsync(cancellationToken);
+        
+        return users.Adapt<List<UserToSendDto>>();
+    }
+
+    public async Task Send(int id, SendDeclarationRequestDto dto, CancellationToken cancellationToken)
+    {
+        if (environment.AuthUser == null)
+        {
+            throw new PermissionException("Не авторизованный доступ");
+        }
+        
+        await dbContext.Database
+            .ExecuteSqlRawAsync("select sp_send_card({0}, {1}, {2}, {3}, {4})", id, dto.OrganisationId, dto.OperatorLevel, environment.AuthUser.Id, dto.UserToSendId);
+    }
+
+    public async Task Remove(int id, CancellationToken cancellationToken)
+    {
+        if (environment.AuthUser == null)
+        {
+            throw new PermissionException("Не авторизованный доступ");
+        }
+        
+        await dbContext.Database
+            .ExecuteSqlRawAsync("select sp_add_card_for_delete({0}, {1}, {2})", id, environment.AuthUser.FullName, environment.ClientIp?.ToString());
+    }
+
+    public async Task<GetRkListDto> FindDeclarationByNumber(string number, CancellationToken cancellationToken)
+    {
+        throw new NotImplementedException();
     }
 }

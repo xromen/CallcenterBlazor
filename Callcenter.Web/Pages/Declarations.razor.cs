@@ -1,4 +1,6 @@
 ﻿using Callcenter.Web.Components;
+using Callcenter.Web.Components.Dialogs;
+using Callcenter.Web.Extensions;
 using Callcenter.Web.Models;
 using Callcenter.Web.Services;
 using Mapster;
@@ -19,8 +21,6 @@ public partial class Declarations : ComponentBase
     [Inject] private ProblemDetailsHandler ProblemDetailsHandler { get; set; } = null!;
     
     private static Random _rnd = new Random();
-
-    private List<DeclarationListDto> _declarations;
     
     private PaginateModel<DeclarationListDto> _paginateModel = new();
     
@@ -39,7 +39,7 @@ public partial class Declarations : ComponentBase
     {
         _isLoading = true;
         
-        var declarationsResult = await Service.GetList(_paginateModel.PageSize, _paginateModel.Page);
+        var declarationsResult = await Service.GetList(_paginateModel.PageSize, _paginateModel.Page, _searchNumber.ToString());
 
         if (!declarationsResult.Success)
         {
@@ -75,9 +75,15 @@ public partial class Declarations : ComponentBase
     private async Task SendCard(DeclarationListDto declarationList)
     {
         DialogOptions options = new() { MaxWidth = MaxWidth.Medium, FullWidth = true };
-        var parameters = new DialogParameters<SendCardDialog> { { x => x.Declaration, declarationList} };
+        var parameters = new DialogParameters<SendCardDialog> { { x => x.DeclarationId, declarationList.Id} };
         
-        await Dialog.ShowAsync<SendCardDialog>("Custom Options Dialog", parameters, options);
+        var dialog = await Dialog.ShowAsync<SendCardDialog>("Custom Options Dialog", parameters, options);
+        var result = await dialog.Result;
+
+        if (!result.Canceled)
+        {
+            await LoadItems();
+        }
     }
 
     private async Task SearchCard()
@@ -87,13 +93,8 @@ public partial class Declarations : ComponentBase
             Snackbar.Add("Вначале введите номер карточки", Severity.Error);
             return;
         }
-        _isLoading = true;
         
-        _paginateModel.Items = _declarations.Where(c => c.Number.Split('-').Last() == _searchNumber.ToString()).ToList();
-        _paginateModel.ItemsCount = 1;
-        _paginateModel.Page = 1;
-        
-        _isLoading = false;
+        await LoadItems();
     }
 
     private int? _searchNumber = null;
@@ -105,5 +106,24 @@ public partial class Declarations : ComponentBase
         {
             await LoadItems();
         }
+    }
+
+    private async Task SendToDelete(int id)
+    {
+        var confirmed = await Dialog.ShowConfirmDialog("Вы уверены что хотите удалить карточку?", "Удалить", Color.Error);
+        
+        if(!confirmed)
+            return;
+        
+        var result = await Service.Remove(id);
+
+        if (!result.Success)
+        {
+            ProblemDetailsHandler.Handle(result.Error!);
+            return;
+        }
+        
+        Snackbar.Add("Карточка успешно отправлена на удаление", Severity.Success);
+        await LoadItems();
     }
 }

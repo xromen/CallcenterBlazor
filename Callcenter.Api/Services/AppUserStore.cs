@@ -59,6 +59,7 @@ public class AppUserStore(ApplicationDbContext db) : IUserStore<User>, IUserPass
         return db.Users
             .Include(c => c.Group)
             .Include(c => c.Organisation)
+            .ThenInclude(c => c.OrganisationName)
             .FirstOrDefaultAsync(c => c.Id == id, cancellationToken);
     }
 
@@ -67,6 +68,7 @@ public class AppUserStore(ApplicationDbContext db) : IUserStore<User>, IUserPass
         return db.Users
             .Include(c => c.Group)
             .Include(c => c.Organisation)
+            .ThenInclude(c => c.OrganisationName)
             .FirstOrDefaultAsync(c => c.Login.ToUpper() == normalizedUserName, cancellationToken);
     }
 

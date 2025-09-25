@@ -1,4 +1,5 @@
-﻿using Callcenter.Web.Models;
+﻿using System.Text;
+using Callcenter.Web.Models;
 using Microsoft.AspNetCore.Components;
 using MudBlazor;
 
@@ -8,16 +9,29 @@ public class ProblemDetailsHandler(ISnackbar snackbar, NavigationManager navigat
 {
     public void Handle(ProblemDetails details)
     {
-        var message = new MarkupString($"""
-                                        {details.Title} <br/>
-                                        requestId: {details.RequestId}
-                                        """);
-
-        snackbar.Add(message, Severity.Warning, configure => { configure.VisibleStateDuration = 10000; });
-
         if(details.Status == 401)
         {
             navigation.NavigateTo("/Account/Login");
+        }
+        else
+        {
+            var messageSb = new StringBuilder($"""
+                                                 {details.Title} <br/>
+                                                 requestId: {details.RequestId} <br/>
+                                                 """);
+
+            foreach (var error in details.Errors)
+            {
+                messageSb.Append(error.Key + ": <br/>");
+                foreach (var errorText in error.Value)
+                {
+                    messageSb.Append($"    {errorText} <br/>");
+                }
+            }
+            
+            var message = new MarkupString(messageSb.ToString());
+            
+            snackbar.Add(message, Severity.Warning, configure => { configure.VisibleStateDuration = 10000; });
         }
     }
 }

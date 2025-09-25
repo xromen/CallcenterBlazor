@@ -1,6 +1,8 @@
 ﻿using Callcenter.Shared;
+using Callcenter.Web.Services;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
+using Microsoft.JSInterop;
 
 namespace Callcenter.Web.Components
 {
@@ -25,11 +27,31 @@ namespace Callcenter.Web.Components
 
         [Parameter] public List<FileDto> DbFiles { get; set; } = new();
 
+        [Inject] public DeclarationsService Service { get; set; } = null!;
+        
+        [Inject] public IJSRuntime Js { get; set; } = null!;
+        
+        [Inject] public ProblemDetailsHandler ProblemDetailsHandler { get; set; } = null!;
+
         private List<IBrowserFile> _files = new();
 
         private async Task OnInputFileChanged(InputFileChangeEventArgs e)
         {
             UploadFiles.AddRange(e.GetMultipleFiles());
+        }
+
+        private async Task DownloadFile(FileDto file)
+        {
+            var result = await Service.DownloadFile(file.Id);
+
+            if (!result.Success)
+            {
+                ProblemDetailsHandler.Handle(result.Error!);
+                return;
+            }
+            
+            await Js.InvokeVoidAsync("saveAsFile", file.Name,
+                Convert.ToBase64String(result.Data!));
         }
     }
 }

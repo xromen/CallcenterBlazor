@@ -21,7 +21,9 @@
                 <MudStack Class="mud-width-full">
                     @foreach (var file in DbFiles)
                     {
-                        <FileCard Name="@file.Name"/>
+                        <FileCard Name="@file.Name" 
+                                  DeleteFile="() => DbFiles.Remove(file)"
+                                  DownloadFile="async () => await DownloadFile(file)"/>
                     }
                     @foreach (var file in _files)
                     {

@@ -23,4 +23,12 @@ public class ApiResult<T>
 
         return new ApiResult<T>(default, await response.GetProblemDetailsAsync());
     }
+
+    public static async Task<ApiResult<T>> FromResponseAsync(IApiResponse response, Func<Task<T>> data)
+    {
+        if (response.IsSuccessStatusCode)
+            return new ApiResult<T>(await data(), null);
+
+        return new ApiResult<T>(default, await response.GetProblemDetailsAsync());
+    }
 }

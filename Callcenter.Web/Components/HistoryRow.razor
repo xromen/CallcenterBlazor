@@ -31,7 +31,7 @@
         <MudStack Class="px-6 py-4"
                   Spacing="0">
             <MudText Class="my-0 history-action-name">@Action.Action</MudText>
-            <MudText Class="my-0 history-action-user">@Action.User.FullName</MudText>
+            <MudText Class="my-0 history-action-user">@Action.UserGroupName @Action.UserFullName</MudText>
             <MudText Class="my-0 history-action-time">@Action.Date.ToString("HH:mm:ss")</MudText>
         </MudStack>
     </MudPaper>

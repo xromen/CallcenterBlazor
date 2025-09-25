@@ -1,0 +1,10 @@
+﻿<MudDialog Style="background-color: #f2dede; color: #a94442">
+    <DialogContent>
+        <ul>
+            @foreach (var error in Errors)
+            {
+                <li>@error</li>
+            }
+        </ul>
+    </DialogContent>
+</MudDialog>

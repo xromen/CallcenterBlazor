@@ -9,7 +9,7 @@ namespace Callcenter.Api.Configuration
     {
         public static IServiceCollection AddAppDbContexts(this IServiceCollection services, IConfiguration config)
         {
-            var mainConnectionString = config.GetConnectionString("Callcenter");
+            var mainConnectionString = config.GetConnectionString("Callcenter") ?? Environment.GetEnvironmentVariable("DB_CONN");
 
             services.AddDbContextPool<ApplicationDbContext>(options =>
             {
