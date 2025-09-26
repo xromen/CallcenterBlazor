@@ -160,7 +160,7 @@ public partial class Declaration : ComponentBase
 
     private string? InsuredMoIdToString(int? moId)
     {
-        if(moId == null) return "Без указания МО";
+        if(moId == null) return null;
         return Dictionaries.MoOrganisations.TryGetValue(moId.Value.ToString(), out var name) ? name : moId.ToString();
     }
 

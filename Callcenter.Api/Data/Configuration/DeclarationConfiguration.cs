@@ -67,5 +67,9 @@ public class DeclarationConfiguration : IEntityTypeConfiguration<Declaration>
         builder
             .Property(c => c.RedirectReasonId)
             .HasConversion(intConverter);
+        
+        builder
+            .Property(c => c.InsuredMoId)
+            .HasConversion(intConverter);
     }
 }

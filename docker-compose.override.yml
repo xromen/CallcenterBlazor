@@ -6,6 +6,8 @@ services:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_HTTP_PORTS=8080
       - ConnectionStrings__Callcenter=${DB_CONN}
+      - Minio__User=${MINIO_USER}
+      - Minio__Password=${MINIO_PASSWORD}
     ports:
       - "5014:8080"
     volumes:

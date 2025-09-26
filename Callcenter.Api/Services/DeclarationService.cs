@@ -186,6 +186,7 @@ public class DeclarationService(ApplicationDbContext dbContext, RequestEnvironme
         }
 
         dto.AnswerUserId = 0;
+        dto.StatusId = 2;
 
         if (dto.AnswerStatusId == 1) //Если промежуточный ответ
         {
@@ -327,6 +328,7 @@ public class DeclarationService(ApplicationDbContext dbContext, RequestEnvironme
         var users = await dbContext.Users
             .Include(c => c.Group)
             .Include(c => c.Organisation)
+            .Where(c => c.IsEnabled)
             .Where(c => c.Group.Name.Contains("1") || c.Group.Name.Contains("2"))
             .ToListAsync(cancellationToken);
         

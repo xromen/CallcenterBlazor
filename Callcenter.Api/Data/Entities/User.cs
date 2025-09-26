@@ -42,5 +42,5 @@ public class User
     public bool IsRuk { get; set; }
     
     [Column("sp_level")]
-    public int SpLevel { get; set; }
+    public int? SpLevel { get; set; }
 }

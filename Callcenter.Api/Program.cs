@@ -14,19 +14,23 @@ public class Program
     {
         var builder = WebApplication.CreateBuilder(args);
 
+        var minioPass = builder.Configuration.GetSection("Minio").GetValue<string>("Password");
+        var minioLogin = builder.Configuration.GetSection("Minio").GetValue<string>("User");
+
         builder.Services.AddMinio(configureClient =>
             configureClient
-                .WithEndpoint("localhost:9000")
-                .WithCredentials("admin", "secret123")
+                .WithEndpoint("192.168.1.128:10000")
+                .WithCredentials(minioLogin, minioPass)
                 .WithSSL(false)
                 .Build()
             );
-        
+
+
         SqlMapper.AddTypeHandler(new DateOnlyHandler());
         
-        Env.Load();
-        var connectionString = Environment.GetEnvironmentVariable("DB_CONN");
-        builder.Configuration["ConnectionStrings:Callcenter"] ??= connectionString;
+        //Env.Load();
+        //var connectionString = Environment.GetEnvironmentVariable("DB_CONN");
+        //builder.Configuration["ConnectionStrings:Callcenter"] ??= connectionString;
         
         MapsterConfig.RegisterMappings();
 
