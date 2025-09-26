@@ -64,3 +64,4 @@ artifacts/
 *.vspx
 *.sap
 /Callcenter.Api/Logs
+/Callcenter.Api/appsettings.Development.json
