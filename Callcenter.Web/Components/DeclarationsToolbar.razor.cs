@@ -19,11 +19,6 @@ public partial class DeclarationsToolbar : ComponentBase
             Name = "Все обращения",
             Href = "/declarations_all"
         },
-        new()
-        {
-            Name = "Дубликаты",
-            Href = "/declarations_double"
-        },
     ];
 
     protected override void OnInitialized()

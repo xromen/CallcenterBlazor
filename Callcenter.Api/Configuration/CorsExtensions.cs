@@ -10,8 +10,11 @@
                     policyBuilder => policyBuilder
                     .WithOrigins(
                         "http://localhost:5249", 
-                        "http://localhost:5004",
-                        "http://192.168.1.128:5004")
+                        "http://localhost:5006",
+                        "http://192.168.1.128:5006",
+                        "http://192.168.1.16:5006",
+                        "http://192.168.1.17:5006"
+                        )
                         .AllowAnyMethod()
                         .AllowAnyHeader());
             });

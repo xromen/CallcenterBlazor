@@ -85,7 +85,20 @@ namespace Callcenter.Api.Configuration
                 options.DefaultAuthenticateScheme = OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme;
                 options.DefaultChallengeScheme = OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme;
             });
-            services.AddAuthorization();
+            services.AddAuthorization(options =>
+            {
+                options.AddPolicy("admin", policy =>
+                    policy.RequireAssertion(context =>
+                    {
+                        var groupClaim = context.User.FindFirst("Group")?.Value;
+                        if (string.IsNullOrEmpty(groupClaim))
+                            return false;
+
+                        return groupClaim.Contains("Администр", StringComparison.OrdinalIgnoreCase) ||
+                               groupClaim.Contains("Инжене", StringComparison.OrdinalIgnoreCase) ||
+                               groupClaim.Contains("Руковод", StringComparison.OrdinalIgnoreCase);
+                    }));
+            });
 
             return services;
         }

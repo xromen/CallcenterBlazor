@@ -1,33 +1,41 @@
 ﻿using Bogus;
 using Callcenter.Web.Components;
 using Callcenter.Web.Components.Dialogs;
+using Callcenter.Web.Models;
+using Callcenter.Web.Services;
+using Mapster;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
+using Microsoft.JSInterop;
 using MudBlazor;
+using UserDto = Callcenter.Shared.UserDto;
 
 namespace Callcenter.Web.Pages;
 
 public partial class Admin : ComponentBase
 {
     [Inject] private IDialogService Dialog { get; set; } = null!;
-    private List<NewsDto> _news = new();
+    
+    [Inject] private ISnackbar Snackbar { get; set; } = null!;
+    
+    [Inject] private AccountsService AccountsService { get; set; } = null!;
+    
+    [Inject] private ReportsService ReportsService { get; set; } = null!;
+    
+    [Inject] private ProblemDetailsHandler ProblemDetailsHandler { get; set; } = null!;
+    
+    [Inject] IJSRuntime Js { get; set; }
+    
     private bool _isLoading = false;
     
-    private List<UserModel> _users = new();
-    private List<string> _orgs = new();
+    private List<UserDto> _users = new();
+    private List<string> _userOrgs = new();
 
-    public static List<string> WorkGroups =
-    [
-        "администратор кц",
-        "инженер кц",
-        "оператор 1 уровня оккмп",
-        "оператор 1 уровня оомс",
-    ];
+    private NewsTable _newsTable;
 
-    protected override async Task OnInitializedAsync()
-    {
-        await NewsLoad();
-    }
+    private DateTime? _reportFrom;
+    private DateTime? _reportTo;
+    private int? _reportOmsMonth;
 
     private async Task TabIndexChanged(int arg)
     {
@@ -35,10 +43,6 @@ public partial class Admin : ComponentBase
         
         switch (arg)
         {
-            //Новости
-            case 0:
-                await NewsLoad();
-                break;
             //Пользователи
             case 1:
                 await UsersLoad();
@@ -48,65 +52,148 @@ public partial class Admin : ComponentBase
         _isLoading = false;
     }
 
-    private async Task NewsLoad()
-    {
-        _news = News.NewsDtos;
-    }
-
     private async Task UsersLoad()
     {
-        var personFaker = new Faker<UserModel>()
-            .RuleFor(p => p.Id, f => f.IndexFaker)
-            .RuleFor(p => p.Fullname, f => f.Name.FullName() + " " + f.Name.FirstName())
-            .RuleFor(p => p.Username,f => f.Name.FirstName())
-            .RuleFor(p => p.Organisation,f => f.PickRandom(News.Orgs))
-            .RuleFor(p => p.WorkGroup,f => f.PickRandom(WorkGroups))
-            .RuleFor(p => p.SpLevel,f => f.Random.Int(1, 2).ToString())
-            .RuleFor(p => p.IsActive,f => f.Random.Bool());
+        var result = await AccountsService.Get();
 
-        _users = personFaker.Generate(100);
-        _orgs = _users.Select(u => u.Organisation).Distinct().ToList();
+        if (!result.Success)
+        {
+            ProblemDetailsHandler.Handle(result.Error!);
+            return;
+        }
+
+        _users = result.Data!;
+        _userOrgs = _users.Select(u => u.OrgName).Distinct().ToList();
     }
 
     private async Task NewsRowClicked(NewsClickEventArgs arg)
     {
-        DialogOptions options = new() { MaxWidth = MaxWidth.Medium, FullWidth = true };
+        DialogOptions options = new() { MaxWidth = MaxWidth.Medium, FullWidth = true, CloseButton = true };
         var parameters = new DialogParameters<NewsEditDialog> { { x => x.NewsObj, arg.Item } };
         
-        await Dialog.ShowAsync<NewsEditDialog>("Custom Options Dialog", parameters, options);
+        var dialog = await Dialog.ShowAsync<NewsEditDialog>("Custom Options Dialog", parameters, options);
+        var result = await dialog.Result;
+
+        if (!result.Canceled)
+        {
+            await _newsTable.LoadNews();
+        }
     }
 
     private async Task AddNews(MouseEventArgs arg)
     {
-        DialogOptions options = new() { MaxWidth = MaxWidth.Medium, FullWidth = true };
+        DialogOptions options = new() { MaxWidth = MaxWidth.Medium, FullWidth = true, CloseButton = true};
         
-        await Dialog.ShowAsync<NewsEditDialog>("Custom Options Dialog", options);
+        var dialog = await Dialog.ShowAsync<NewsEditDialog>("Custom Options Dialog", options);
+        var result = await dialog.Result;
+
+        if (!result.Canceled)
+        {
+            await _newsTable.LoadNews();
+        }
     }
 
-    private async Task UserCardClick(MouseEventArgs arg, UserModel user)
+    private async Task UserCardClick(MouseEventArgs arg, UserDto user)
     {
-        DialogOptions options = new() { MaxWidth = MaxWidth.Small, FullWidth = true };
-        var parameters = new DialogParameters<UserEditDialog> { { x => x.User, user} };
+        DialogOptions options = new() { MaxWidth = MaxWidth.Small, FullWidth = true, CloseButton = true};
+        var parameters = new DialogParameters<UserEditDialog> { { x => x.UserId, user.Id} };
         
-        await Dialog.ShowAsync<UserEditDialog>("Custom Options Dialog", parameters, options);
+        var dialog = await Dialog.ShowAsync<UserEditDialog>("Редактирование пользователя", parameters, options);
+        var result = await dialog.Result;
+
+        if (!result.Canceled)
+        {
+            await UsersLoad();
+        }
     }
 
     private async Task AddUser(MouseEventArgs arg)
     {
-        DialogOptions options = new() { MaxWidth = MaxWidth.Small, FullWidth = true };
+        DialogOptions options = new() { MaxWidth = MaxWidth.Small, FullWidth = true, CloseButton = true };
         
-        await Dialog.ShowAsync<UserEditDialog>("Custom Options Dialog", options);
-    }
-}
+        var dialog = await Dialog.ShowAsync<UserEditDialog>("Создание пользователя", options);
+        var result = await dialog.Result;
 
-public class UserModel
-{
-    public int? Id { get; set; }
-    public string Fullname { get; set; }
-    public string Username { get; set; }
-    public string Password { get; set; }
-    public string Organisation { get; set; }
-    public string WorkGroup { get; set; }
-    public string SpLevel { get; set; }
-    public bool IsActive { get; set; }
+        if (!result.Canceled)
+        {
+            await UsersLoad();
+        }
+    }
+
+    private Task MakeReportPgGeneral(MouseEventArgs arg)
+    {
+        return MakeReportFromTo(ReportsService.GetPgFormGeneral, "Форма ПГ общая.xlsx");
+    }
+
+    private Task MakeReportPgGroupByMo(MouseEventArgs arg)
+    {
+        return MakeReportFromTo(ReportsService.GetPgFormGroupByMo, "Форма ПГ в разрезе МО.xlsx");
+    }
+
+    private async Task MakeOmsPerformanceCriteria(MouseEventArgs arg)
+    {
+        if (_reportOmsMonth == null)
+        {
+            Snackbar.Add("Вначале выберите месяц", Severity.Warning);
+            return;
+        }
+
+        _isLoading = true;
+        try
+        {
+            var result = await ReportsService.GetOmsPerformanceCriteriaForm(_reportOmsMonth.Value);
+
+            if (!result.Success)
+            {
+                ProblemDetailsHandler.Handle(result.Error!);
+                return;
+            }
+
+            await Js.InvokeVoidAsync("saveAsFile", "Критерии эффективности ОМС.xlsx",
+                Convert.ToBase64String(result.Data!));
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+
+    private Task MakeJustifiedComplaints(MouseEventArgs arg)
+    {
+        return MakeReportFromTo(ReportsService.GetJustifiedComplaintsForm, "Обоснованные жалобы по МО.xlsx");
+    }
+
+    private async Task MakeReportFromTo(Func<DateOnly, DateOnly, CancellationToken, Task<ApiResult<byte[]>>> report, string fileName)
+    {
+        if (_reportFrom == null || _reportTo == null)
+        {
+            Snackbar.Add("Вначале выберите даты", Severity.Warning);
+            return;
+        }
+        
+        _isLoading = true;
+        try
+        {
+            var result = await report(DateOnly.FromDateTime(_reportFrom.Value),
+                DateOnly.FromDateTime(_reportTo.Value), CancellationToken.None);
+
+            if (!result.Success)
+            {
+                ProblemDetailsHandler.Handle(result.Error!);
+                return;
+            }
+
+            await Js.InvokeVoidAsync("saveAsFile", fileName,
+                Convert.ToBase64String(result.Data!));
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+
+    private Task MakeAllComplaints(MouseEventArgs arg)
+    {
+        return MakeReportFromTo(ReportsService.GetAllComplaintsForm, "Все жалобы по МО.xlsx");
+    }
 }

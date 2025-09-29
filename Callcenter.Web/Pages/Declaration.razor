@@ -358,6 +358,21 @@
                                              Color="Color.Info"/>
                             </MudItem>
                         }
+                        @if (Model?.TypeId == 2)
+                        {
+                            <MudItem lg="3">
+                                <MudSelect @bind-Value="Model.MpTypeId"
+                                           Label="Вид оказанной МП"
+                                           Variant="Variant.Outlined"
+                                           Margin="Margin.Dense"
+                                           Modal="false">
+                                    @foreach (var mpTypeKv in Dictionaries.MpTypes)
+                                    {
+                                        <MudSelectItem T="int?" Value="@mpTypeKv.Key">@mpTypeKv.Value</MudSelectItem>
+                                    }
+                                </MudSelect>
+                            </MudItem>
+                        }
                         <MudItem lg="3">
                             <MudSelect @bind-Value="Model.KemTypeId"
                                        Label="Вид проведенных КЭМ"

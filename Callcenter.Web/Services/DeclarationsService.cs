@@ -6,10 +6,11 @@ using Callcenter.Web.Services.Interfaces;
 using Mapster;
 using Microsoft.AspNetCore.Components.Forms;
 using Refit;
+using UserDto = Callcenter.Shared.UserDto;
 
 namespace Callcenter.Web.Services;
 
-public class DeclarationsService(IDeclarationClient apiClient)
+public class DeclarationsService(IApiClient apiClient)
 {
     public async Task<ApiResult<DeclarationDto>> Add(DeclarationModel model, CancellationToken cancellationToken = default)
     {
@@ -62,7 +63,7 @@ public class DeclarationsService(IDeclarationClient apiClient)
         var response = await apiClient.DownloadFile(fileId, cancellationToken);
         
         return await ApiResult<byte[]>
-            .FromResponseAsync(response, async () => await response.Content!.ReadAsByteArrayAsync(cancellationToken));
+            .FromResponseAsync(response, () => response.Content!.ReadAsByteArrayAsync(cancellationToken));
     }
     public async Task<ApiResult<List<int>>> FindDeclarationsByFio(string firstName, string secName, DateTime birthDate, CancellationToken cancellationToken = default)
     {
@@ -86,11 +87,11 @@ public class DeclarationsService(IDeclarationClient apiClient)
         
         return await ApiResult<object>.FromResponseAsync(response);
     }
-    public async Task<ApiResult<List<UserToSendDto>>> GetUsersToSend(CancellationToken cancellationToken = default)
+    public async Task<ApiResult<List<UserDto>>> GetUsersToSend(CancellationToken cancellationToken = default)
     {
         var response = await apiClient.GetUsersToSend(cancellationToken);
         
-        return await ApiResult<List<UserToSendDto>>.FromResponseAsync(response);
+        return await ApiResult<List<UserDto>>.FromResponseAsync(response);
     }
     public async Task<ApiResult<object>> SendDeclaration(
         int declarationId, 
@@ -110,6 +111,26 @@ public class DeclarationsService(IDeclarationClient apiClient)
         var response = await apiClient.SendDeclaration(declarationId, request, cancellationToken);
         
         return await ApiResult<object>.FromResponseAsync(response);
+    }
+    public async Task<ApiResult<byte[]>> AllExcelExport(
+        FilterRequestDto[]? filters,
+        OrderRequestDto[]? orders,
+        CancellationToken cancellationToken = default)
+    {
+        var request = new ExcelExportRequest()
+        {
+            Filters = filters,
+            Orders = orders,
+        };
+        var response = await apiClient.AllExcelExport(request, cancellationToken);
+        
+        return await ApiResult<byte[]>.FromResponseAsync(response, () => response.Content!.ReadAsByteArrayAsync(cancellationToken));
+    }
+    public async Task<ApiResult<byte[]>> AllExcelExportFull(CancellationToken cancellationToken = default)
+    {
+        var response = await apiClient.AllExcelExportFull(cancellationToken);
+        
+        return await ApiResult<byte[]>.FromResponseAsync(response, () => response.Content!.ReadAsByteArrayAsync(cancellationToken));
     }
 
     public async Task<ApiResult<object>> Remove(int id, CancellationToken cancellationToken = default)
@@ -173,5 +194,22 @@ public class DeclarationsService(IDeclarationClient apiClient)
         var response = await apiClient.DeleteQuestion(id, cancellationToken);
         
         return await ApiResult<QuestionDto>.FromResponseAsync(response);
+    }
+
+    public async Task<ApiResult<PaginatedResponseDto<DeclarationDto>>> SearchAll(
+        PaginatedRequestDto? paginate,
+        FilterRequestDto[]? filters,
+        OrderRequestDto[]? orders,
+        CancellationToken cancellationToken = default)
+    {
+        var request = new SearchRequestDto()
+        {
+            PaginatedRequest = paginate,
+            Filters = filters,
+            Orders = orders,
+        };
+        var response = await apiClient.SearchAll(request, cancellationToken);
+        
+        return await ApiResult<PaginatedResponseDto<DeclarationDto>>.FromResponseAsync(response);
     }
 }

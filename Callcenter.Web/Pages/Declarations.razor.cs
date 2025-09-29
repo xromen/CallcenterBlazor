@@ -20,8 +20,6 @@ public partial class Declarations : ComponentBase
     
     [Inject] private ProblemDetailsHandler ProblemDetailsHandler { get; set; } = null!;
     
-    private static Random _rnd = new Random();
-    
     private PaginateModel<DeclarationListDto> _paginateModel = new();
     
     private bool _isLoading = false;
@@ -29,6 +27,24 @@ public partial class Declarations : ComponentBase
     private long _answerSendCount = 0;
     private long _needsReworkCount = 0;
     private long _smoRedirectCount = 0;
+
+    private string GetPanelStyleByStatusId(int statusId) =>
+        statusId switch
+        {
+            3 => "background-color:#d6eba0;",//перенаправлен в смо
+            10 => "background-color:orange;",//требует доработок
+            _ => string.Empty
+        };
+    
+    private string GetStatusTextStyleByStatusId(int statusId) =>
+        statusId switch
+        {
+            2 => "color:#ff5722;",//в обработке
+            4 => "color:#673ab7;",//отправлен промежуточный ответ
+            5 => "color:#673ab7;",//отправлен ответ
+            7 => "color:#212121;",//закрыт администратором
+            _ => string.Empty
+        };
 
     protected override async Task OnInitializedAsync()
     {

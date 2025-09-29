@@ -8,8 +8,9 @@ services:
       - ConnectionStrings__Callcenter=${DB_CONN}
       - Minio__User=${MINIO_USER}
       - Minio__Password=${MINIO_PASSWORD}
+      - Minio__Endpoint=${MINIO_ENDPOINT}
     ports:
-      - "5014:8080"
+      - "5016:8080"
     volumes:
       - ${APPDATA}/Microsoft/UserSecrets:/home/app/.microsoft/usersecrets:ro
       - ${APPDATA}/ASP.NET/Https:/home/app/.aspnet/https:ro
@@ -17,8 +18,9 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_HTTP_PORTS=80
+      - API_URL=${API_URL}
     ports:
-      - "5004:80"
+      - "5006:80"
     volumes:
       - ${APPDATA}/Microsoft/UserSecrets:/home/app/.microsoft/usersecrets:ro
       - ${APPDATA}/ASP.NET/Https:/home/app/.aspnet/https:ro

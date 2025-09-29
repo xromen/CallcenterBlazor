@@ -5,6 +5,7 @@ using Callcenter.Api.Middlewares;
 using Dapper;
 using DotNetEnv;
 using Minio;
+using OfficeOpenXml;
 
 namespace Callcenter.Api;
 
@@ -12,25 +13,11 @@ public class Program
 {
     public static void Main(string[] args)
     {
-        var builder = WebApplication.CreateBuilder(args);
-
-        var minioPass = builder.Configuration.GetSection("Minio").GetValue<string>("Password");
-        var minioLogin = builder.Configuration.GetSection("Minio").GetValue<string>("User");
-
-        builder.Services.AddMinio(configureClient =>
-            configureClient
-                .WithEndpoint("192.168.1.128:10000")
-                .WithCredentials(minioLogin, minioPass)
-                .WithSSL(false)
-                .Build()
-            );
-
-
-        SqlMapper.AddTypeHandler(new DateOnlyHandler());
+        ExcelPackage.License.SetNonCommercialOrganization("HKFOMS");
         
-        //Env.Load();
-        //var connectionString = Environment.GetEnvironmentVariable("DB_CONN");
-        //builder.Configuration["ConnectionStrings:Callcenter"] ??= connectionString;
+        var builder = WebApplication.CreateBuilder(args);
+        
+        SqlMapper.AddTypeHandler(new DateOnlyHandler());
         
         MapsterConfig.RegisterMappings();
 
@@ -38,6 +25,7 @@ public class Program
             .AddEnvironmentVariables();
 
         builder.Services
+            .AddAppMinio(builder.Configuration)
             .AddAppSerilog()
             .AddAppCors(builder.Configuration)
             .AddAppDbContexts(builder.Configuration)

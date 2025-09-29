@@ -4,6 +4,7 @@ using Callcenter.Api.Extensions;
 using Callcenter.Api.Models;
 using Callcenter.Api.Models.Exceptions;
 using Callcenter.Shared;
+using Callcenter.Shared.Requests;
 using Callcenter.Shared.Responses;
 using Dapper;
 using Mapster;
@@ -12,8 +13,34 @@ using OpenIddict.EntityFrameworkCore.Models;
 
 namespace Callcenter.Api.Services;
 
-public class DeclarationService(ApplicationDbContext dbContext, RequestEnvironment environment, FileStorageService fileStorageService)
+public class DeclarationService(
+    ApplicationDbContext dbContext, 
+    RequestEnvironment environment, 
+    FileStorageService fileStorageService,
+    ExcelService excelService)
 {
+    private IQueryable<Declaration> _baseDeclarationsQuery => dbContext.Declarations
+        .Include(d => d.Status)
+        .Include(d => d.Type)
+        .Include(d => d.ContactForm)
+        .Include(d => d.CitizenCategory)
+        .Include(d => d.InsuredSmo)
+        .Include(d => d.Result)
+        .Include(d => d.AnswerStatus)
+        .Include(d => d.Source)
+        .Include(d => d.SvedJal)
+        .Include(d => d.Creator)
+        .Include(d => d.AnswerOrg)
+        .Include(d => d.AnswerUser)
+        .Include(d => d.HaveOrg)
+        .Include(d => d.MpType)
+        .Include(d => d.RedirectReason)
+        .Include(d => d.KemType)
+        .Include(d => d.SvoStatus)
+        .Include(d => d.MoPhone)
+        .Include(c => c.Files)
+        .Include(c => c.Code)
+        .ThenInclude(c => c.OrganisationName);
     public async Task<GetDeclarationsResponseDto> GetDeclarations(int page, int pageSize, string? filter, CancellationToken cancellationToken = default)
     {
         if (environment.AuthUser == null)
@@ -44,27 +71,7 @@ public class DeclarationService(ApplicationDbContext dbContext, RequestEnvironme
 
     public async Task<DeclarationDto?> GetDeclarationById(int id, CancellationToken cancellationToken = default)
     {
-        var declaration = await dbContext.Declarations
-            .Include(d => d.Status)
-            .Include(d => d.Type)
-            .Include(d => d.ContactForm)
-            .Include(d => d.CitizenCategory)
-            .Include(d => d.InsuredSmo)
-            .Include(d => d.Result)
-            .Include(d => d.AnswerStatus)
-            .Include(d => d.Source)
-            .Include(d => d.SvedJal)
-            .Include(d => d.Creator)
-            .Include(d => d.AnswerOrg)
-            .Include(d => d.AnswerUser)
-            .Include(d => d.HaveOrg)
-            .Include(d => d.MpType)
-            .Include(d => d.RedirectReason)
-            .Include(d => d.KemType)
-            .Include(d => d.SvoStatus)
-            .Include(d => d.MoPhone)
-            .Include(c => c.Files)
-            .SingleOrDefaultAsync(d => d.Id == id, cancellationToken);
+        var declaration = await _baseDeclarationsQuery.SingleOrDefaultAsync(d => d.Id == id, cancellationToken);
         
         return declaration?.Adapt<DeclarationDto>();
     }
@@ -323,7 +330,7 @@ public class DeclarationService(ApplicationDbContext dbContext, RequestEnvironme
             .ExecuteSqlRawAsync("select sp_close_ruk({0}, {1}, {2}, {3})", environment.AuthUser.Id, declarationId, dto.Notes, dto.IsBad ? 1 : 0);
     }
 
-    public async Task<List<UserToSendDto>> GetUsersToSend(CancellationToken cancellationToken)
+    public async Task<List<UserDto>> GetUsersToSend(CancellationToken cancellationToken)
     {
         var users = await dbContext.Users
             .Include(c => c.Group)
@@ -332,7 +339,7 @@ public class DeclarationService(ApplicationDbContext dbContext, RequestEnvironme
             .Where(c => c.Group.Name.Contains("1") || c.Group.Name.Contains("2"))
             .ToListAsync(cancellationToken);
         
-        return users.Adapt<List<UserToSendDto>>();
+        return users.Adapt<List<UserDto>>();
     }
 
     public async Task Send(int id, SendDeclarationRequestDto dto, CancellationToken cancellationToken)
@@ -357,8 +364,131 @@ public class DeclarationService(ApplicationDbContext dbContext, RequestEnvironme
             .ExecuteSqlRawAsync("select sp_add_card_for_delete({0}, {1}, {2})", id, environment.AuthUser.FullName, environment.ClientIp?.ToString());
     }
 
-    public async Task<GetRkListDto> FindDeclarationByNumber(string number, CancellationToken cancellationToken)
+    public async Task<PaginatedResponseDto<DeclarationDto>> SearchAllByFilters(int page,
+        int size,
+        IEnumerable<FilterRequestDto>? filters,
+        IEnumerable<OrderRequestDto>? orders,
+        CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        var baseQuery = BaseQueryForDeclarationsAll();
+        
+        var filtered = filters != null ? baseQuery.ApplyFilters(filters) : baseQuery;
+
+        var totalFiltered = await filtered.CountAsync(cancellationToken);
+
+        var ordered = orders != null && orders.Any() ?
+            filtered.ApplyOrders(orders) :
+            filtered.OrderByDescending(c => c.Id);
+
+        var paginateQuery = ordered.Skip(page * size);
+        if (size != 0)
+        {
+            paginateQuery = paginateQuery.Take(size);
+        }
+
+        var declarations = await paginateQuery.ToListAsync(cancellationToken);
+        var dtos = declarations.Adapt<List<DeclarationDto>>();
+        return new(page, totalFiltered, dtos);
+    }
+    
+    public async Task<byte[]> AllExportExcel(
+        IEnumerable<FilterRequestDto>? filters,
+        IEnumerable<OrderRequestDto>? orders,
+        CancellationToken cancellationToken = default)
+    {
+        var items = (await SearchAllByFilters(1, 0, filters, orders, cancellationToken)).Items;
+
+        return await excelService.ExportAsync(items.Adapt<List<Models.Excel.Declaration>>(), cancellationToken);
+    }
+    
+    public async Task<byte[]> AllExportExcelFull(CancellationToken cancellationToken = default)
+    {
+        if (environment.AuthUser == null)
+        {
+            throw new PermissionException("Не авторизованный доступ");
+        }
+        
+        IQueryable<Declaration> query;
+
+        if (environment.AuthUser.GroupId == 5)
+        {
+            query = _baseDeclarationsQuery;
+        }
+        else
+        {
+            query = _baseDeclarationsQuery.Where(c => (c.HaveOrgId ?? c.CodeId) == environment.AuthUser.OrgId);
+        }
+        
+        var items = await query.ToListAsync(cancellationToken);
+
+        return await excelService.ExportAsync(items.Adapt<List<Models.Excel.Declaration>>(), cancellationToken);
+    }
+
+    private IQueryable<Declaration> BaseQueryForDeclarationsAll()
+    {
+        if (environment.AuthUser == null)
+        {
+            throw new PermissionException("Не авторизованный доступ");
+        }
+        
+        IQueryable<int> rkQuery;
+        IQueryable<Declaration> baseQyery = _baseDeclarationsQuery.AsNoTracking();
+        
+        var user = environment.AuthUser;
+
+        if (user.OrgId == 5)
+        {
+            // Маппинг групп -> какие группы брать для поиска rk
+            var groupMap = new Dictionary<int[], int[]>
+            {
+                { new [] { 1, 2 }, new [] { 1, 2 } },
+                { new [] { 10, 11 }, new [] { 10, 11 } },
+                { new [] { 7, 8 }, new [] { 7, 8 } },
+                { new [] { 12 }, new [] { 10, 11 } },
+                { new [] { 6 }, new [] { 1, 2 } },
+                { new [] { 9 }, new [] { 7, 8 } }
+            };
+
+            // если группа 4 → отдельный случай
+            if (user.GroupId == 4)
+            {
+                return baseQyery
+                    .OrderByDescending(r => r.Id);
+            }
+
+            // ищем соответствие по маппингу
+            var targetGroups = groupMap
+                .FirstOrDefault(x => x.Key.Contains(user.GroupId))
+                .Value;
+
+            if (targetGroups != null)
+            {
+                var userIds = dbContext.Users
+                    .Where(u => targetGroups.Contains(u.GroupId) && u.OrgId == user.OrgId)
+                    .Select(u => u.Id);
+
+                rkQuery = dbContext.DeclarationPermissions
+                    .Where(p => userIds.Contains(p.UserId))
+                    .Select(p => p.DeclarationId);
+            }
+            else
+            {
+                rkQuery = Enumerable.Empty<int>().AsQueryable();
+            }
+        }
+        else
+        {
+            var userIds = dbContext.Users
+                .Where(u => u.OrgId == user.OrgId)
+                .Select(u => u.Id);
+
+            rkQuery = dbContext.DeclarationPermissions
+                .Where(p => userIds.Contains(p.UserId))
+                .Select(p => p.DeclarationId);
+        }
+
+        return baseQyery
+            .Where(r => rkQuery.Contains(r.Id))
+            .OrderByDescending(r => r.Id);
     }
 }

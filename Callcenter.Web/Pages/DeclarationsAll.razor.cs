@@ -1,221 +1,136 @@
-﻿using Microsoft.AspNetCore.Components;
+﻿using Callcenter.Shared;
+using Callcenter.Shared.Requests;
+using Callcenter.Shared.Responses;
+using Callcenter.Web.Components;
+using Callcenter.Web.Services;
+using Microsoft.AspNetCore.Components;
+using Microsoft.JSInterop;
 using MudBlazor;
 
 namespace Callcenter.Web.Pages;
 
 public partial class DeclarationsAll : ComponentBase
 {
-    private static Random _rnd = new Random();
+    
+    [Inject] DeclarationsService Service { get; set; }
+    
+    [Inject] ProblemDetailsHandler ProblemDetailsHandler { get; set; }
+    
+    [Inject] NavigationManager NavigationManager { get; set; }
+    
+    [Inject] IJSRuntime Js { get; set; }
+    
     private int selectedRowNumber = -1;
-    private MudDataGrid<DeclarationDetail> _mudDataGrid;
-
-    private List<DeclarationDetail> _declarations =
-    [
-        new()
-        {
-            Operator = "Попов Денис Алексанрович", Number = "ХКФОМС-" + _rnd.Next(100),
-            EjogNumber = _rnd.Next(100000).ToString(),
-            Status = "Отправлен ответ", Code = "ХКФОМС"
-        },
-        new()
-        {
-            Operator = "Попов Денис Алексанрович", Number = "ХКФОМС-" + _rnd.Next(100),
-            EjogNumber = _rnd.Next(100000).ToString(),
-            Status = "Отправлен ответ", Code = "ХКФОМС"
-        },
-        new()
-        {
-            Operator = "Попов Денис Алексанрович", Number = "ХКФОМС-" + _rnd.Next(100),
-            EjogNumber = _rnd.Next(100000).ToString(),
-            Status = "Отправлен ответ", Code = "ХКФОМС"
-        },
-        new()
-        {
-            Operator = "Попов Денис Алексанрович", Number = "ХКФОМС-" + _rnd.Next(100),
-            EjogNumber = _rnd.Next(100000).ToString(),
-            Status = "Отправлен ответ", Code = "ХКФОМС"
-        },
-        new()
-        {
-            Operator = "Попов Денис Алексанрович", Number = "ХКФОМС-" + _rnd.Next(100),
-            EjogNumber = _rnd.Next(100000).ToString(),
-            Status = "Отправлен ответ", Code = "ХКФОМС"
-        },
-        new()
-        {
-            Operator = "Попов Денис Алексанрович", Number = "ХКФОМС-" + _rnd.Next(100),
-            EjogNumber = _rnd.Next(100000).ToString(),
-            Status = "Отправлен ответ", Code = "ХКФОМС"
-        },
-        new()
-        {
-            Operator = "Попов Денис Алексанрович", Number = "ХКФОМС-" + _rnd.Next(100),
-            EjogNumber = _rnd.Next(100000).ToString(),
-            Status = "Отправлен ответ", Code = "ХКФОМС"
-        },
-        new()
-        {
-            Operator = "Попов Денис Алексанрович", Number = "ХКФОМС-" + _rnd.Next(100),
-            EjogNumber = _rnd.Next(100000).ToString(),
-            Status = "Отправлен ответ", Code = "ХКФОМС"
-        },
-        new()
-        {
-            Operator = "Попов Денис Алексанрович", Number = "ХКФОМС-" + _rnd.Next(100),
-            EjogNumber = _rnd.Next(100000).ToString(),
-            Status = "Отправлен ответ", Code = "ХКФОМС"
-        },
-        new()
-        {
-            Operator = "Попов Денис Алексанрович", Number = "ХКФОМС-" + _rnd.Next(100),
-            EjogNumber = _rnd.Next(100000).ToString(),
-            Status = "Отправлен ответ", Code = "ХКФОМС"
-        },
-        new()
-        {
-            Operator = "Попов Денис Алексанрович", Number = "ХКФОМС-" + _rnd.Next(100),
-            EjogNumber = _rnd.Next(100000).ToString(),
-            Status = "Отправлен ответ", Code = "ХКФОМС"
-        },
-        new()
-        {
-            Operator = "Попов Денис Алексанрович", Number = "ХКФОМС-" + _rnd.Next(100),
-            EjogNumber = _rnd.Next(100000).ToString(),
-            Status = "Отправлен ответ", Code = "ХКФОМС"
-        },
-        new()
-        {
-            Operator = "Попов Денис Алексанрович", Number = "ХКФОМС-" + _rnd.Next(100),
-            EjogNumber = _rnd.Next(100000).ToString(),
-            Status = "Отправлен ответ", Code = "ХКФОМС"
-        },
-        new()
-        {
-            Operator = "Попов Денис Алексанрович", Number = "ХКФОМС-" + _rnd.Next(100),
-            EjogNumber = _rnd.Next(100000).ToString(),
-            Status = "Отправлен ответ", Code = "ХКФОМС"
-        },
-    ];
+    private FlexDataGrid<DeclarationDto> _mudDataGrid;
+    private List<IFilterDefinition<DeclarationDto>> _filters = new();
 
     protected override void OnInitialized()
     {
-        for (int i = 0; i < _declarations.Count; i++)
+        
+    }
+    private void RowClickEvent(DataGridRowClickEventArgs<DeclarationDto> args)
+    {
+        if (args.MouseEventArgs.Detail > 1)
         {
-            _declarations[i].Id = i;
+            NavigationManager.NavigateTo($"/Declaration/{args.Item.Id}");
         }
     }
-    private void RowClickEvent(DataGridRowClickEventArgs<DeclarationDetail> tableRowClickEventArgs)
-    {
-    }
 
-    private string SelectedRowClassFunc(DeclarationDetail element, int rowNumber)
+    private string SelectedRowClassFunc(DeclarationDto element, int rowNumber)
     {
-        return _mudDataGrid.SelectedItems.Contains(element) ? "selected" : "";
-    }
-
-    private async Task<GridData<DeclarationDetail>> ServerReload(GridState<DeclarationDetail> state)
-    {
-        IEnumerable<DeclarationDetail> data = _declarations;
-        await Task.Delay(300);
-        data = data.Where(item =>
+        if (selectedRowNumber == rowNumber)
         {
-            var result = true;
-            foreach (var filter in state.FilterDefinitions)
-            {
-                if (filter.Value == null)
-                {
-                    continue;
-                }
-                
-                switch (filter.Column.PropertyName)
-                {
-                    case nameof(DeclarationDetail.Number):
-                        if (!item.Number.Contains(filter.Value.ToString()))
-                            return false;
-                        break;
-                }
-            }
-
-            return true;
-        }).ToArray();
-        var totalItems = data.Count();
-
-        var sortDefinition = state.SortDefinitions.FirstOrDefault();
-        if (sortDefinition != null)
-        {
-            switch (sortDefinition.SortBy)
-            {
-                case nameof(DeclarationDetail.Number):
-                    data = data.OrderByDirection(
-                        sortDefinition.Descending ? SortDirection.Descending : SortDirection.Ascending,
-                        o => o.Number
-                    );
-                    break;
-                case nameof(DeclarationDetail.Operator):
-                    data = data.OrderByDirection(
-                        sortDefinition.Descending ? SortDirection.Descending : SortDirection.Ascending,
-                        o => o.Operator
-                    );
-                    break;
-                case nameof(DeclarationDetail.Status):
-                    data = data.OrderByDirection(
-                        sortDefinition.Descending ? SortDirection.Descending : SortDirection.Ascending,
-                        o => o.Status
-                    );
-                    break;
-                case nameof(DeclarationDetail.Code):
-                    data = data.OrderByDirection(
-                        sortDefinition.Descending ? SortDirection.Descending : SortDirection.Ascending,
-                        o => o.Code
-                    );
-                    break;
-                case nameof(DeclarationDetail.EjogNumber):
-                    data = data.OrderByDirection(
-                        sortDefinition.Descending ? SortDirection.Descending : SortDirection.Ascending,
-                        o => o.EjogNumber
-                    );
-                    break;
-                default:
-                    var sortByColumn = _mudDataGrid.RenderedColumns.First(c => c.PropertyName == sortDefinition.SortBy);
-                    switch (sortByColumn.Title)
-                    {
-                        case nameof(DeclarationDetail.Operator):
-                            data = data.OrderByDirection(
-                                sortDefinition.Descending ? SortDirection.Descending : SortDirection.Ascending,
-                                o => o.Operator
-                            );
-                            break;
-                    }
-
-                    break;
-            }
+            selectedRowNumber = -1;
+            return string.Empty;
         }
 
-        var pagedData = data.Skip(state.Page * state.PageSize).Take(state.PageSize).ToArray();
-        return new GridData<DeclarationDetail>
+        if (_mudDataGrid.SelectedItems.Any(c => c.Id == element.Id))
         {
-            TotalItems = totalItems,
-            Items = pagedData
-        };
-    }
-}
-
-public class DeclarationDetail
-{
-    public long Id { get; set; }
-    public string Operator { get; set; }
-    public string Number { get; set; }
-    public string EjogNumber { get; set; }
-    public string Status { get; set; }
-    public string Code { get; set; }
-
-    public override bool Equals(object? obj)
-    {
-        if (obj is DeclarationDetail item)
-        {
-            return Id == item.Id;
+            selectedRowNumber = rowNumber;
+            return "selected";
         }
         
-        return false;
+        return string.Empty;
+    }
+
+    private async Task<GridData<DeclarationDto>> ServerReload(GridState<DeclarationDto> state)
+    {
+        var filters = state.FilterDefinitions.Select(c => new FilterRequestDto()
+            {
+                Field = c.Column?.PropertyName,
+                Operator = c.Operator,
+                Value = c.Value
+            })
+            .ToArray();
+
+        var paginate = new PaginatedRequestDto
+        {
+            Page = state.Page,
+            PageSize = state.PageSize,
+        };
+
+        var orders = state.SortDefinitions.Select(c => new OrderRequestDto()
+            {
+                Field = c.SortBy,
+                Descending = c.Descending
+            })
+            .ToArray();
+
+        var result = await Service.SearchAll(paginate, filters, orders);
+        
+        if (!result.Success)
+        {
+            ProblemDetailsHandler.Handle(result.Error!);
+            return new GridData<DeclarationDto>
+            {
+                TotalItems = 0,
+                Items = new List<DeclarationDto>()
+            };
+        }
+        
+        var items = result.Data!.Items;
+        var totalItems = result.Data!.TotalItems;
+
+        return new GridData<DeclarationDto>
+        {
+            TotalItems = (int) totalItems,
+            Items = items
+        };
+    }
+    
+    private async Task ExcelExport()
+    {
+        var filters = _filters.Select(c => new FilterRequestDto()
+            {
+                Field = c.Column?.PropertyName,
+                Operator = c.Operator,
+                Value = c.Value
+            })
+            .ToArray();
+
+        var file = await Service.AllExcelExport(filters, null);
+
+        if (!file.Success)
+        {
+            ProblemDetailsHandler.Handle(file.Error!);
+            return;
+        }
+
+        await Js.InvokeVoidAsync("saveAsFile", "Выгрузка.xlsx",
+            Convert.ToBase64String(file.Data!));
+    }
+    
+    private async Task ExcelExportAll()
+    {
+        var file = await Service.AllExcelExportFull();
+
+        if (!file.Success)
+        {
+            ProblemDetailsHandler.Handle(file.Error!);
+            return;
+        }
+
+        await Js.InvokeVoidAsync("saveAsFile", "Выгрузка.xlsx",
+            Convert.ToBase64String(file.Data!));
     }
 }

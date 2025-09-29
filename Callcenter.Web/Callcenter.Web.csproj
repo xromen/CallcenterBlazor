@@ -28,7 +28,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ServiceWorker Include="wwwroot\service-worker.js" PublishedContent="wwwroot\service-worker.published.js"/>
+        <ServiceWorker Include="wwwroot\service-worker.js" PublishedContent="wwwroot\service-worker.published.js" />
     </ItemGroup>
 
     <ItemGroup>
@@ -41,16 +41,19 @@
       <AdditionalFiles Include="Components\FileUploadComponent.razor" />
       <AdditionalFiles Include="Components\FlexDataGrid.razor" />
       <AdditionalFiles Include="Components\HistoryRow.razor" />
-      <AdditionalFiles Include="Components\NewsEditDialog.razor" />
       <AdditionalFiles Include="Components\NewsTable.razor" />
       <AdditionalFiles Include="Components\RedirectToLogin.razor" />
-      <AdditionalFiles Include="Components\SendCardDialog.razor" />
-      <AdditionalFiles Include="Components\UserEditDialog.razor" />
       <AdditionalFiles Include="Pages\Declaration.razor" />
     </ItemGroup>
 
     <ItemGroup>
       <ProjectReference Include="..\Callcenter.Shared\Callcenter.Shared.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Update="entrypoint.sh">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
     </ItemGroup>
 
 </Project>

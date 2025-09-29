@@ -1,5 +1,6 @@
 ﻿using Callcenter.Api.Services;
 using Callcenter.Shared;
+using Callcenter.Shared.Requests;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using OpenIddict.Validation.AspNetCore;

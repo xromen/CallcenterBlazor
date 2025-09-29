@@ -20,12 +20,15 @@ public class ProblemDetailsHandler(ISnackbar snackbar, NavigationManager navigat
                                                  requestId: {details.RequestId} <br/>
                                                  """);
 
-            foreach (var error in details.Errors)
+            if (details.Errors != null && details.Errors.Any())
             {
-                messageSb.Append(error.Key + ": <br/>");
-                foreach (var errorText in error.Value)
+                foreach (var error in details.Errors)
                 {
-                    messageSb.Append($"    {errorText} <br/>");
+                    messageSb.Append(error.Key + ": <br/>");
+                    foreach (var errorText in error.Value)
+                    {
+                        messageSb.Append($"    {errorText} <br/>");
+                    }
                 }
             }
             

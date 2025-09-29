@@ -1,53 +1,54 @@
 ﻿@using Callcenter.Web.Pages
 <MudDialog>
-    <TitleContent>
-        @if (User.Id == null)
-        {
-            @("Создание пользователя")
-        }
-        else
-        {
-            @("Редактирование пользователя")
-        }
-    </TitleContent>
+    @* <TitleContent> *@
+    @*     @if (UserId == null) *@
+    @*     { *@
+    @*         @("Создание пользователя") *@
+    @*     } *@
+    @*     else *@
+    @*     { *@
+    @*         @("Редактирование пользователя") *@
+    @*     } *@
+    @* </TitleContent> *@
     <DialogContent>
         <MudStack>
-            <MudTextField @bind-Value="User.Fullname"
+            <MudTextField @bind-Value="_user.FullName"
                           Variant="Variant.Outlined"
                           Label="Имя пользователя"/>
-            <MudTextField @bind-Value="User.Username"
+            <MudTextField @bind-Value="_user.Login"
                           Variant="Variant.Outlined"
                           Label="Логин"/>
-            <MudTextField @bind-Value="User.Password"
+            <MudTextField @bind-Value="_user.Password"
                           Variant="Variant.Outlined"
-                          InputType="InputType.Password"
                           Label="Пароль"/>
-            <MudSelect @bind-Value="User.Organisation"
+            <MudSelect T="int?"
+                       ValueChanged="UserOrgIdChanged"
+                       Value="@_user.OrgId"
                        Variant="Variant.Outlined"
                        Label="Организация">
-                @foreach (var org in News.Orgs)
+                @foreach (var org in _orgs)
                 {
-                    <MudSelectItem Value="org">@org</MudSelectItem>
+                    <MudSelectItem T="int?" Value="org.Key">@org.Value</MudSelectItem>
                 }
             </MudSelect>
-            <MudSelect @bind-Value="User.WorkGroup"
+            <MudSelect @bind-Value="_user.GroupId"
                        Variant="Variant.Outlined"
                        Label="Рабочая группа">
-                @foreach (var workGroup in Admin.WorkGroups)
+                @foreach (var group in _userGroups.Where(c => _user.OrgId != null && c.OrgId == _user.OrgId))
                 {
-                    <MudSelectItem Value="workGroup">@workGroup</MudSelectItem>
+                    <MudSelectItem T="int?" Value="group.Id">@group.Name</MudSelectItem>
                 }
             </MudSelect>
-            <MudTextField @bind-Value="User.SpLevel"
-                          Variant="Variant.Outlined"
-                          Label="Уровень СП"/>
-            <MudCheckBox @bind-Value="User.IsActive"
+            <MudNumericField @bind-Value="_user.SpLevel"
+                             Variant="Variant.Outlined"
+                             Label="Уровень СП"/>
+            <MudCheckBox @bind-Value="_user.IsEnabled"
                          Color="Color.Info"
                          Label="Активен"/>
         </MudStack>
     </DialogContent>
     <DialogActions>
-        @if (User.Id != null)
+        @if (UserId != null)
         {
             <MudButton Color="Color.Error"
                        Variant="Variant.Filled"

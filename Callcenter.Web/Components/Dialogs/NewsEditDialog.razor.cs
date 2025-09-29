@@ -1,4 +1,6 @@
-﻿using Callcenter.Web.Pages;
+﻿using Callcenter.Shared;
+using Callcenter.Web.Pages;
+using Callcenter.Web.Services;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using MudBlazor;
@@ -12,31 +14,89 @@ public partial class NewsEditDialog : ComponentBase
     [CascadingParameter]
     private IMudDialogInstance MudDialog { get; set; }
     
-    [Inject] private ISnackbar Snackbar { get; set; }
+    [Inject] private ISnackbar Snackbar { get; set; } = null!;
+
+    [Inject]
+    private DeclarationsService DeclarationsService { get; set; } = null!;
+
+    [Inject]
+    private NewsService NewsService { get; set; } = null!;
+    
+    [Inject]
+    private ProblemDetailsHandler ProblemDetailsHandler { get; set; } = null!;
+    
+    private Dictionary<int, string> _orgs = new ();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var result = await DeclarationsService.GetDictionaries();
+
+        if (!result.Success)
+        {
+            ProblemDetailsHandler.Handle(result.Error!);
+            return;
+        }
+        
+        _orgs = result.Data!.Organisations;
+    }
     
     private void Cancel() => MudDialog.Cancel();
 
-    private void Delete()
+    private async Task Delete()
     {
+        if (NewsObj.Id == null)
+        {
+            return;
+        }
+        
+        var result = await NewsService.DeleteNews(NewsObj.Id!.Value);
+
+        if (!result.Success)
+        {
+            ProblemDetailsHandler.Handle(result.Error!);
+            return;
+        }
+        
         Snackbar.Add("Новость удалена", Severity.Success);
-        MudDialog.Cancel();
+        MudDialog.Close();
     }
 
-    private void Save()
+    private async Task Save()
     {
-        Snackbar.Add("Новость сохранена", Severity.Success);
-        MudDialog.Cancel();
-    } 
-
-    private void OrgCheckedChanged(bool value, string org)
-    {
-        if (value)
+        if (NewsObj.Id == null)
         {
-            NewsObj.Orgs.Add(org);
+            var result = await NewsService.CreateNews(NewsObj);
+
+            if (!result.Success)
+            {
+                ProblemDetailsHandler.Handle(result.Error!);
+                return;
+            }
         }
         else
         {
-            NewsObj.Orgs.Remove(org);
+            var result = await NewsService.UpdateNews(NewsObj.Id.Value, NewsObj);
+
+            if (!result.Success)
+            {
+                ProblemDetailsHandler.Handle(result.Error!);
+                return;
+            }
+        }
+        
+        Snackbar.Add("Новость сохранена", Severity.Success);
+        MudDialog.Close();
+    } 
+
+    private void OrgCheckedChanged(bool value, int orgId)
+    {
+        if (value)
+        {
+            NewsObj.OrganisationIds.Add(orgId);
+        }
+        else
+        {
+            NewsObj.OrganisationIds.Remove(orgId);
         }
     }
 }

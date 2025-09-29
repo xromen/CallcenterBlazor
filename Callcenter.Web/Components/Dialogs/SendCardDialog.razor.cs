@@ -5,6 +5,7 @@ using Callcenter.Web.Services;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using MudBlazor;
+using UserDto = Callcenter.Shared.UserDto;
 
 namespace Callcenter.Web.Components.Dialogs;
 
@@ -22,7 +23,7 @@ public partial class SendCardDialog : ComponentBase
     [Inject] private ProblemDetailsHandler ProblemDetailsHandler { get; set; }
     
     private Dictionary<int, string> _organisations = new Dictionary<int, string>();
-    private List<UserToSendDto> _users = new List<UserToSendDto>();
+    private List<UserDto> _users = new List<UserDto>();
 
     private int? _selectedOrgId;
     private int? _selectedOperatorLevel;

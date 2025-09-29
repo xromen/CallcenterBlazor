@@ -1,24 +1,47 @@
 stages:
   - build
   - deploy
-  
+
 image: docker/compose:latest
-services: 
-  - name: docker:dind
 
-build:
+services:
+  - docker:dind
+
+# Шаблон для сборки
+.build_template: &build_template
   stage: build
-  tags:
-  - maxi
   script:
-  - docker-compose build
+    - docker-compose build
 
-deploy:
-  only:
-  - master
-  tags:
-  - maxi
+# Шаблон для деплоя
+.deploy_template: &deploy_template
   stage: deploy
+  only:
+    - master
   script:
-  - docker-compose down || true
-  - docker-compose up -d
+    - docker-compose down || true
+    - docker-compose up -d
+
+# ---------- Сборка ----------
+build:
+  <<: *build_template
+  parallel:
+    matrix:
+      - RUNNER_TAG: "tfoms-app"
+      - RUNNER_TAG: "tfoms-ext"
+  tags:
+    - $RUNNER_TAG
+
+# ---------- Деплой ----------
+deploy:
+  <<: *deploy_template
+  parallel:
+    matrix:
+      - RUNNER_TAG: "tfoms-app"
+        ENV_NAME: "tfoms-app"
+      - RUNNER_TAG: "tfoms-ext"
+        ENV_NAME: "tfoms-ext"
+  tags:
+    - $RUNNER_TAG
+  environment:
+    name: $ENV_NAME

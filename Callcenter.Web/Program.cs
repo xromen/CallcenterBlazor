@@ -22,12 +22,7 @@ public class Program
         CultureInfo.DefaultThreadCurrentUICulture = new CultureInfo("ru-RU");
         
         var builder = WebAssemblyHostBuilder.CreateDefault(args);
-        var apiUri =
-#if DEBUG
-            "http://localhost:5014/";
-#else
-            "http://localhost:5014/";
-#endif
+        var apiUri = builder.Configuration["ApiUri"] ?? throw new Exception("ApiUri configuration not found");
 
         builder.RootComponents.Add<App>("#app");
         builder.RootComponents.Add<HeadOutlet>("head::after");
@@ -50,7 +45,7 @@ public class Program
         builder.Services.AddTransient<RefreshTokenHandler>();
         builder.Services.AddHttpClient<AuthenticationService>(client => client.BaseAddress = new Uri(apiUri));
         builder.Services.AddHttpClient<JwtParser>(client => client.BaseAddress = new Uri(apiUri));
-        builder.Services.AddRefitClient<IDeclarationClient>()
+        builder.Services.AddRefitClient<IApiClient>()
             .ConfigureHttpClient(c =>
                 {
                     c.BaseAddress = new Uri(apiUri.TrimEnd('/'));
@@ -61,6 +56,9 @@ public class Program
 
         builder.Services.AddScoped<ProblemDetailsHandler>();
         builder.Services.AddScoped<DeclarationsService>();
+        builder.Services.AddScoped<NewsService>();
+        builder.Services.AddScoped<AccountsService>();
+        builder.Services.AddScoped<ReportsService>();
         
         MapsterConfig.RegisterMappings();
 

@@ -15,6 +15,8 @@ services:
     build:
       context: .
       dockerfile: Callcenter.Web/Dockerfile
+      args:
+        API_URL: ${API_URL}
     networks:
       - main_network
     depends_on:

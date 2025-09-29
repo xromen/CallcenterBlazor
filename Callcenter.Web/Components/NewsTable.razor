@@ -1,11 +1,22 @@
-﻿<MudSimpleTable Hover Striped Style="overflow-x: hidden;">
-    <tbody>
-    @foreach (var item in NewsDtos)
-    {
-        <tr @onclick="(c) => RowClickEvent(c, item)">
-            <td>@((MarkupString)item.Body)</td>
-            <td>@item.Date.ToString("dd.MM.yyyy")</td>
-        </tr>
-    }
-    </tbody>
-</MudSimpleTable>
+﻿<MudStack Class="pa-4 mud-height-full"
+          AlignItems="AlignItems.Center">
+    <MudSimpleTable Hover Striped Style="overflow-x: hidden;">
+        <tbody>
+        @foreach (var item in _news.Items)
+        {
+            <tr @onclick="@((a) => RowClickEvent(a, item))" class="cursor-pointer">
+                <td>@((MarkupString)item.Text)</td>
+                <td>@item.Date.ToString("dd.MM.yyyy")</td>
+            </tr>
+        }
+        </tbody>
+    </MudSimpleTable>
+    
+    <MudSpacer/>
+    
+    <MudPagination BoundaryCount="2"
+                   MiddleCount="3"
+                   Count="@((int)System.Math.Ceiling((double)_news.ItemsCount / _news.PageSize))"
+                   SelectedChanged="SelectedPageChanged"
+                   Selected="_news.Page"/>
+</MudStack>
