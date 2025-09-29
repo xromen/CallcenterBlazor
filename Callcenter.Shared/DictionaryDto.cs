@@ -26,6 +26,8 @@ public class DictionariesDto
     
     public Dictionary<int, string> IdentityDocumentTypes { get; set; }
     
+    public Dictionary<int, string> Organisations { get; set; }
+    
     public Dictionary<int, string> SmoOrganisations { get; set; }
     
     /// <summary>
@@ -47,4 +49,6 @@ public class DictionariesDto
     public Dictionary<int, string> SvedJals { get; set; }
     
     public Dictionary<int, string> RedirectReasons { get; set; }
+    
+    public Dictionary<int, string> MpTypes { get; set; }
 }

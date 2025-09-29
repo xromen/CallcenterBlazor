@@ -17,6 +17,9 @@ public class Declaration
     [Column("code_id")]
     public int? CodeId { get; set; }
     
+    [ForeignKey(nameof(CodeId))]
+    public Organisation? Code { get; set; }
+    
     [Column("type_id")]
     public int? TypeId { get; set; }
     
@@ -90,7 +93,7 @@ public class Declaration
     public DateOnly? ClosedDate { get; set; }
     
     [Column("rk_number")]
-    public string Number { get; set; }
+    public string? Number { get; set; }
     
     [Column("an_status")]
     public int? AnswerStatusId { get; set; }

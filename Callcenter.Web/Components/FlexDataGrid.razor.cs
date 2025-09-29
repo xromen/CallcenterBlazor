@@ -6,6 +6,9 @@ namespace Callcenter.Web.Components;
 [CascadingTypeParameter("T")]
 public partial class FlexDataGrid<T> : ComponentBase
 {
+    [CascadingParameter(Name = "IsZoomed")]
+    public bool IsZoomed { get; set; }
+    
     [Parameter]
     public EventCallback<DataGridRowClickEventArgs<T>> RowClick { get; set; }
     
@@ -16,11 +19,14 @@ public partial class FlexDataGrid<T> : ComponentBase
     public RenderFragment Columns { get; set; }
     
     [Parameter]
-    public RenderFragment PagerContent { get; set; }
+    public RenderFragment PagerContent { get; set; } 
+    
+    [Parameter]
+    public Func<T, int, string> RowClassFunc { get; set; }
+
+    [Parameter] public List<IFilterDefinition<T>> FilterDefinitions { get; set; } = new();
+
+    public HashSet<T> SelectedItems => _mudDataGrid.SelectedItems;
     
     private MudDataGrid<T> _mudDataGrid;
-    private string SelectedRowClassFunc(T element, int rowNumber)
-    {
-        return _mudDataGrid.SelectedItems.Contains(element) ? "selected" : "";
-    }
 }

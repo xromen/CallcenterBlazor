@@ -86,7 +86,9 @@
                     </MudStack>
 
                     <div class="layout-body">
-                        @Body
+                        <CascadingValue Name="IsZoomed" Value="_zoomedIn">
+                            @Body
+                        </CascadingValue>
                     </div>
                 </MudStack>
             </MudStack>

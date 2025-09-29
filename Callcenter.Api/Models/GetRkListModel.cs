@@ -22,6 +22,9 @@ public class GetRkListModel
     [Column("statusik")]
     public string Status { get; set; }
     
+    [Column("statusik_id")]
+    public int? StatusId { get; set; }
+    
     [Column("total_count")]
     public long TotalItems { get; set; }
     

@@ -15,26 +15,26 @@ public partial class AccountsService(
     UserManager<User> userManager,
     ApplicationDbContext context)
 {
-    public async Task CreateAsync(UserDto user, CancellationToken cancellationToken = default)
+    public async Task CreateAsync(UserCreateDto userCreate, CancellationToken cancellationToken = default)
     {
-        if (UserNameRegex().IsMatch(user.Login) == false)
+        if (UserNameRegex().IsMatch(userCreate.Login) == false)
         {
             throw new IncorrectDataException("Извините, но имя пользователя не может содержать служебные символы.");
         }
 
-        var userExisted = await userManager.FindByNameAsync(user.Login);
+        var userExisted = await userManager.FindByNameAsync(userCreate.Login);
 
         if (userExisted != null)
         {
             throw new IncorrectDataException("Извините, но пользователь с таким именем уже зарегистрирован. Пожалуйста, попробуйте другое имя пользователя.");
         }
 
-        var appUser = user.Adapt<User>();
+        var appUser = userCreate.Adapt<User>();
 
         appUser.ParentUserId = environment.AuthUser.Id;
         appUser.DateAdded = DateTime.Now;
 
-        var result = await userManager.CreateAsync(appUser, user.Password);
+        var result = await userManager.CreateAsync(appUser, userCreate.Password);
 
         if (result.Succeeded == false)
         {
@@ -42,26 +42,32 @@ public partial class AccountsService(
         }
     }
     
-    public async Task UpdateAsync(UserDto user, CancellationToken cancellationToken = default)
+    public async Task UpdateAsync(UserCreateDto userCreate, CancellationToken cancellationToken = default)
     {
-        var appUser = await userManager.FindByIdAsync(user.Id.ToString());
+        var appUser = await userManager.FindByIdAsync(userCreate.Id.ToString());
 
         if (appUser == null)
         {
-            throw new IncorrectDataException("Пользователь с указанным Id не найден");
+            throw new EntityNotFoundException("Пользователь с указанным Id не найден");
         }
         
         var passwordHasher = userManager.PasswordHasher;
-        
-        appUser.Login = user.Login;
-        appUser.FullName = user.FullName;
-        appUser.GroupId = user.GroupId;
-        appUser.IsEnabled = user.IsEnabled;
-        appUser.SpLevel = user.SpLevel;
 
-        if (!string.IsNullOrWhiteSpace(user.Password))
+        if (!string.IsNullOrWhiteSpace(userCreate.Login))
+            appUser.Login = userCreate.Login;
+
+        if (!string.IsNullOrWhiteSpace(userCreate.FullName))
+            appUser.FullName = userCreate.FullName;
+        
+        if(userCreate.GroupId.HasValue)
+            appUser.GroupId = userCreate.GroupId.Value;
+        
+        appUser.IsEnabled = userCreate.IsEnabled;
+        appUser.SpLevel = userCreate.SpLevel;
+
+        if (!string.IsNullOrWhiteSpace(userCreate.Password))
         {
-            appUser.Password = passwordHasher.HashPassword(appUser, user.Password);
+            appUser.Password = passwordHasher.HashPassword(appUser, userCreate.Password);
         }
         
         var result = await userManager.UpdateAsync(appUser);
@@ -70,6 +76,50 @@ public partial class AccountsService(
         {
             throw new IncorrectDataException($"Ошибки: {string.Join("; ", result.Errors.Select(error => error.Description))}");
         }
+    }
+
+    public async Task<List<UserDto>> GetUsersAsync(CancellationToken cancellationToken)
+    {
+        var users = await context.Users
+            .Include(c => c.Organisation)
+            .Include(c => c.Group)
+            .Where(c => c.IsEnabled)
+            .ToListAsync(cancellationToken);
+        
+        return users.Adapt<List<UserDto>>();
+    }
+
+    public async Task<UserDto> DeleteUserAsync(int id, CancellationToken cancellationToken)
+    {
+        var dbUser = await userManager.FindByIdAsync(id.ToString());
+
+        if (dbUser == null)
+        {
+            throw new EntityNotFoundException();
+        }
+        
+        await userManager.DeleteAsync(dbUser);
+        
+        return dbUser.Adapt<UserDto>();
+    }
+
+    public async Task<UserDto> GetUserByIdAsync(int id, CancellationToken cancellationToken)
+    {
+        var user = await userManager.FindByIdAsync(id.ToString());
+
+        if (user == null)
+        {
+            throw new EntityNotFoundException();
+        }
+        
+        return user.Adapt<UserDto>();
+    }
+
+    public async Task<List<UserGroupDto>> GetUserGroupsAsync(CancellationToken cancellationToken)
+    {
+        var groups = await context.UserGroups.ToListAsync(cancellationToken);
+        
+        return groups.Adapt<List<UserGroupDto>>();
     }
     
     [GeneratedRegex("^[a-zA-Z0-9_-]+$", RegexOptions.Compiled)]

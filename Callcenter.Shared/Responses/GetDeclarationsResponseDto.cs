@@ -1,4 +1,4 @@
-﻿namespace Callcenter.Shared;
+﻿namespace Callcenter.Shared.Responses;
 
 public class GetDeclarationsResponseDto
 {

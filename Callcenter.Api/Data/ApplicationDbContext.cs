@@ -10,9 +10,12 @@ public class ApplicationDbContext(DbContextOptions options) : DbContext(options)
     public DbSet<User> Users { get; set; } = null!;
     public DbSet<Declaration> Declarations { get; set; } = null!;
     public DbSet<DeclarationAction> DeclarationHistories { get; set; } = null!;
+    public DbSet<DeclarationPermission> DeclarationPermissions { get; set; } = null!;
     public DbSet<Question> Questions { get; set; } = null!;
     public DbSet<QuestionGroup> QuestionGroups { get; set; } = null!;
     public DbSet<DeclarationFile> Files { get; set; } = null!;
+    public DbSet<News> News { get; set; } = null!;
+    public DbSet<NewsPermission> NewsPermissions { get; set; } = null!;
     
     // Справочники
     public DbSet<UserGroup> UserGroups { get; set; } = null!;
@@ -38,6 +41,8 @@ public class ApplicationDbContext(DbContextOptions options) : DbContext(options)
     public DbSet<DeclarationTheme> DeclarationThemes { get; set; } = null!;
     public DbSet<IdentityDocumentType> IdentityDocumentTypes { get; set; } = null!;
     public DbSet<MoDepartment> MoDepartments { get; set; } = null!;
+    public DbSet<Region> Regions { get; set; } = null!;
+    public DbSet<MoRegion> MoRegions { get; set; } = null!;
     
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -59,11 +64,10 @@ public class ApplicationDbContext(DbContextOptions options) : DbContext(options)
             .Property(t => t.RedemptionDate)
             .HasColumnType("timestamp with time zone");
 
-        // modelBuilder.Entity<User>()
-        //     .HasOne(u => u.OrganisationName)
-        //     .WithMany()
-        //     .HasForeignKey(u => u.OrgId)
-        //     .HasPrincipalKey(o => o.OrganisationId);
+        modelBuilder.Entity<News>()
+            .HasMany(u => u.Organisations)
+            .WithMany()
+            .UsingEntity<NewsPermission>();
     }
 
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)

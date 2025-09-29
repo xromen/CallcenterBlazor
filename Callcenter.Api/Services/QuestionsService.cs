@@ -3,6 +3,7 @@ using Callcenter.Api.Data.Entities;
 using Callcenter.Api.Models;
 using Callcenter.Api.Models.Exceptions;
 using Callcenter.Shared;
+using Callcenter.Shared.Requests;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
 

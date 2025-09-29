@@ -41,11 +41,8 @@
       <AdditionalFiles Include="Components\FileUploadComponent.razor" />
       <AdditionalFiles Include="Components\FlexDataGrid.razor" />
       <AdditionalFiles Include="Components\HistoryRow.razor" />
-      <AdditionalFiles Include="Components\NewsEditDialog.razor" />
       <AdditionalFiles Include="Components\NewsTable.razor" />
       <AdditionalFiles Include="Components\RedirectToLogin.razor" />
-      <AdditionalFiles Include="Components\SendCardDialog.razor" />
-      <AdditionalFiles Include="Components\UserEditDialog.razor" />
       <AdditionalFiles Include="Pages\Declaration.razor" />
     </ItemGroup>
 

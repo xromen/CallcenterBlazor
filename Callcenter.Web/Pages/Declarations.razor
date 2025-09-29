@@ -70,7 +70,7 @@
                 <MudExpansionPanels>
                     @foreach (var declaration in _paginateModel.Items)
                     {
-                        <MudExpansionPanel Class="declaration-panel">
+                        <MudExpansionPanel Class="declaration-panel" Style="@GetPanelStyleByStatusId(declaration.StatusId!.Value)">
                             <TitleContent>
                                 <MudGrid>
                                     <MudItem lg="2">
@@ -88,7 +88,7 @@
                                         <MudText>@declaration.Theme</MudText>
                                     </MudItem>
                                     <MudItem lg="2">
-                                        <MudText>@declaration.Status</MudText>
+                                        <MudText Style="@GetStatusTextStyleByStatusId(declaration.StatusId!.Value)">@declaration.Status</MudText>
                                     </MudItem>
                                 </MudGrid>
                             </TitleContent>

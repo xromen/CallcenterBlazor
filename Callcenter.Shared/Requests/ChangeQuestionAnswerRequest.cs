@@ -1,4 +1,4 @@
-﻿namespace Callcenter.Shared;
+﻿namespace Callcenter.Shared.Requests;
 
 public class ChangeQuestionAnswerRequest
 {

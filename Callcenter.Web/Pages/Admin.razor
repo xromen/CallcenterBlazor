@@ -1,13 +1,21 @@
 ﻿@page "/Admin"
 
 <style>
-    .user-card:hover{
+    .user-card:hover {
         background-color: #fad993;
         cursor: pointer;
     }
-    
-    .user-name{
+
+    .user-name {
         color: var(--mud-palette-info-darken)
+    }
+
+    .user-panel-header {
+        background-color: #f5f5f5;
+    }
+
+    .user-panel-header:hover {
+        text-decoration: underline
     }
 </style>
 
@@ -15,8 +23,7 @@
          ActivePanelIndexChanged="TabIndexChanged">
     <MudTabPanel Text="Новости">
         <MudStack AlignItems="AlignItems.Center">
-            <NewsTable NewsDtos="_news"
-                       OnRowClick="NewsRowClicked"/>
+            <NewsTable OnRowClick="NewsRowClicked" @ref="_newsTable"/>
             <MudButton Variant="Variant.Filled"
                        Color="Color.Success"
                        OnClick="AddNews">
@@ -28,12 +35,12 @@
         <MudStack AlignItems="AlignItems.Center"
                   Class="mud-width-full pb-4">
             <MudExpansionPanels Class="pa-4 mud-width-full">
-                @foreach (var org in _orgs)
+                @foreach (var org in _userOrgs)
                 {
-                    <MudExpansionPanel Text="@org">
+                    <MudExpansionPanel Text="@org" HeaderClass="user-panel-header">
                         <MudGrid Spacing="0"
                                  Class="pa-4">
-                            @foreach (var user in _users.Where(c => c.Organisation == org))
+                            @foreach (var user in _users.Where(c => c.OrgName == org))
                             {
                                 <MudItem xs="12" sm="4" md="3" lg="2" Class="ma-4">
                                     <MudStack Row
@@ -41,14 +48,15 @@
                                               Class="user-card pa-1"
                                               Spacing="0"
                                               @onclick="(a) => UserCardClick(a, user)">
-                                        <MudAvatar Color="Color.Dark" Variant="Variant.Filled" Class="mx-2">
-                                            <MudIcon Style="color: white" Icon="@Icons.Material.Filled.Person" Size="Size.Large"/>
+                                        <MudAvatar Variant="Variant.Filled" Class="mx-2">
+                                            <MudIcon Style="color: white" Icon="@Icons.Material.Filled.Person"
+                                                     Size="Size.Large"/>
                                         </MudAvatar>
                                         <MudStack AlignItems="AlignItems.Start"
                                                   Justify="Justify.Center"
                                                   Spacing="0">
-                                            <MudText Class="user-name">@user.Fullname</MudText>
-                                            <MudText Typo="Typo.body2">@user.WorkGroup</MudText>
+                                            <MudText Class="user-name">@user.FullName</MudText>
+                                            <MudText Typo="Typo.body2">@user.GroupName</MudText>
                                         </MudStack>
                                     </MudStack>
                                 </MudItem>
@@ -70,47 +78,72 @@
                 <MudExpansionPanel Text="Форма ПГ общая (новая)">
                     <MudStack Row
                               Style="width: fit-content">
-                        <MudDatePicker Label="С"
+                        <MudDatePicker @bind-Date="@_reportFrom"
+                                       Label="С"
                                        ShowToolbar="false"
                                        Variant="Variant.Outlined"
                                        Modal="false"
                                        Margin="Margin.Dense"/>
-                        <MudDatePicker Label="По"
+                        <MudDatePicker @bind-Date="@_reportTo"
+                                       Label="По"
                                        ShowToolbar="false"
                                        Variant="Variant.Outlined"
                                        Modal="false"
                                        Margin="Margin.Dense"/>
                         <MudButton Variant="Variant.Filled"
                                    Color="Color.Success"
-                                   Class="ma-2">
-                            Сохранить
+                                   Class="ma-2"
+                                   OnClick="MakeReportPgGeneral"
+                                   Disabled="_isLoading">
+                            @if (_isLoading)
+                            {
+                                <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true"/>
+                                <MudText Class="ms-2">Загрузка</MudText>
+                            }
+                            else
+                            {
+                                <MudText>Сохранить</MudText>
+                            }
                         </MudButton>
                     </MudStack>
                 </MudExpansionPanel>
                 <MudExpansionPanel Text="Форма ПГ в разрезе МО">
                     <MudStack Row
                               Style="width: fit-content">
-                        <MudDatePicker Label="С"
+                        <MudDatePicker @bind-Date="@_reportFrom"
+                                       Label="С"
                                        ShowToolbar="false"
                                        Variant="Variant.Outlined"
                                        Modal="false"
                                        Margin="Margin.Dense"/>
-                        <MudDatePicker Label="По"
+                        <MudDatePicker @bind-Date="@_reportTo"
+                                       Label="По"
                                        ShowToolbar="false"
                                        Variant="Variant.Outlined"
                                        Modal="false"
                                        Margin="Margin.Dense"/>
                         <MudButton Variant="Variant.Filled"
                                    Color="Color.Success"
-                                   Class="ma-2">
-                            Сохранить
+                                   Class="ma-2"
+                                   OnClick="MakeReportPgGroupByMo"
+                                   Disabled="_isLoading">
+                            @if (_isLoading)
+                            {
+                                <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true"/>
+                                <MudText Class="ms-2">Загрузка</MudText>
+                            }
+                            else
+                            {
+                                <MudText>Сохранить</MudText>
+                            }
                         </MudButton>
                     </MudStack>
                 </MudExpansionPanel>
                 <MudExpansionPanel Text="Критерии Эффективности ОМС">
                     <MudStack Row
                               Style="width: fit-content">
-                        <MudDatePicker Label="Месяц"
+                        <MudDatePicker DateChanged="(d) => _reportOmsMonth = d?.Month"
+                                       Label="Месяц"
                                        ShowToolbar="false"
                                        Variant="Variant.Outlined"
                                        Modal="false"
@@ -119,48 +152,82 @@
                                        FixDay="1"/>
                         <MudButton Variant="Variant.Filled"
                                    Color="Color.Success"
-                                   Class="ma-2">
-                            Сохранить
+                                   Class="ma-2"
+                                   Disabled="_isLoading"
+                                   OnClick="MakeOmsPerformanceCriteria">
+                            @if (_isLoading)
+                            {
+                                <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true"/>
+                                <MudText Class="ms-2">Загрузка</MudText>
+                            }
+                            else
+                            {
+                                <MudText>Сохранить</MudText>
+                            }
                         </MudButton>
                     </MudStack>
                 </MudExpansionPanel>
                 <MudExpansionPanel Text="Обоснованные жалобы по МО">
                     <MudStack Row
                               Style="width: fit-content">
-                        <MudDatePicker Label="С"
+                        <MudDatePicker @bind-Date="@_reportFrom"
+                                       Label="С"
                                        ShowToolbar="false"
                                        Variant="Variant.Outlined"
                                        Modal="false"
                                        Margin="Margin.Dense"/>
-                        <MudDatePicker Label="По"
+                        <MudDatePicker @bind-Date="@_reportTo"
+                                       Label="По"
                                        ShowToolbar="false"
                                        Variant="Variant.Outlined"
                                        Modal="false"
                                        Margin="Margin.Dense"/>
                         <MudButton Variant="Variant.Filled"
                                    Color="Color.Success"
-                                   Class="ma-2">
-                            Сохранить
+                                   Class="ma-2"
+                                   Disabled="_isLoading"
+                                   OnClick="MakeJustifiedComplaints">
+                            @if (_isLoading)
+                            {
+                                <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true"/>
+                                <MudText Class="ms-2">Загрузка</MudText>
+                            }
+                            else
+                            {
+                                <MudText>Сохранить</MudText>
+                            }
                         </MudButton>
                     </MudStack>
                 </MudExpansionPanel>
                 <MudExpansionPanel Text="Все жалобы по МО">
                     <MudStack Row
                               Style="width: fit-content">
-                        <MudDatePicker Label="С"
+                        <MudDatePicker @bind-Date="@_reportFrom"
+                                       Label="С"
                                        ShowToolbar="false"
                                        Variant="Variant.Outlined"
                                        Modal="false"
                                        Margin="Margin.Dense"/>
-                        <MudDatePicker Label="По"
+                        <MudDatePicker @bind-Date="@_reportTo"
+                                       Label="По"
                                        ShowToolbar="false"
                                        Variant="Variant.Outlined"
                                        Modal="false"
                                        Margin="Margin.Dense"/>
                         <MudButton Variant="Variant.Filled"
                                    Color="Color.Success"
-                                   Class="ma-2">
-                            Сохранить
+                                   Class="ma-2"
+                                   Disabled="_isLoading"
+                                   OnClick="MakeAllComplaints">
+                            @if (_isLoading)
+                            {
+                                <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true"/>
+                                <MudText Class="ms-2">Загрузка</MudText>
+                            }
+                            else
+                            {
+                                <MudText>Сохранить</MudText>
+                            }
                         </MudButton>
                     </MudStack>
                 </MudExpansionPanel>

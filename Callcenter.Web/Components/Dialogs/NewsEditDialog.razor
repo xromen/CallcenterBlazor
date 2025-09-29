@@ -12,18 +12,18 @@
     </TitleContent>
     <DialogContent>
         <MudStack>
-            <MudTextField @bind-Value="NewsObj.Body"
+            <MudTextField @bind-Value="NewsObj.Text"
                           Label="Тело новости"
                           Variant="Variant.Outlined"
                           Margin="Margin.Dense"
                           Lines="10"
                           MaxLines="20"/>
-            @foreach (var org in News.Orgs)
+            @foreach (var org in _orgs)
             {
                 <MudCheckBox T="bool"
-                             Value="@NewsObj.Orgs.Contains(org)"
-                             Label="@org"
-                             ValueChanged="(v) => OrgCheckedChanged(v, org)"/>
+                             Value="@NewsObj.OrganisationIds.Contains(org.Key)"
+                             Label="@org.Value"
+                             ValueChanged="(v) => OrgCheckedChanged(v, org.Key)"/>
             }
         </MudStack>
     </DialogContent>

@@ -13,4 +13,6 @@ public class GetRkListDto
     public string ObrTheme { get; set; }
     
     public string Status { get; set; }
+    
+    public int? StatusId { get; set; }
 }

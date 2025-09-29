@@ -6,15 +6,15 @@ public class UserDto
     
     public int GroupId { get; set; }
     
-    public string Login { get; set; }
+    public string? GroupName { get; set; }
     
-    public string? Password { get; set; }
+    public string Login { get; set; }
     
     public int OrgId { get; set; }
     
-    public bool IsEnabled { get; set; }
+    public string? OrgName { get; set; }
     
-    public string FullName { get; set; }
+    public string? FullName { get; set; }
     
-    public int SpLevel { get; set; }
+    public int? SpLevel { get; set; }
 }

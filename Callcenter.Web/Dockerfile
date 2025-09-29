@@ -28,4 +28,9 @@ COPY --from=build /app/publish/wwwroot .
 COPY Callcenter.Web/nginx.conf /etc/nginx/conf.d/default.conf
 
 EXPOSE 80
+
+COPY Callcenter.Web/entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+ENTRYPOINT ["/entrypoint.sh"]
 CMD ["nginx", "-g", "daemon off;"]

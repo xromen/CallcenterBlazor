@@ -79,11 +79,11 @@ public class DeclarationModel
     
     public DateTime? SupervisorDate { get; set; }
     
-    public Callcenter.Shared.UserDto? Creator { get; set; }
+    public UserDto? Creator { get; set; }
     
     public int? AnswerOrgId { get; set; }
     
-    public Callcenter.Shared.UserDto? AnswerUser { get; set; }
+    public UserDto? AnswerUser { get; set; }
     
     public int? HaveOrgId { get; set; }
     

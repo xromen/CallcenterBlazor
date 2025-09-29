@@ -84,14 +84,38 @@ public class DeclarationsController(DeclarationService service) : ControllerBase
         return Ok(result);
     }
     
-    [HttpGet("findByNumber")]
-    [ProducesResponseType(typeof(GetRkListDto), StatusCodes.Status200OK)]
+    [HttpPost("all/findByFilters")]
+    [ProducesResponseType(typeof(PaginatedResponseDto<DeclarationDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> FindDeclarationByNumber([FromQuery] string number, CancellationToken cancellationToken)
+    public async Task<IActionResult> SearchByFilters([FromBody] SearchRequestDto request, CancellationToken cancellationToken = default)
     {
-        var result = await service.FindDeclarationByNumber(number, cancellationToken);
-        
+        var result = await service.SearchAllByFilters(request.PaginatedRequest.Page, request.PaginatedRequest.PageSize,
+            request.Filters, request.Orders, cancellationToken);
         return Ok(result);
+    }
+    
+    [HttpPost("all/excelExport")]
+    [ProducesResponseType(typeof(byte[]), StatusCodes.Status200OK)]
+    public async Task<IActionResult> AllExcelExport(
+        [FromBody] ExcelExportRequest request,
+        CancellationToken cancellationToken = default
+    )
+    {
+        var bytes = await service.AllExportExcel(request.Filters, request.Orders, cancellationToken);
+        return File(bytes,
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            "Выгрузка.xlsx");
+    }
+
+    [HttpPost("all/excelExportFull")] [ProducesResponseType(typeof(byte[]), StatusCodes.Status200OK)]
+    public async Task<IActionResult> AllExcelExportFull(
+        CancellationToken cancellationToken = default
+    )
+    {
+        var bytes = await service.AllExportExcelFull(cancellationToken);
+        return File(bytes,
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            "Выгрузка.xlsx");
     }
     
     [HttpPut("{id:int}")]
@@ -147,6 +171,7 @@ public class DeclarationsController(DeclarationService service) : ControllerBase
     [HttpPost("{id:int}/supervisorClose")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [Authorize(Policy = "admin")]
     public async Task<IActionResult> SupervisorClose(int id, [FromBody] SupervisorCloseDto dto, CancellationToken cancellationToken)
     {
         await service.SupervisorClose(id, dto, cancellationToken);
@@ -155,7 +180,7 @@ public class DeclarationsController(DeclarationService service) : ControllerBase
     }
     
     [HttpGet("usersToSend")]
-    [ProducesResponseType(typeof(List<UserToSendDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(List<UserDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> GetUsersToSend(CancellationToken cancellationToken)
     {
@@ -167,6 +192,7 @@ public class DeclarationsController(DeclarationService service) : ControllerBase
     [HttpDelete("{id:int}")]
     [ProducesResponseType( StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [Authorize(Policy = "admin")]
     public async Task<IActionResult> Remove(int id, CancellationToken cancellationToken)
     {
         await service.Remove(id, cancellationToken);
