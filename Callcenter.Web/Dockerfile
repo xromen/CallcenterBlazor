@@ -32,5 +32,6 @@ EXPOSE 80
 COPY Callcenter.Web/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
-ENTRYPOINT ["/entrypoint.sh"] #Файл обязательно должен быть в кодировке UTF8 (без BOM)
+#Файл обязательно должен быть в кодировке UTF8 (без BOM)
+ENTRYPOINT ["/entrypoint.sh"] 
 CMD ["nginx", "-g", "daemon off;"]
