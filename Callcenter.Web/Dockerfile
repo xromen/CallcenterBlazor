@@ -3,9 +3,9 @@ FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 WORKDIR /src
 
 ENV TZ=Asia/Vladivostok
-ENV LANG ru_RU.UTF-8
-ENV LANGUAGE ${LANG}
-ENV LC_ALL ${LANG}
+ENV LANG=ru_RU.UTF-8
+ENV LANGUAGE=${LANG}
+ENV LC_ALL=${LANG}
 
 # копируем csproj
 COPY ["Callcenter.Web/Callcenter.Web.csproj", "Callcenter.Web/"]
@@ -32,5 +32,6 @@ EXPOSE 80
 COPY Callcenter.Web/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
-ENTRYPOINT ["/entrypoint.sh"]
+#Файл обязательно должен быть в кодировке UTF8 (без BOM)
+ENTRYPOINT ["/entrypoint.sh"] 
 CMD ["nginx", "-g", "daemon off;"]

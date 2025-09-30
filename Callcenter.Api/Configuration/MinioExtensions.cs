@@ -14,7 +14,7 @@ public static class MinioExtensions
         services.AddMinio(configureClient =>
             configureClient
                 .WithEndpoint(minioConfig.Endpoint)
-                .WithCredentials(minioConfig.Login, minioConfig.Password)
+                .WithCredentials(minioConfig.User, minioConfig.Password)
                 .WithSSL(false)
                 .Build()
         );

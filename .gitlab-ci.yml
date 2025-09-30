@@ -6,19 +6,40 @@ image: docker/compose:latest
 services: 
   - name: docker:dind
 
-build:
+build-app:
   stage: build
   tags:
-  - maxi
+  - tfoms-app
   script:
-  - docker-compose build
+  - docker-compose build --no-cache
 
-deploy:
+build-ext:
+  stage: build
+  tags:
+  - tfoms-ext
+  script:
+  - docker-compose build --no-cache
+
+deploy-app:
   only:
   - master
   tags:
-  - maxi
+  - tfoms-app
   stage: deploy
+  environment:
+    name: tfoms-app
+  script:
+  - docker-compose down || true
+  - docker-compose up -d
+
+deploy-ext:
+  only:
+  - master
+  tags:
+  - tfoms-ext
+  stage: deploy
+  environment:
+    name: tfoms-ext
   script:
   - docker-compose down || true
   - docker-compose up -d

@@ -2,7 +2,7 @@
 
 public class MinioConfiguration
 {
-    public string Login { get; set; }
+    public string User { get; set; }
     public string Password { get; set; }
     public string Endpoint { get; set; }
 }
