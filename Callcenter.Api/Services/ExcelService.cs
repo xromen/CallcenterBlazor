@@ -7,6 +7,7 @@ public class ExcelService
 {
     public Task<byte[]> ExportAsync<T>(
         IEnumerable<T> items,
+        bool autoFit = true,
         CancellationToken cancellationToken = default)
         {
             return Task.Run<byte[]>(() =>
@@ -58,9 +59,12 @@ public class ExcelService
                     col = 1;
                 }
 
-                foreach (var column in worksheet.Columns)
+                if (autoFit)
                 {
-                    column.AutoFit();
+                    foreach (var column in worksheet.Columns)
+                    {
+                        column.AutoFit();
+                    }
                 }
 
                 return package.GetAsByteArray();

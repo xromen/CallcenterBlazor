@@ -60,6 +60,12 @@
     </ItemGroup>
 
     <ItemGroup>
+      <None Update="Templates\ObosJal.xlsx">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="Templates\pg_by_mo.xlsx">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
       <None Update="Templates\PG_new_new.xlsx">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>

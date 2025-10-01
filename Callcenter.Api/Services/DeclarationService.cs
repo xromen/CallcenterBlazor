@@ -398,7 +398,7 @@ public class DeclarationService(
     {
         var items = (await SearchAllByFilters(1, 0, filters, orders, cancellationToken)).Items;
 
-        return await excelService.ExportAsync(items.Adapt<List<Models.Excel.Declaration>>(), cancellationToken);
+        return await excelService.ExportAsync(items.Adapt<List<Models.Excel.Declaration>>(), false, cancellationToken);
     }
     
     public async Task<byte[]> AllExportExcelFull(CancellationToken cancellationToken = default)
@@ -421,7 +421,7 @@ public class DeclarationService(
         
         var items = await query.ToListAsync(cancellationToken);
 
-        return await excelService.ExportAsync(items.Adapt<List<Models.Excel.Declaration>>(), cancellationToken);
+        return await excelService.ExportAsync(items.Adapt<List<Models.Excel.Declaration>>(), false, cancellationToken);
     }
 
     public async Task<List<IdentedPersonDto>> IdentPerson(string secName, string firstName, string fathName, DateTime birthDate, CancellationToken cancellationToken)
