@@ -12,6 +12,11 @@ namespace Callcenter.Api.Controllers;
 [Route("[controller]")]
 public class QuestionsController(QuestionsService service) : ControllerBase
 {
+    /// <summary>
+    /// Получение групп вопросов и самих вопросов в группах
+    /// </summary>
+    /// <param name="cancellationToken">Токен отмены</param>
+    /// <returns>Список групп с вопросами</returns>
     [HttpGet("groups")]
     [ProducesResponseType(typeof(List<QuestionGroupDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -22,6 +27,12 @@ public class QuestionsController(QuestionsService service) : ControllerBase
         return Ok(result);
     }
     
+    /// <summary>
+    /// Создание новой группы вопросов
+    /// </summary>
+    /// <param name="request">Запрос на создание группы</param>
+    /// <param name="cancellationToken">Токен отмены</param>
+    /// <returns>Созданная группа</returns>
     [HttpPost("groups/create")]
     [ProducesResponseType(typeof(QuestionGroupDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -32,6 +43,13 @@ public class QuestionsController(QuestionsService service) : ControllerBase
         return Ok(result);
     }
     
+    /// <summary>
+    /// Смена имени группы вопросов
+    /// </summary>
+    /// <param name="id">Идентификатор группы</param>
+    /// <param name="request">Запрос для смены имени</param>
+    /// <param name="cancellationToken">Токен отмены</param>
+    /// <returns>Измененная группа вопросов</returns>
     [HttpPatch("groups/{id:int}/rename")]
     [ProducesResponseType(typeof(QuestionGroupDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -42,6 +60,13 @@ public class QuestionsController(QuestionsService service) : ControllerBase
         return Ok(result);
     }
     
+    /// <summary>
+    /// Изменить ответ на вопрос
+    /// </summary>
+    /// <param name="id">Идентификатор вопроса</param>
+    /// <param name="request">Запроса на смену ответа</param>
+    /// <param name="cancellationToken">Токен отмены</param>
+    /// <returns>Измененный вопрос</returns>
     [HttpPatch("{id:int}/answer")]
     [ProducesResponseType(typeof(QuestionDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -52,6 +77,12 @@ public class QuestionsController(QuestionsService service) : ControllerBase
         return Ok(result);
     }
     
+    /// <summary>
+    /// Создание нового вопроса
+    /// </summary>
+    /// <param name="request">Запрос для создания вопроса</param>
+    /// <param name="cancellationToken">Токен отмены</param>
+    /// <returns>Созданный вопрос</returns>
     [HttpPost("create")]
     [ProducesResponseType(typeof(QuestionDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -62,6 +93,12 @@ public class QuestionsController(QuestionsService service) : ControllerBase
         return Ok(result);
     }
     
+    /// <summary>
+    /// Удаление вопроса
+    /// </summary>
+    /// <param name="id">Идентификатор вопроса</param>
+    /// <param name="cancellationToken">Токен отмены</param>
+    /// <returns>Удаленный вопрос</returns>
     [HttpDelete("{id:int}")]
     [ProducesResponseType(typeof(QuestionDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]

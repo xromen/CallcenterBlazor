@@ -11,6 +11,12 @@ namespace Callcenter.Api.Controllers;
 [Route("[controller]")]
 public class ReportsController(ReportsService service) : ControllerBase
 {
+    /// <summary>
+    /// Выгрузка ПГ Общая в формате xlsx
+    /// </summary>
+    /// <param name="request">Запрос для выгрузки</param>
+    /// <param name="cancellationToken">Токен отмены</param>
+    /// <returns>Файл Excel</returns>
     [HttpGet("PgFormGeneral")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -23,6 +29,12 @@ public class ReportsController(ReportsService service) : ControllerBase
             "ПГ общая.xlsx");
     }
     
+    /// <summary>
+    /// Выгрузка ПГ в разрезе МО
+    /// </summary>
+    /// <param name="request">Запрос для выгрузки</param>
+    /// <param name="cancellationToken">Токен отмены</param>
+    /// <returns>Файл Excel</returns>
     [HttpGet("PgFormGroupByMo")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -35,6 +47,12 @@ public class ReportsController(ReportsService service) : ControllerBase
             "ПГ в разрезе МО.xlsx");
     }
     
+    /// <summary>
+    /// Выгрузка критериев эффективности ОМС
+    /// </summary>
+    /// <param name="month">Месяц выгрузки</param>
+    /// <param name="cancellationToken">Токен отмены</param>
+    /// <returns>Файл Excel</returns>
     [HttpGet("OmsPerformanceCriteriaForm")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -47,6 +65,12 @@ public class ReportsController(ReportsService service) : ControllerBase
             "ПГ в разрезе МО.xlsx");
     }
     
+    /// <summary>
+    /// Выгрузка обоснованных жалоб
+    /// </summary>
+    /// <param name="request">Запрос для выгрузки</param>
+    /// <param name="cancellationToken">Токена отмены</param>
+    /// <returns>Файл Excel</returns>
     [HttpGet("JustifiedComplaintsForm")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -59,6 +83,12 @@ public class ReportsController(ReportsService service) : ControllerBase
             "ПГ в разрезе МО.xlsx");
     }
     
+    /// <summary>
+    /// Выгрзка всех жалоб
+    /// </summary>
+    /// <param name="request">Запрос для выгрузки</param>
+    /// <param name="cancellationToken">Токен отмены</param>
+    /// <returns>Файл Excel</returns>
     [HttpGet("AllComplaintsForm")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]

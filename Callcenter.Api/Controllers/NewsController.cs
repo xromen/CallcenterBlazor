@@ -13,6 +13,12 @@ namespace Callcenter.Api.Controllers;
 [Route("[controller]")]
 public class NewsController(NewsService service) : ControllerBase
 {
+    /// <summary>
+    /// Создание новости
+    /// </summary>
+    /// <param name="dto">Информация о новости</param>
+    /// <param name="cancellationToken">Токен отмены</param>
+    /// <returns>Созданная новость</returns>
     [HttpPost]
     [ProducesResponseType(typeof(NewsDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -24,6 +30,12 @@ public class NewsController(NewsService service) : ControllerBase
         return Ok(result);
     }
     
+    /// <summary>
+    /// Получение новостей с пагинацией
+    /// </summary>
+    /// <param name="request">Запрос с пагинацией</param>
+    /// <param name="cancellationToken">Токен отмены</param>
+    /// <returns>Список новостей</returns>
     [HttpGet]
     [ProducesResponseType(typeof(PaginatedResponseDto<NewsDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -34,6 +46,13 @@ public class NewsController(NewsService service) : ControllerBase
         return Ok(result);
     }
     
+    /// <summary>
+    /// Обновление новости
+    /// </summary>
+    /// <param name="id">Идентификатор новости</param>
+    /// <param name="dto">Информация и новости</param>
+    /// <param name="cancellationToken">Токен отмены</param>
+    /// <returns>Измененная новость</returns>
     [HttpPut("{id:int}")]
     [ProducesResponseType(typeof(NewsDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -45,6 +64,12 @@ public class NewsController(NewsService service) : ControllerBase
         return Ok(result);
     }
     
+    /// <summary>
+    /// Удаление новости
+    /// </summary>
+    /// <param name="id">Идентификтор новости</param>
+    /// <param name="cancellationToken">Токен отмены</param>
+    /// <returns>Удаленная новость</returns>
     [HttpDelete("{id:int}")]
     [ProducesResponseType(typeof(NewsDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]

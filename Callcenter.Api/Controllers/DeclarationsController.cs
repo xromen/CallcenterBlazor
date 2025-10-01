@@ -15,6 +15,12 @@ namespace Callcenter.Api.Controllers;
 [Route("[controller]")]
 public class DeclarationsController(DeclarationService service) : ControllerBase
 {
+    /// <summary>
+    /// Создает новое обращение
+    /// </summary>
+    /// <param name="dto">Информация об обращении</param>
+    /// <param name="cancellationToken">Токен отмены</param>
+    /// <returns>Созданное обращение</returns>
     [HttpPost]
     [ProducesResponseType(typeof(DeclarationDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -25,6 +31,12 @@ public class DeclarationsController(DeclarationService service) : ControllerBase
         return Ok(result);
     }
     
+    /// <summary>
+    /// Возвращает список обращений, достпуных пользователю
+    /// </summary>
+    /// <param name="request">Запрос с пагинацией</param>
+    /// <param name="cancellationToken">Токен отмены</param>
+    /// <returns>Список обращений и статистика по всем обращениям</returns>
     [HttpGet]
     [ProducesResponseType(typeof(GetDeclarationsResponseDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -35,6 +47,12 @@ public class DeclarationsController(DeclarationService service) : ControllerBase
         return Ok(result);
     }
     
+    /// <summary>
+    /// Возвращает историю обращения
+    /// </summary>
+    /// <param name="id">Идентификатор обращения</param>
+    /// <param name="cancellationToken">Токен отмены</param>
+    /// <returns>Список действий с обращением</returns>
     [HttpGet("{id:int}/history")]
     [ProducesResponseType(typeof(List<DeclarationActionDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -48,6 +66,12 @@ public class DeclarationsController(DeclarationService service) : ControllerBase
         return Ok(result);
     }
     
+    /// <summary>
+    /// Получение обращения по идентификатору
+    /// </summary>
+    /// <param name="id">Идентификатор обращения</param>
+    /// <param name="cancellationToken">Токен отмены</param>
+    /// <returns>Информация об обращении</returns>
     [HttpGet("{id:int}")]
     [ProducesResponseType(typeof(GetDeclarationsResponseDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -61,6 +85,14 @@ public class DeclarationsController(DeclarationService service) : ControllerBase
         return Ok(result);
     }
     
+    /// <summary>
+    /// Ищет обращения по имени, фамилии и дате рождения ЗЛ
+    /// </summary>
+    /// <param name="firstName">Имя</param>
+    /// <param name="secName">Фамилия</param>
+    /// <param name="birthDate">Дата рождения</param>
+    /// <param name="cancellationToken">Токен отмены</param>
+    /// <returns>Список идентификаторов найденных обращений</returns>
     [HttpGet("findByFio")]
     [ProducesResponseType(typeof(List<int>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -74,6 +106,12 @@ public class DeclarationsController(DeclarationService service) : ControllerBase
         return Ok(result);
     }
     
+    /// <summary>
+    /// Ищет обращение по номеру ЭЖОГ
+    /// </summary>
+    /// <param name="ejogNumber">Номер ЭЖОГ</param>
+    /// <param name="cancellationToken">Токен отмены</param>
+    /// <returns>Информация о найденом обращении</returns>
     [HttpGet("findByEjogNumber")]
     [ProducesResponseType(typeof(DeclarationDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -84,6 +122,12 @@ public class DeclarationsController(DeclarationService service) : ControllerBase
         return Ok(result);
     }
     
+    /// <summary>
+    /// Поиск и получени обращений по фильтрам, сортировке, пагинации
+    /// </summary>
+    /// <param name="request">Запрос</param>
+    /// <param name="cancellationToken">Токен отмены</param>
+    /// <returns>Список найденных обращений</returns>
     [HttpPost("all/findByFilters")]
     [ProducesResponseType(typeof(PaginatedResponseDto<DeclarationDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -94,6 +138,12 @@ public class DeclarationsController(DeclarationService service) : ControllerBase
         return Ok(result);
     }
     
+    /// <summary>
+    /// Формирует выгрузку по всем найденным обращениям в xlsx формате
+    /// </summary>
+    /// <param name="request">Фильтрация и сортировка</param>
+    /// <param name="cancellationToken">Токен отмены</param>
+    /// <returns>Массив байтов - Excel файл</returns>
     [HttpPost("all/excelExport")]
     [ProducesResponseType(typeof(byte[]), StatusCodes.Status200OK)]
     public async Task<IActionResult> AllExcelExport(
@@ -107,6 +157,11 @@ public class DeclarationsController(DeclarationService service) : ControllerBase
             "Выгрузка.xlsx");
     }
 
+    /// <summary>
+    /// Формирует выгрузку по всем доступным пользователю обращениям в xlsx формате
+    /// </summary>
+    /// <param name="cancellationToken">Токен отмены</param>
+    /// <returns>Массив байтов - Excel файл</returns>
     [HttpPost("all/excelExportFull")] [ProducesResponseType(typeof(byte[]), StatusCodes.Status200OK)]
     public async Task<IActionResult> AllExcelExportFull(
         CancellationToken cancellationToken = default
@@ -118,8 +173,15 @@ public class DeclarationsController(DeclarationService service) : ControllerBase
             "Выгрузка.xlsx");
     }
     
+    /// <summary>
+    /// Обновление информации обращения
+    /// </summary>
+    /// <param name="id">Идентификатор обращения</param>
+    /// <param name="dto">Информация об обращении. Должна содержать все старые и новые данные</param>
+    /// <param name="cancellationToken">Токен отмены</param>
+    /// <returns>Измененное обращение</returns>
     [HttpPut("{id:int}")]
-    [ProducesResponseType(typeof(GetDeclarationsResponseDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(DeclarationDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> UpdateDeclaration(int id, DeclarationDto dto, CancellationToken cancellationToken)
     {
@@ -131,6 +193,13 @@ public class DeclarationsController(DeclarationService service) : ControllerBase
         return Ok(result);
     }
     
+    /// <summary>
+    /// Отправляет обращение в другую организацию
+    /// </summary>
+    /// <param name="id">Идентификатор обращения</param>
+    /// <param name="dto">Информация для отправки</param>
+    /// <param name="cancellationToken">Токен отмены</param>
+    /// <returns></returns>
     [HttpPost("{id:int}/send")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -141,8 +210,15 @@ public class DeclarationsController(DeclarationService service) : ControllerBase
         return Ok();
     }
     
+    /// <summary>
+    /// Добавляет файл в обращение
+    /// </summary>
+    /// <param name="id">Идентификатор обращения</param>
+    /// <param name="file">Файл</param>
+    /// <param name="cancellationToken">Токен отмены</param>
+    /// <returns></returns>
     [HttpPost("{id:int}/file")]
-    [ProducesResponseType(typeof(GetDeclarationsResponseDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> AddDeclarationFile(int id, IFormFile file, CancellationToken cancellationToken)
     {
@@ -151,6 +227,12 @@ public class DeclarationsController(DeclarationService service) : ControllerBase
         return Ok();
     }
     
+    /// <summary>
+    /// Возвращает файл
+    /// </summary>
+    /// <param name="fileId">Идентификатор файла</param>
+    /// <param name="cancellationToken">Токен отмены</param>
+    /// <returns>Файл</returns>
     [HttpGet("file/{fileId:int}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -168,6 +250,13 @@ public class DeclarationsController(DeclarationService service) : ControllerBase
         return File(file.Stream, contentType, file.Name);
     }
     
+    /// <summary>
+    /// Закрытие обращения администратором/руководителем
+    /// </summary>
+    /// <param name="id">Идентификатор обращения</param>
+    /// <param name="dto">Информация о закрытии</param>
+    /// <param name="cancellationToken">Токен отмены</param>
+    /// <returns></returns>
     [HttpPost("{id:int}/supervisorClose")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -179,6 +268,11 @@ public class DeclarationsController(DeclarationService service) : ControllerBase
         return Ok();
     }
     
+    /// <summary>
+    /// Возвращет список пользователей которым можно отправить обращение
+    /// </summary>
+    /// <param name="cancellationToken">Токен отмены</param>
+    /// <returns>Списко пользователей</returns>
     [HttpGet("usersToSend")]
     [ProducesResponseType(typeof(List<UserDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -189,8 +283,14 @@ public class DeclarationsController(DeclarationService service) : ControllerBase
         return Ok(users);
     }
     
+    /// <summary>
+    /// Удаляет обращение
+    /// </summary>
+    /// <param name="id">Идентификатор обращения</param>
+    /// <param name="cancellationToken">Токен отмены</param>
+    /// <returns></returns>
     [HttpDelete("{id:int}")]
-    [ProducesResponseType( StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [Authorize(Policy = "admin")]
     public async Task<IActionResult> Remove(int id, CancellationToken cancellationToken)
@@ -200,8 +300,14 @@ public class DeclarationsController(DeclarationService service) : ControllerBase
         return Ok();
     }
     
+    /// <summary>
+    /// Идентифицирует человека по ФИО ДР для заполнения данных обращения
+    /// </summary>
+    /// <param name="request">Запрос с ФИО ДР</param>
+    /// <param name="cancellationToken">Токен отмены</param>
+    /// <returns>Данные идентифированной персоны</returns>
     [HttpPost("identPerson")]
-    [ProducesResponseType( typeof(List<IdentedPersonDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(List<IdentedPersonDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> IdentPerson([FromBody] IdentPersonRequestDto request, CancellationToken cancellationToken)
     {

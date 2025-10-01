@@ -12,8 +12,13 @@ namespace Callcenter.Api.Controllers;
 [ResponseCache(Duration = 3600 * 8, Location = ResponseCacheLocation.Any, NoStore = false)]
 public class DictionariesController(DictionariesService service) : ControllerBase
 {
+    /// <summary>
+    /// Получение данных всех справочников (кеш 8 часов)
+    /// </summary>
+    /// <param name="cancellationToken">Токен отмены</param>
+    /// <returns>Все справочники</returns>
     [HttpGet]
-    [ProducesResponseType(typeof(List<DictionariesDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(DictionariesDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> GetAnswerStatuses(CancellationToken cancellationToken)
     {

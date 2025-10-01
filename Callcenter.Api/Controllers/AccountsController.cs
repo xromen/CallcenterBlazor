@@ -28,6 +28,11 @@ public class AccountsController(AccountsService service) : ControllerBase
         return NoContent();
     }
     
+    /// <summary>
+    /// Возвращает список всех пользователей приложения
+    /// </summary>
+    /// <param name="cancellationToken">Токен отмены</param>
+    /// <returns>Список пользователей</returns>
     [HttpGet]
     [Authorize(Policy = "admin")]
     [ProducesResponseType(typeof(List<UserDto>), StatusCodes.Status200OK)]
@@ -39,6 +44,12 @@ public class AccountsController(AccountsService service) : ControllerBase
         return Ok(users);
     }
     
+    /// <summary>
+    /// Получение пользователя по идентификатору
+    /// </summary>
+    /// <param name="id">Идентификатор пользователя</param>
+    /// <param name="cancellationToken">Токен отмены</param>
+    /// <returns>Информация о пользователе</returns>
     [HttpGet("{id:int}")]
     [Authorize(Policy = "admin")]
     [ProducesResponseType(typeof(UserDto), StatusCodes.Status200OK)]
@@ -50,6 +61,11 @@ public class AccountsController(AccountsService service) : ControllerBase
         return Ok(users);
     }
     
+    /// <summary>
+    /// Получение групп/ролей пользователей из справочника
+    /// </summary>
+    /// <param name="cancellationToken">Токен отмены</param>
+    /// <returns>Список групп</returns>
     [HttpGet("groups")]
     [Authorize(Policy = "admin")]
     [ProducesResponseType(typeof(List<UserGroupDto>), StatusCodes.Status200OK)]
@@ -61,6 +77,11 @@ public class AccountsController(AccountsService service) : ControllerBase
         return Ok(users);
     }
     
+    /// <summary>
+    /// Получение не просмотренных уведомлений текущего пользователя (кешируется 5 минут)
+    /// </summary>
+    /// <param name="cancellationToken">Токен отмены</param>
+    /// <returns>Список уведомлений</returns>
     [HttpGet("notifications")]
     [ProducesResponseType(typeof(List<UserNotificationDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -72,6 +93,12 @@ public class AccountsController(AccountsService service) : ControllerBase
         return Ok(notifications);
     }
     
+    /// <summary>
+    /// Просмотр уведомления
+    /// </summary>
+    /// <param name="id">Идентификтор уведомления</param>
+    /// <param name="cancellationToken">Токен отмены</param>
+    /// <returns></returns>
     [HttpGet("notifications/{id:int}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -82,6 +109,12 @@ public class AccountsController(AccountsService service) : ControllerBase
         return Ok();
     }
     
+    /// <summary>
+    /// Удаление аккаунта пользователя
+    /// </summary>
+    /// <param name="id">Идентификатор пользователя</param>
+    /// <param name="cancellationToken">Токен отмены</param>
+    /// <returns>Информация об удаленном пользователе</returns>
     [HttpDelete("{id:int}")]
     [Authorize(Policy = "admin")]
     [ProducesResponseType(typeof(UserDto), StatusCodes.Status200OK)]
@@ -94,11 +127,11 @@ public class AccountsController(AccountsService service) : ControllerBase
     }
     
     /// <summary>
-    /// Обновление пользователя.
+    /// Обновление пользователя
     /// </summary>
-    /// <param name="userCreate">Данные пользователя.</param>
-    /// <param name="cancellationToken">Токен отмены.</param>
-    /// <returns>Статус выполнения операции.</returns>
+    /// <param name="userCreate">Данные пользователя</param>
+    /// <param name="cancellationToken">Токен отмены</param>
+    /// <returns>Статус выполнения операции</returns>
     [HttpPut("{id:int}")]
     [Authorize(Policy = "admin")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
