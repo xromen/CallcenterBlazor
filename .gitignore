@@ -65,3 +65,4 @@ artifacts/
 *.sap
 /Callcenter.Api/Logs
 /Callcenter.Api/appsettings.Development.json
+/Callcenter.Web/wwwroot/appsettings.Development.json

@@ -199,4 +199,14 @@ public class DeclarationsController(DeclarationService service) : ControllerBase
 
         return Ok();
     }
+    
+    [HttpPost("identPerson")]
+    [ProducesResponseType( typeof(List<IdentedPersonDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> IdentPerson([FromBody] IdentPersonRequestDto request, CancellationToken cancellationToken)
+    {
+        var result = await service.IdentPerson(request.SecName, request.FirstName, request.FathName, request.BirthDate, cancellationToken);
+
+        return Ok(result);
+    }
 }

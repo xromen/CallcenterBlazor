@@ -1,0 +1,55 @@
+﻿@using Callcenter.Shared
+<style>
+    .selected {
+        background-color: #1E88E5 !important;
+    }
+    .selected > td {
+        color: white !important;
+    }
+    .selected > td .mud-input {
+        color: white !important;
+    }
+</style>
+
+<MudDialog>
+    <DialogContent>
+        <MudTable T="IdentedPersonDto"
+                  Hover="true" 
+                  Breakpoint="Breakpoint.Sm" 
+                  @ref="mudTable"
+                  RowClass="cursor-pointer" 
+                  RowClassFunc="@SelectedRowClassFunc"
+                  ServerData="ServerReload"
+                  Bordered="true">
+            <HeaderContent>
+                <MudTh>СМО</MudTh>
+                <MudTh>Адрес</MudTh>
+                <MudTh>ЕНП</MudTh>
+                <MudTh>Тип документа</MudTh>
+                <MudTh>Серия</MudTh>
+                <MudTh>Номер</MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd DataLabel="СМО">@context.InsuredSmoId</MudTd>
+                <MudTd DataLabel="Адрес">@context.ResidenceAddress</MudTd>
+                <MudTd DataLabel="ЕНП">@context.InsuredEnp</MudTd>
+                <MudTd DataLabel="Тип документа">@context.IdentityDocType</MudTd>
+                <MudTd DataLabel="Серия">@context.IdentityDocSeries</MudTd>
+                <MudTd DataLabel="Номер">@context.IdentityDocNumber</MudTd>
+            </RowTemplate>
+        </MudTable>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Color="Color.Success"
+                   Variant="Variant.Filled"
+                   OnClick="Choose"
+                   Disabled="_selectedPerson == null">
+            Заполнить
+        </MudButton>
+        <MudButton Color="Color.Info"
+                   Variant="Variant.Filled"
+                   OnClick="Cancel">
+            Закрыть
+        </MudButton>
+    </DialogActions>
+</MudDialog>

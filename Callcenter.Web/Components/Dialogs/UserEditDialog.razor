@@ -1,15 +1,4 @@
-﻿@using Callcenter.Web.Pages
-<MudDialog>
-    @* <TitleContent> *@
-    @*     @if (UserId == null) *@
-    @*     { *@
-    @*         @("Создание пользователя") *@
-    @*     } *@
-    @*     else *@
-    @*     { *@
-    @*         @("Редактирование пользователя") *@
-    @*     } *@
-    @* </TitleContent> *@
+﻿<MudDialog>
     <DialogContent>
         <MudStack>
             <MudTextField @bind-Value="_user.FullName"

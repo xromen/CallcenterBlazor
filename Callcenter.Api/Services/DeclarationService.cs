@@ -370,7 +370,7 @@ public class DeclarationService(
         IEnumerable<OrderRequestDto>? orders,
         CancellationToken cancellationToken = default)
     {
-        var baseQuery = BaseQueryForDeclarationsAll();
+        var baseQuery = BaseQueryForDeclarationsAll().ProjectToType<DeclarationDto>();
         
         var filtered = filters != null ? baseQuery.ApplyFilters(filters) : baseQuery;
 
@@ -387,8 +387,8 @@ public class DeclarationService(
         }
 
         var declarations = await paginateQuery.ToListAsync(cancellationToken);
-        var dtos = declarations.Adapt<List<DeclarationDto>>();
-        return new(page, totalFiltered, dtos);
+        //var dtos = declarations.Adapt<List<DeclarationDto>>();
+        return new(page, totalFiltered, declarations);
     }
     
     public async Task<byte[]> AllExportExcel(
@@ -422,6 +422,11 @@ public class DeclarationService(
         var items = await query.ToListAsync(cancellationToken);
 
         return await excelService.ExportAsync(items.Adapt<List<Models.Excel.Declaration>>(), cancellationToken);
+    }
+
+    public async Task<List<IdentedPersonDto>> IdentPerson(string secName, string firstName, string fathName, DateTime birthDate, CancellationToken cancellationToken)
+    {
+        throw new NotImplementedException();
     }
 
     private IQueryable<Declaration> BaseQueryForDeclarationsAll()

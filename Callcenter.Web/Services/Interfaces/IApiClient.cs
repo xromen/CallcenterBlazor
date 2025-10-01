@@ -95,6 +95,11 @@ public interface IApiClient
         SendDeclarationRequestDto dto,
         CancellationToken cancellationToken = default);
     
+    [Post("/declarations/identPerson")]
+    Task<ApiResponse<List<IdentedPersonDto>>> IdentPerson(
+        [Body(BodySerializationMethod.Serialized)] IdentPersonRequestDto request,
+        CancellationToken cancellationToken = default);
+    
     [Delete("/declarations/{id}")]
     Task<ApiResponse<object>> RemoveDeclaration(
         int id,
@@ -104,6 +109,8 @@ public interface IApiClient
     Task<ApiResponse<DictionariesDto>> GetDictionaries(
         CancellationToken cancellationToken = default
     );
+    
+    //Вопросы ответы
 
     [Get("/questions/groups")]
     Task<ApiResponse<List<QuestionGroupDto>>> GetQuestionGroups(

@@ -133,11 +133,31 @@ public class DeclarationsService(IApiClient apiClient)
         return await ApiResult<byte[]>.FromResponseAsync(response, () => response.Content!.ReadAsByteArrayAsync(cancellationToken));
     }
 
-    public async Task<ApiResult<object>> Remove(int id, CancellationToken cancellationToken = default)
+    public async Task<ApiResult> Remove(int id, CancellationToken cancellationToken = default)
     {
         var response = await apiClient.RemoveDeclaration(id, cancellationToken);
         
-        return await ApiResult<object>.FromResponseAsync(response);
+        return await ApiResult.FromResponseAsync(response);
+    }
+
+    public async Task<ApiResult<List<IdentedPersonDto>>> IdentPerson(
+        string secName, 
+        string firstName, 
+        string fathName, 
+        DateTime birthDate, 
+        CancellationToken cancellationToken = default)
+    {
+        var request = new IdentPersonRequestDto()
+        {
+            SecName = secName,
+            FirstName = firstName,
+            FathName = fathName,
+            BirthDate = birthDate
+        };
+        
+        var response = await apiClient.IdentPerson(request, cancellationToken);
+        
+        return await ApiResult<List<IdentedPersonDto>>.FromResponseAsync(response);
     }
 
     public async Task<ApiResult<DictionariesDto>> GetDictionaries(CancellationToken cancellationToken = default)

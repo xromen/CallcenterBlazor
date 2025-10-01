@@ -20,4 +20,10 @@ public static class IdentityExtensions
             
         return int.TryParse(orgId, out var id) ? id : null;
     }
+    
+    public static bool CanCreateDeclaration(this ClaimsPrincipal user)
+    {
+        var orgId = user.GetOrgId();
+        return orgId != null && orgId != 6 && orgId != 9;
+    }
 }

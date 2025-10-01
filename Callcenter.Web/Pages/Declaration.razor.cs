@@ -271,6 +271,31 @@ public partial class Declaration : ComponentBase
         }
     }
 
+    private async Task IdentPerson(MouseEventArgs arg)
+    {
+        DialogOptions options = new() { FullWidth = true, CloseButton = true};
+        var parameters = new DialogParameters<IdentPersonDialog>
+        {
+            { x => x.FirstName, Model.FirstName },
+            { x => x.SecName, Model.SecName },
+            { x => x.FathName, Model.FathName },
+            { x => x.BirthDate, Model.BirthDate },
+        };
+
+        var dialog = await Dialog.ShowAsync<IdentPersonDialog>("Поиск человека в базе застрахованных", parameters, options);
+        var result = await dialog.Result;
+
+        if (!result.Canceled && result.Data is IdentedPersonDto person)
+        {
+            Model.InsuredSmoId = person.InsuredSmoId;
+            Model.IdentityDocType = person.IdentityDocType;
+            Model.IdentityDocSeries =  person.IdentityDocSeries;
+            Model.IdentityDocNumber = person.IdentityDocNumber;
+            Model.InsuredEnp = person.InsuredEnp;
+            Model.ResidenceAddress = person.ResidenceAddress;
+        }
+    }
+
     private async Task<List<ValidationMessage>> ValidateModel()
     {
         var errors = new List<ValidationMessage>();

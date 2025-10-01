@@ -1,4 +1,5 @@
 ﻿using Callcenter.Shared;
+using Callcenter.Web.Extensions;
 using Callcenter.Web.Models;
 using Callcenter.Web.Pages;
 using Callcenter.Web.Services;
@@ -14,8 +15,6 @@ public partial class UserEditDialog : ComponentBase
     [Parameter] 
     public int? UserId { get; set; }
     
-    private UserCreateDto _user { get; set; } = new();
-    
     [CascadingParameter]
     private IMudDialogInstance MudDialog { get; set; }
     
@@ -26,6 +25,10 @@ public partial class UserEditDialog : ComponentBase
     [Inject] private AccountsService AccountsService { get; set; }
     
     [Inject] private ProblemDetailsHandler ProblemDetailsHandler { get; set; }
+    
+    [Inject] private IDialogService Dialog { get; set; } = null!;
+    
+    private UserCreateDto _user { get; set; } = new();
 
     private Dictionary<int, string> _orgs = new();
     private List<UserGroupDto> _userGroups = new();
@@ -73,6 +76,11 @@ public partial class UserEditDialog : ComponentBase
     private async Task Delete()
     {
         if(UserId == null)
+            return;
+        
+        var confirmed = await Dialog.ShowConfirmDialog("Вы действительно хотите удалить пользователя?", "Удалить", Color.Error);
+        
+        if(!confirmed)
             return;
         
         var result = await AccountsService.Delete(UserId.Value);
