@@ -412,7 +412,7 @@ public class DeclarationService(
         
         IQueryable<Declaration> query;
 
-        if (environment.AuthUser.GroupId == 5)
+        if (environment.AuthUser.OrgId == 5)
         {
             query = _baseDeclarationsQuery;
         }
