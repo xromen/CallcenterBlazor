@@ -1,0 +1,22 @@
+﻿<MudDialog Style="background-color: #e9ebf0;">
+    <DialogContent>
+        @foreach (var comment in Comments)
+        {
+            <MudPaper Elevation="10"
+                      Outlined="true"
+                      Class="px-2 py-1 mx-1">
+                <MudStack Spacing="1">
+                    <MudText Typo="Typo.h6">@comment.Supervisor.FullName</MudText>
+                    <MudText>@comment.Comment</MudText>
+                    <MudText Align="Align.End" Typo="Typo.caption">@comment.CommentDate.ToString("g")</MudText>
+                </MudStack>
+            </MudPaper>
+        }
+    </DialogContent>
+    <DialogActions>
+        <MudButton Variant="Variant.Filled"
+                   OnClick="Cancel">
+            Закрыть
+        </MudButton>
+    </DialogActions>
+</MudDialog>

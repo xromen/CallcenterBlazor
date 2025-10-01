@@ -296,6 +296,17 @@ public partial class Declaration : ComponentBase
         }
     }
 
+    private async Task SupervisorCommentsOpen(MouseEventArgs arg)
+    {
+        DialogOptions options = new() { FullWidth = true, CloseButton = true};
+        var parameters = new DialogParameters<SupervisorCommentsDialog>
+        {
+            { x => x.Comments, Model.Comments },
+        };
+
+        await Dialog.ShowAsync<SupervisorCommentsDialog>("Комментарии руководителя", parameters, options);
+    }
+
     private async Task<List<ValidationMessage>> ValidateModel()
     {
         var errors = new List<ValidationMessage>();

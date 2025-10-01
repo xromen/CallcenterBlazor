@@ -37,6 +37,20 @@ public class AccountsService(IApiClient apiClient)
         return await ApiResult<List<UserGroupDto>>.FromResponseAsync(response);
     }
     
+    public async Task<ApiResult<List<UserNotificationDto>>> GetUserNotifications(CancellationToken cancellationToken = default)
+    {
+        var response = await apiClient.GetUserNotifications(cancellationToken);
+        
+        return await ApiResult<List<UserNotificationDto>>.FromResponseAsync(response);
+    }
+    
+    public async Task<ApiResult> ReadUserNotification(int id, CancellationToken cancellationToken = default)
+    {
+        var response = await apiClient.ReadUserNotification(id, cancellationToken);
+        
+        return await ApiResult.FromResponseAsync(response);
+    }
+    
     public async Task<ApiResult> Update(int id, UserCreateDto newsDto, CancellationToken cancellationToken = default)
     {
         var response = await apiClient.UpdateUser(id, newsDto, cancellationToken);

@@ -40,7 +40,9 @@ public class DeclarationService(
         .Include(d => d.MoPhone)
         .Include(c => c.Files)
         .Include(c => c.Code)
-        .ThenInclude(c => c.OrganisationName);
+        .ThenInclude(c => c.OrganisationName)
+        .Include(c => c.Comments)
+        .ThenInclude(c => c.Supervisor);
     public async Task<GetDeclarationsResponseDto> GetDeclarations(int page, int pageSize, string? filter, CancellationToken cancellationToken = default)
     {
         if (environment.AuthUser == null)

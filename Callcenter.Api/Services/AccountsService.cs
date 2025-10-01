@@ -124,4 +124,35 @@ public partial class AccountsService(
     
     [GeneratedRegex("^[a-zA-Z0-9_-]+$", RegexOptions.Compiled)]
     private static partial Regex UserNameRegex();
+
+    public async Task<List<UserNotificationDto>> GetUserNotificationsAsync(CancellationToken cancellationToken)
+    {
+        if (environment.AuthUser == null)
+        {
+            throw new PermissionException("Не авторизованный доступ");
+        }
+        
+        var notifications = await context.UserNotifications
+            .Include(n => n.NotificationType)
+            .Include(n => n.User)
+            .Include(n => n.UserWhoSend)
+            .Where(c => c.IsRead == false && c.UserId == environment.AuthUser.Id)
+            .ToListAsync(cancellationToken);
+        
+        return notifications.Adapt<List<UserNotificationDto>>();
+    }
+
+    public async Task ReadNotificationAsync(int id, CancellationToken cancellationToken)
+    {
+        var entity = await context.UserNotifications.SingleOrDefaultAsync(c => c.Id == id, cancellationToken);
+
+        if (entity == null)
+        {
+            throw new EntityNotFoundException();
+        }
+        
+        entity.IsRead = true;
+        
+        await context.SaveChangesAsync(cancellationToken);
+    }
 }

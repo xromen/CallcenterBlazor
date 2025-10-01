@@ -41,6 +41,16 @@
         display: flex;
         flex-direction: column;
     }
+    
+    .notification-paper{
+        background-color: var(--mud-palette-success);
+        color: white;
+        cursor: pointer;
+    }
+    
+    .notification-paper:hover{
+        background-color: var(--mud-palette-success-darken);
+    }
 </style>
 
 <MudThemeProvider Theme="_theme"/>
@@ -67,12 +77,58 @@
                         <MudSpacer/>
 
                         <MudStack Spacing="0" AlignItems="AlignItems.End" Justify="Justify.FlexEnd">
-                            <MudBadge Content="100"
+                            <MudBadge Content="@_userNotifications.Count"
                                       Color="Color.Primary"
                                       Overlap="true"
-                                      Class="mx-6 my-4">
+                                      Class="mx-6 my-4"
+                                      Visible="_userNotifications.Any()">
                                 <MudIconButton Icon="@Icons.Material.Filled.Email"
-                                               Size="Size.Large"/>
+                                               Color="@(_userNotifications.Any() ? Color.Success : Color.Default)"
+                                               Size="Size.Large"
+                                               OnClick="() => _notificationsVisible = !_notificationsVisible">
+                                </MudIconButton>
+                                <MudPopover OverflowBehavior="OverflowBehavior.FlipNever"
+                                            Open="@_notificationsVisible"
+                                            AnchorOrigin="Origin.BottomRight"
+                                            TransformOrigin="Origin.TopRight"
+                                            Class="pa-4"
+                                            Elevation="20">
+                                    <MudStack Class="mud-width-full"
+                                              AlignItems="AlignItems.Center"
+                                              Justify="Justify.SpaceBetween"
+                                              Row>
+                                        @if (_userNotifications.Any())
+                                        {
+                                            <MudText Typo="Typo.body2">У вас @_userNotifications.Count новых уведомлений</MudText>
+                                        }
+                                        else
+                                        {
+                                            <MudText Typo="Typo.body2">У вас нет новых уведомлений</MudText>
+                                        }
+                                        <MudIconButton Icon="@Icons.Material.Filled.Close"
+                                                       OnClick="() => _notificationsVisible = false"/>
+                                    </MudStack>
+                                    @foreach (var notification in _userNotifications)
+                                    {
+                                        <MudPaper Elevation="10"
+                                                  Outlined="true"
+                                                  MinWidth="400px"
+                                                  Class="pa-2 mb-2 notification-paper"
+                                                  @onclick="() => NotificationClick(notification)">
+                                            <MudStack Row
+                                                      AlignItems="AlignItems.Center">
+                                                <MudIcon Icon="@Icons.Material.Filled.Warning"
+                                                         Size="Size.Large"
+                                                         Color="Color.Default"/>
+                                                <MudStack Spacing="0">
+                                                    <MudText Typo="Typo.body2">@notification.NotificationTypeName</MudText>
+                                                    <MudText Typo="Typo.body2">Номер карточки: @notification.DeclarationId</MudText>
+                                                    <MudText Typo="Typo.body2">@notification.Date.ToString("g")</MudText>
+                                                </MudStack>
+                                            </MudStack>
+                                        </MudPaper>
+                                    }
+                                </MudPopover>
                             </MudBadge>
                         </MudStack>
                         <MudToggleIconButton ToggledChanged="ZoomToggledChanged"

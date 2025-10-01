@@ -12,39 +12,64 @@
               @ref="_mudDataGrid">
     <Columns>
         <PropertyColumn Property="x => x.Creator.FullName" Title="Оператор"/>
-        <PropertyColumn Property="x => x.Number" Title="Номер" />
-        <PropertyColumn Property="x => x.Id" Title="Id" />
-        <PropertyColumn Property="x => x.EjogNumber" Title="Номер ЭЖОГ" />
-        <PropertyColumn Property="x => x.StatusName" Title="Статус" />
-        <PropertyColumn Property="x => x.CodeName" Title="Код" />
-        <PropertyColumn Property="x => x.TypeName" Title="Тип" />
-        <PropertyColumn Property="x => x.ContactFormName" Title="Форма" />
-        <PropertyColumn Property="x => x.DateRegistered ?? x.DateRegisteredSmo" Title="Дата регистрации" Format="dd.MM.yyyy" />
-        <PropertyColumn Property="x => x.SecName" Title="Фамилия" />
-        <PropertyColumn Property="x => x.AgentSecName" Title="Фамилия представителя" />
-        <PropertyColumn Property="x => x.Theme" Title="Тема" />
-        <PropertyColumn Property="x => x.WorkDone" Title="Принятые меры" />
-        <PropertyColumn Property="x => x.AnswerStatusName" Title="Статус ответа" />
-        <PropertyColumn Property="x => x.SupervisorDate" Title="Дата закрытия" Format="dd.MM.yyyy" />
-        <PropertyColumn Property="x => x.AnswerOrgName" Title="СМО ответ" />
-        <PropertyColumn Property="x => x.AnswerUser.FullName" Title="Оператор ответ" />
-        <PropertyColumn Property="x => x.KemTypeName" Title="Вид проведенных КЭМ" />
-        <PropertyColumn Property="x => x.SvoStatusName" Title="СВО статус" />
-        <PropertyColumn Filterable="false" Property="@(x => x.ClosedDate != null ? "Да" : "Нет")" Title="Закрыт админом" />
+        <PropertyColumn Property="x => x.Number" Title="Номер"/>
+        <PropertyColumn Property="x => x.Id" Title="Id"/>
+        <PropertyColumn Property="x => x.EjogNumber" Title="Номер ЭЖОГ"/>
+        <PropertyColumn Property="x => x.StatusName" Title="Статус"/>
+        <PropertyColumn Property="x => x.CodeName" Title="Код"/>
+        <PropertyColumn Property="x => x.TypeName" Title="Тип"/>
+        <PropertyColumn Property="x => x.ContactFormName" Title="Форма"/>
+        <PropertyColumn Property="x => x.DateRegistered ?? x.DateRegisteredSmo" Title="Дата регистрации"
+                        Format="dd.MM.yyyy"/>
+        <PropertyColumn Property="x => x.SecName" Title="Фамилия"/>
+        <PropertyColumn Property="x => x.AgentSecName" Title="Фамилия представителя"/>
+        <PropertyColumn Property="x => x.Theme" Title="Тема"/>
+        <PropertyColumn Property="x => x.WorkDone" Title="Принятые меры"/>
+        <PropertyColumn Property="x => x.AnswerStatusName" Title="Статус ответа"/>
+        <PropertyColumn Property="x => x.SupervisorDate" Title="Дата закрытия" Format="dd.MM.yyyy"/>
+        <PropertyColumn Property="x => x.AnswerOrgName" Title="СМО ответ"/>
+        <PropertyColumn Property="x => x.AnswerUser.FullName" Title="Оператор ответ"/>
+        <PropertyColumn Property="x => x.KemTypeName" Title="Вид проведенных КЭМ"/>
+        <PropertyColumn Property="x => x.SvoStatusName" Title="СВО статус"/>
+        <PropertyColumn Filterable="false" Property="@(x => x.ClosedDate != null ? "Да" : "Нет")"
+                        Title="Закрыт админом"/>
     </Columns>
     <PagerContent>
         <MudStack Row AlignItems="AlignItems.Center">
             <MudTooltip Text="Выгрузка в Excel" Arrow Placement="Placement.Top">
-                <MudIconButton OnClick="ExcelExport" Class="ms-4" Icon="@Icons.Custom.FileFormats.FileExcel" Color="Color.Success" Variant="Variant.Filled"/>
-            </MudTooltip>
-            <MudTooltip Text="Выгрузка в Pdf" Arrow Placement="Placement.Top">
-                <MudIconButton Icon="@Icons.Custom.FileFormats.FilePdf" Color="Color.Error" Variant="Variant.Filled"></MudIconButton>
-            </MudTooltip>
-            <MudTooltip Text="Выгрузка в Csv" Arrow Placement="Placement.Top">
-                <MudIconButton Icon="@Icons.Custom.FileFormats.FileDocument" Color="Color.Info" Variant="Variant.Filled"></MudIconButton>
+                <MudIconButton OnClick="ExcelExport" 
+                               Class="ms-4" 
+                               Color="Color.Success" 
+                               Variant="Variant.Filled"
+                               Disabled="_isLoading">
+                    <span class="mud-icon-button-label">
+                        @if (_isLoading)
+                        {
+                            <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true"/>
+                        }
+                        else
+                        {
+                            <MudIcon Icon="@Icons.Custom.FileFormats.FileExcel"/>
+                        }
+                    </span>
+                </MudIconButton>
             </MudTooltip>
             <MudTooltip Text="Полная выгрузка" Arrow Placement="Placement.Top">
-                <MudIconButton OnClick="ExcelExportAll" Icon="@Icons.Material.Filled.Search" Color="Color.Tertiary" Variant="Variant.Filled"></MudIconButton>
+                <MudIconButton OnClick="ExcelExportAll" 
+                               Color="Color.Tertiary"
+                               Variant="Variant.Filled"
+                               Disabled="_isLoading">
+                    <span class="mud-icon-button-label">
+                        @if (_isLoading)
+                        {
+                            <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true"/>
+                        }
+                        else
+                        {
+                            <MudIcon Icon="@Icons.Material.Filled.Search"/>
+                        }
+                    </span>
+                </MudIconButton>
             </MudTooltip>
             <MudSpacer/>
             <MudDataGridPager T="DeclarationDto" Style="width: fit-content"/>

@@ -16,6 +16,8 @@ public class ApplicationDbContext(DbContextOptions options) : DbContext(options)
     public DbSet<DeclarationFile> Files { get; set; } = null!;
     public DbSet<News> News { get; set; } = null!;
     public DbSet<NewsPermission> NewsPermissions { get; set; } = null!;
+    public DbSet<UserNotification> UserNotifications { get; set; } = null!;
+    public DbSet<SupervisorComment> SupervisorComments { get; set; } = null!;
     
     // Справочники
     public DbSet<UserGroup> UserGroups { get; set; } = null!;
@@ -43,6 +45,8 @@ public class ApplicationDbContext(DbContextOptions options) : DbContext(options)
     public DbSet<MoDepartment> MoDepartments { get; set; } = null!;
     public DbSet<Region> Regions { get; set; } = null!;
     public DbSet<MoRegion> MoRegions { get; set; } = null!;
+    
+    public DbSet<NotificationType> NotificationTypes { get; set; } = null!;
     
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

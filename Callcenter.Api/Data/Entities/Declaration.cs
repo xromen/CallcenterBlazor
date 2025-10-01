@@ -198,4 +198,7 @@ public class Declaration
     
     [InverseProperty(nameof(DeclarationFile.Declaration))]
     public List<DeclarationFile> Files { get; set; }
+    
+    [InverseProperty(nameof(SupervisorComment.Declaration))]
+    public List<SupervisorComment> Comments { get; set; }
 }

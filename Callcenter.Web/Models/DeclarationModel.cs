@@ -115,4 +115,6 @@ public class DeclarationModel
     public string? AgentSecName { get; set; }
     
     public List<FileDto> Files { get; set; }
+    
+    public List<SupervisorCommentDto> Comments { get; set; }
 }

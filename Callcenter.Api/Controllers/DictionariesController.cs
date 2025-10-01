@@ -9,7 +9,7 @@ namespace Callcenter.Api.Controllers;
 [ApiController]
 [Authorize(AuthenticationSchemes = OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme)]
 [Route("[controller]")]
-//[ResponseCache(Duration = 3600 * 8, Location = ResponseCacheLocation.Any, NoStore = false)]
+[ResponseCache(Duration = 3600 * 8, Location = ResponseCacheLocation.Any, NoStore = false)]
 public class DictionariesController(DictionariesService service) : ControllerBase
 {
     [HttpGet]

@@ -125,4 +125,6 @@ public class DeclarationDto
     public string? AgentSecName { get; set; }
 
     public List<FileDto>? Files { get; set; } = new();
+    
+    public List<SupervisorCommentDto> Comments { get; set; } = new();
 }

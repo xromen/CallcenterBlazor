@@ -1,6 +1,9 @@
 ﻿using Blazored.LocalStorage;
+using Callcenter.Shared;
+using Callcenter.Web.Services;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.AspNetCore.Components.Routing;
 using MudBlazor;
 
 namespace Callcenter.Web.Layout;
@@ -12,10 +15,21 @@ public partial class MainLayout : LayoutComponentBase
     
     [Inject]
     public ILocalStorageService LocalStorageService { get; set; }
+    
+    [Inject]
+    public AccountsService AccountsService { get; set; }
+    
+    [Inject]
+    public ProblemDetailsHandler ProblemDetailsHandler { get; set; }
+    
+    [Inject]
+    public NavigationManager NavigationManager { get; set; }
 
     private string? _userFullName;
     private string? _userGroup;
     private string? _userOrganisation;
+    private List<UserNotificationDto> _userNotifications = new();
+    private bool _notificationsVisible = false;
     
     private bool _zoomedIn = false;
 
@@ -44,38 +58,6 @@ public partial class MainLayout : LayoutComponentBase
             min-height: 93vh;
         }
     ";
-
-    protected override async Task OnInitializedAsync()
-    {
-        var authState = await AuthStateTask;
-
-        _zoomedIn = await LocalStorageService.GetItemAsync<bool?>("zoomed") ?? false;
-        
-        _userFullName = authState.User.FindFirst("FullName")?.Value;
-        _userGroup = authState.User.FindFirst("Group")?.Value;
-        _userOrganisation = authState.User.FindFirst("Organisation")?.Value;
-        
-        await base.OnInitializedAsync();
-    }
-
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender)
-        {
-            // var authState = await AuthStateTask;
-            //
-            // var zoomedInRes = await ProtectedSessionStore.GetAsync<bool?>("zoomed");
-            // _zoomedIn = zoomedInRes.Value ?? false;
-            //
-            // _userFullName = authState.User.FindFirst("FullName")?.Value;
-            // _userGroup = authState.User.FindFirst("Group")?.Value;
-            // _userOrganisation = authState.User.FindFirst("Organisation")?.Value;
-            
-            StateHasChanged();
-        }
-            
-        await base.OnAfterRenderAsync(firstRender);
-    }
     
     private MudTheme _theme = new()
     {
@@ -87,10 +69,61 @@ public partial class MainLayout : LayoutComponentBase
         }
     };
 
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthStateTask;
+
+        _zoomedIn = await LocalStorageService.GetItemAsync<bool?>("zoomed") ?? false;
+        
+        _userFullName = authState.User.FindFirst("FullName")?.Value;
+        _userGroup = authState.User.FindFirst("Group")?.Value;
+        _userOrganisation = authState.User.FindFirst("Organisation")?.Value;
+
+        NavigationManager.LocationChanged += async (s, a) => await LocationChangedAsync(s, a);
+        
+        await base.OnInitializedAsync();
+    }
+
+    private async Task LocationChangedAsync(object sender, LocationChangedEventArgs e)
+    {
+        await LoadNotifications();
+        _notificationsVisible = false;
+        StateHasChanged();
+    }
+
+    private async ValueTask LoadNotifications()
+    {
+        var result = await AccountsService.GetUserNotifications();
+
+        if (!result.Success)
+        {
+            ProblemDetailsHandler.Handle(result.Error!);
+        }
+        else
+        {
+            _userNotifications = result.Data!;
+        }
+    }
+
     private async Task ZoomToggledChanged(bool value)
     {
         _zoomedIn = value;
         
         await LocalStorageService.SetItemAsync("zoomed", value);
+    }
+
+    private async Task NotificationClick(UserNotificationDto notification)
+    {
+        var result = await AccountsService.ReadUserNotification(notification.Id);
+
+        if (!result.Success)
+        {
+            ProblemDetailsHandler.Handle(result.Error!);
+            return;
+        }
+
+        _notificationsVisible = false;
+        _userNotifications.Remove(notification);
+        NavigationManager.NavigateTo($"/declaration/{notification.DeclarationId}", forceLoad: true);
     }
 }

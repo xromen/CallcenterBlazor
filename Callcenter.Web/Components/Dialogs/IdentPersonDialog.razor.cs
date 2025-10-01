@@ -8,19 +8,21 @@ namespace Callcenter.Web.Components.Dialogs;
 
 public partial class IdentPersonDialog : ComponentBase
 {
-    [Parameter] public string FirstName { get; set; }
+    [Parameter] public string? FirstName { get; set; }
 
-    [Parameter] public string SecName { get; set; }
+    [Parameter] public string? SecName { get; set; }
 
-    [Parameter] public string FathName { get; set; }
+    [Parameter] public string? FathName { get; set; }
 
-    [Parameter] public DateTime BirthDate { get; set; }
+    [Parameter] public DateTime? BirthDate { get; set; }
 
     [CascadingParameter] private IMudDialogInstance MudDialog { get; set; }
 
     [Inject] private DeclarationsService DeclarationsService { get; set; }
 
     [Inject] private ProblemDetailsHandler ProblemDetailsHandler { get; set; }
+    
+    [Inject] private ISnackbar Snackbar { get; set; }
 
     private void Cancel() => MudDialog.Cancel();
 
@@ -50,7 +52,13 @@ public partial class IdentPersonDialog : ComponentBase
 
     private async Task<TableData<IdentedPersonDto>> ServerReload(TableState state, CancellationToken cancellationToken)
     {
-        var result = await DeclarationsService.IdentPerson(SecName, FirstName, FathName, BirthDate, cancellationToken);
+        if (string.IsNullOrWhiteSpace(FirstName) || string.IsNullOrWhiteSpace(SecName) || !BirthDate.HasValue)
+        {
+            Snackbar.Add("Не указаны обязательные параметры", Severity.Error);
+            return new() { Items = [], TotalItems = 0 };
+        }
+        
+        var result = await DeclarationsService.IdentPerson(SecName, FirstName, FathName, BirthDate.Value, cancellationToken);
 
         if (!result.Success)
         {

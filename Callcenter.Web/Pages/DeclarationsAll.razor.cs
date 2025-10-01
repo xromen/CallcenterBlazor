@@ -24,6 +24,8 @@ public partial class DeclarationsAll : ComponentBase
     private FlexDataGrid<DeclarationDto> _mudDataGrid;
     private List<IFilterDefinition<DeclarationDto>> _filters = new();
 
+    private bool _isLoading = false;
+
     protected override void OnInitialized()
     {
         
@@ -100,37 +102,57 @@ public partial class DeclarationsAll : ComponentBase
     
     private async Task ExcelExport()
     {
-        var filters = _filters.Select(c => new FilterRequestDto()
-            {
-                Field = c.Column?.PropertyName,
-                Operator = c.Operator,
-                Value = c.Value
-            })
-            .ToArray();
+        _isLoading = true;
 
-        var file = await Service.AllExcelExport(filters, null);
-
-        if (!file.Success)
+        try
         {
-            ProblemDetailsHandler.Handle(file.Error!);
-            return;
-        }
+            await Task.Delay(4000);
+            var filters = _filters.Select(c => new FilterRequestDto()
+                {
+                    Field = c.Column?.PropertyName,
+                    Operator = c.Operator,
+                    Value = c.Value
+                })
+                .ToArray();
 
-        await Js.InvokeVoidAsync("saveAsFile", "Выгрузка.xlsx",
-            Convert.ToBase64String(file.Data!));
+            var file = await Service.AllExcelExport(filters, null);
+
+            if (!file.Success)
+            {
+                ProblemDetailsHandler.Handle(file.Error!);
+                return;
+            }
+
+            await Js.InvokeVoidAsync("saveAsFile", "Выгрузка.xlsx",
+                Convert.ToBase64String(file.Data!));
+        }
+        finally
+        {
+            _isLoading = false;
+        }
     }
     
     private async Task ExcelExportAll()
     {
-        var file = await Service.AllExcelExportFull();
+        _isLoading = true;
 
-        if (!file.Success)
+        try
         {
-            ProblemDetailsHandler.Handle(file.Error!);
-            return;
-        }
+            await Task.Delay(4000);
+            var file = await Service.AllExcelExportFull();
 
-        await Js.InvokeVoidAsync("saveAsFile", "Выгрузка.xlsx",
-            Convert.ToBase64String(file.Data!));
+            if (!file.Success)
+            {
+                ProblemDetailsHandler.Handle(file.Error!);
+                return;
+            }
+
+            await Js.InvokeVoidAsync("saveAsFile", "Выгрузка.xlsx",
+                Convert.ToBase64String(file.Data!));
+        }
+        finally
+        {
+            _isLoading = false;
+        }
     }
 }

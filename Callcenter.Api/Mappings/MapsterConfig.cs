@@ -109,5 +109,10 @@ public static class MapsterConfig
             .NewConfig()
             .Map(dest => dest.OrganisationIds,
                 src => src.Organisations.Select(o => o.Id).ToList());
+
+        TypeAdapterConfig<UserNotification, UserNotificationDto>
+            .NewConfig()
+            .Map(dest => dest.NotificationTypeName,
+                src => src.NotificationType.Name);
     }
 }

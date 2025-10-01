@@ -196,6 +196,15 @@ public interface IApiClient
     Task<ApiResponse<List<UserGroupDto>>> GetUserGroups(
         CancellationToken cancellationToken = default);
     
+    [Get("/accounts/notifications")]
+    Task<ApiResponse<List<UserNotificationDto>>> GetUserNotifications(
+        CancellationToken cancellationToken = default);
+    
+    [Get("/accounts/notifications/{id}")]
+    Task<ApiResponse<object>> ReadUserNotification(
+        int id,
+        CancellationToken cancellationToken = default);
+    
     [Put("/accounts/{id}")]
     Task<ApiResponse<object>> UpdateUser(
         int id,
