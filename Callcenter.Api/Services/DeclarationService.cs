@@ -14,7 +14,8 @@ using OpenIddict.EntityFrameworkCore.Models;
 namespace Callcenter.Api.Services;
 
 public class DeclarationService(
-    ApplicationDbContext dbContext, 
+    ApplicationDbContext dbContext,
+    BdzDbContext bdzDnContext,
     RequestEnvironment environment, 
     FileStorageService fileStorageService,
     ExcelService excelService)
@@ -428,7 +429,31 @@ public class DeclarationService(
 
     public async Task<List<IdentedPersonDto>> IdentPerson(string secName, string firstName, string fathName, DateTime birthDate, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        var persons = await bdzDnContext.Database.SqlQueryRaw<IdententedPersonModel>(@"Select al.*
+from (
+         SELECT
+                per.Person_id as PersonId,
+                ad.[Address_Address] as ResidenceAddress,
+                per.[Person_ENP] as InsuredEnp,
+                dt.[DocumType_Socr] as IdentityDocType,
+                per.[Docum_Ser] as IdentityDocSeries,
+                per.[Docum_Num] as IdentityDocNumber,
+                CASE
+                    WHEN po.OrgSmo_id = 1 then 2
+                    when po.OrgSmo_id = 2 then 3
+                    when po.OrgSmo_id = 7 then 1
+                    when po.OrgSmo_id = 6 then 4
+                    else 0 end as InsuredSmoId
+         FROM [BDZ].[dbo].[v_Person] per
+                  inner join [BDZ].[dbo].[Polis] po on per.polis_id = po.polis_id
+                  left join [BDZ].[dbo].[Address] ad on per.address_pid = ad.address_id
+                  left join [BDZ].[dbo].[DocumType] dt on per.DocumType_id = dt.DocumType_id
+         where lower([Person_Surname]) = lower({0})
+           and lower([Person_Firname]) = lower({1})
+           and [Person_Birthday] = {2}) al", secName, firstName, birthDate)
+            .ToListAsync(cancellationToken);
+
+        return persons.Adapt<List<IdentedPersonDto>>();
     }
 
     private IQueryable<Declaration> BaseQueryForDeclarationsAll()

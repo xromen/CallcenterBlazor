@@ -17,6 +17,13 @@ namespace Callcenter.Api.Configuration
                 options.UseOpenIddict();
             });
 
+            var bdzConnectionString = config.GetConnectionString("Bdz") ?? Environment.GetEnvironmentVariable("BDZ_CONN");
+
+            services.AddDbContextPool<BdzDbContext>(options =>
+            {
+                options.UseSqlServer(bdzConnectionString);
+            });
+
             return services;
         }
     }

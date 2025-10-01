@@ -35,19 +35,23 @@ public partial class IdentPersonDialog : ComponentBase
         if (_selectedRowNumber == rowNumber)
         {
             _selectedRowNumber = null;
-            _selectedPerson = null;
+            mudTable.SelectedItem = null;
             return string.Empty;
         }
         else if (mudTable.SelectedItem != null && mudTable.SelectedItem.Equals(person))
         {
             _selectedRowNumber = rowNumber;
-            _selectedPerson = person;
             return "selected";
         }
         else
         {
             return string.Empty;
         }
+    }
+
+    private void RowClickEvent(TableRowClickEventArgs<IdentedPersonDto> args)
+    {
+
     }
 
     private async Task<TableData<IdentedPersonDto>> ServerReload(TableState state, CancellationToken cancellationToken)

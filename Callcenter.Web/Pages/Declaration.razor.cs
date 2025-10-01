@@ -273,7 +273,7 @@ public partial class Declaration : ComponentBase
 
     private async Task IdentPerson(MouseEventArgs arg)
     {
-        DialogOptions options = new() { FullWidth = true, CloseButton = true};
+        DialogOptions options = new() { FullWidth = true, MaxWidth = MaxWidth.Large, CloseButton = true};
         var parameters = new DialogParameters<IdentPersonDialog>
         {
             { x => x.FirstName, Model.FirstName },

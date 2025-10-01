@@ -20,7 +20,9 @@
                   RowClass="cursor-pointer" 
                   RowClassFunc="@SelectedRowClassFunc"
                   ServerData="ServerReload"
-                  Bordered="true">
+                  Bordered="true"
+                  OnRowClick="@RowClickEvent"
+                  @bind-SelectedItem="@_selectedPerson">
             <HeaderContent>
                 <MudTh>СМО</MudTh>
                 <MudTh>Адрес</MudTh>
