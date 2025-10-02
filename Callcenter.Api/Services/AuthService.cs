@@ -161,6 +161,7 @@ public class AuthService(
             .SetClaim(OpenIddictConstants.Claims.Name, await userNameTask)
             .SetClaim(OpenIddictConstants.Claims.PreferredUsername, await userNameTask)
             .SetClaim("FullName", user.FullName)
+            .SetClaim("GroupId", user.GroupId)
             .SetClaim("Group", user.Group.Name)
             .SetClaim("Organisation", user.Organisation.Name)
             .SetClaim("OrganisationId", user.Organisation.Id)

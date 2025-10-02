@@ -258,7 +258,7 @@ public class DeclarationService(
         return declarations.First().Adapt<DeclarationDto>();
     }
 
-    public async Task AddFile(int declarationId, IFormFile file, CancellationToken cancellationToken)
+    public async Task<int> AddFile(int declarationId, IFormFile file, CancellationToken cancellationToken)
     {
         if (environment.AuthUser == null)
         {
@@ -276,11 +276,14 @@ public class DeclarationService(
             await fileStorageService.UploadFileAsync(uniqFileName, stream, cancellationToken);
         }
 
-        await dbContext.Database.ExecuteSqlRawAsync("select * from sp_add_file({0}, {1}, {2}, {3})", 
+        var fileId = await dbContext.Database.SqlQueryRaw<int>("select * from sp_add_file({0}, {1}, {2}, {3})", 
             file.FileName, 
             environment.AuthUser.Id,
             declarationId,
-            uniqFileName);
+            uniqFileName)
+            .FirstOrDefaultAsync(cancellationToken);
+
+        return fileId;
     }
 
     public async Task<FileModel> GetFile(int fileId, CancellationToken cancellationToken)

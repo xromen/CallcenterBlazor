@@ -21,9 +21,16 @@ public static class IdentityExtensions
         return int.TryParse(orgId, out var id) ? id : null;
     }
     
+    public static int? GetGroupId(this ClaimsPrincipal user)
+    {
+        var orgId = user.FindFirst("GroupId")?.Value;
+            
+        return int.TryParse(orgId, out var id) ? id : null;
+    }
+    
     public static bool CanCreateDeclaration(this ClaimsPrincipal user)
     {
-        var orgId = user.GetOrgId();
+        var orgId = user.GetGroupId();
         return orgId != null && orgId != 6 && orgId != 9;
     }
 }

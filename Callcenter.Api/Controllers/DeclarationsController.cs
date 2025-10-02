@@ -216,15 +216,15 @@ public class DeclarationsController(DeclarationService service) : ControllerBase
     /// <param name="id">Идентификатор обращения</param>
     /// <param name="file">Файл</param>
     /// <param name="cancellationToken">Токен отмены</param>
-    /// <returns></returns>
+    /// <returns>Идентификатор созданного файла</returns>
     [HttpPost("{id:int}/file")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(int), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> AddDeclarationFile(int id, IFormFile file, CancellationToken cancellationToken)
     {
-        await service.AddFile(id, file, cancellationToken);
+        var fileid = await service.AddFile(id, file, cancellationToken);
         
-        return Ok();
+        return Ok(fileid);
     }
     
     /// <summary>
