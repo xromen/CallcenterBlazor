@@ -8,7 +8,7 @@ using MudBlazor;
 
 namespace Callcenter.Web.Layout;
 
-public partial class MainLayout : LayoutComponentBase
+public partial class MainLayout : LayoutComponentBase, IDisposable
 {
     [CascadingParameter]
     private Task<AuthenticationState> AuthStateTask { get; set; } = null!;
@@ -69,6 +69,11 @@ public partial class MainLayout : LayoutComponentBase
         }
     };
 
+    public void Dispose()
+    {
+        NavigationManager.LocationChanged -= LocationChangedAsync;
+    }
+
     protected override async Task OnInitializedAsync()
     {
         var authState = await AuthStateTask;
@@ -79,12 +84,12 @@ public partial class MainLayout : LayoutComponentBase
         _userGroup = authState.User.FindFirst("Group")?.Value;
         _userOrganisation = authState.User.FindFirst("Organisation")?.Value;
 
-        NavigationManager.LocationChanged += async (s, a) => await LocationChangedAsync(s, a);
+        NavigationManager.LocationChanged += LocationChangedAsync;
         
         await base.OnInitializedAsync();
     }
 
-    private async Task LocationChangedAsync(object sender, LocationChangedEventArgs e)
+    private async void LocationChangedAsync(object? sender, LocationChangedEventArgs e)
     {
         await LoadNotifications();
         _notificationsVisible = false;

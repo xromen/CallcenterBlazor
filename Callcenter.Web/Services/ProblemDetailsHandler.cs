@@ -11,7 +11,8 @@ public class ProblemDetailsHandler(ISnackbar snackbar, NavigationManager navigat
     {
         if(details.Status == 401)
         {
-            navigation.NavigateTo("/Account/Login");
+            var returnUrl = Uri.EscapeDataString(navigation.Uri);
+            navigation.NavigateTo($"/Account/Login?returnUrl={returnUrl}", true);
         }
         else
         {
