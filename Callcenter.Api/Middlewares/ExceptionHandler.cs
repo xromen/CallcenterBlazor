@@ -46,7 +46,8 @@ public class ExceptionHandler(IProblemDetailsService problemDetailsService, ILog
             Title = exception.Message,
         };
 
-        logger.LogError(exception, "Произошло исключение: {Message}", exception.Message);
+        if(statusCode != StatusCodes.Status403Forbidden)
+            logger.LogError(exception, "Произошло исключение: {Message}", exception.Message);
 
         httpContext.Response.StatusCode = statusCode.Value;
 
