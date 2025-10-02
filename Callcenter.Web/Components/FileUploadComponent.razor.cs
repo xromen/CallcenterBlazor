@@ -6,7 +6,7 @@ using Microsoft.JSInterop;
 
 namespace Callcenter.Web.Components
 {
-    public partial class FileUploadComponent
+    public partial class FileUploadComponent : IDisposable
     {
         [Parameter]
         public List<IBrowserFile> UploadFiles
@@ -34,6 +34,8 @@ namespace Callcenter.Web.Components
         [Inject] public ProblemDetailsHandler ProblemDetailsHandler { get; set; } = null!;
 
         private List<IBrowserFile> _files = new();
+        
+        private CancellationTokenSource _tokenSource = new();
 
         private async Task OnInputFileChanged(InputFileChangeEventArgs e)
         {
@@ -42,7 +44,7 @@ namespace Callcenter.Web.Components
 
         private async Task DownloadFile(FileDto file)
         {
-            var result = await Service.DownloadFile(file.Id);
+            var result = await Service.DownloadFile(file.Id, _tokenSource.Token);
 
             if (!result.Success)
             {
@@ -52,6 +54,12 @@ namespace Callcenter.Web.Components
             
             await Js.InvokeVoidAsync("saveAsFile", file.Name,
                 Convert.ToBase64String(result.Data!));
+        }
+
+        public void Dispose()
+        {
+            _tokenSource.Cancel();
+            _tokenSource.Dispose();
         }
     }
 }

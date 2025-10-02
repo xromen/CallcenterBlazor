@@ -21,20 +21,16 @@ public class Program
 {
     public static async Task Main(string[] args)
     {
-        Log.Logger = new LoggerConfiguration()
-            .MinimumLevel.Debug()
-            .Enrich.WithProperty("InstanceId", Guid.NewGuid().ToString("n"))
-            .WriteTo.BrowserConsole()
-            .CreateLogger();
-
         CultureInfo.DefaultThreadCurrentCulture = new CultureInfo("ru-RU");
         CultureInfo.DefaultThreadCurrentUICulture = new CultureInfo("ru-RU");
         
         var builder = WebAssemblyHostBuilder.CreateDefault(args);
-        var apiUri = builder.Configuration["ApiUri"] ?? throw new Exception("ApiUri configuration not found");
-
+        var apiUri = "http://localhost:5016/";//builder.HostEnvironment.BaseAddress.TrimEnd('/') + "/api/";
+        
         builder.RootComponents.Add<App>("#app");
         builder.RootComponents.Add<HeadOutlet>("head::after");
+        
+        builder.Logging.SetMinimumLevel(LogLevel.Warning);
 
         builder.Services.AddMudServices(configuration =>
         {
@@ -54,13 +50,12 @@ public class Program
         Log.Logger.Information(builder.HostEnvironment.BaseAddress);
 
         builder.Services.AddTransient<RefreshTokenHandler>();
-        builder.Services.AddHttpClient<AuthenticationService>(client => client.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress.TrimEnd('/') + "/api/"));
-        builder.Services.AddHttpClient<JwtParser>(client => client.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress.TrimEnd('/') + "/api/"));
+        builder.Services.AddHttpClient<AuthenticationService>(client => client.BaseAddress = new Uri(apiUri));
+        builder.Services.AddHttpClient<JwtParser>(client => client.BaseAddress = new Uri(apiUri));
         builder.Services.AddRefitClient<IApiClient>()
             .ConfigureHttpClient(c =>
                 {
-                    c.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress.TrimEnd('/') + "/api");
-                    //c.BaseAddress = new Uri(apiUri.TrimEnd('/'));
+                    c.BaseAddress = new Uri(apiUri.TrimEnd('/'));
                     c.Timeout = TimeSpan.FromDays(1);
                 }
             )

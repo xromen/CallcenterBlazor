@@ -7,7 +7,7 @@ using MudBlazor;
 
 namespace Callcenter.Web.Components.Dialogs;
 
-public partial class NewsEditDialog : ComponentBase
+public partial class NewsEditDialog : ComponentBase, IDisposable
 {
     [Parameter] public NewsDto NewsObj { get; set; } = new();
     
@@ -26,10 +26,12 @@ public partial class NewsEditDialog : ComponentBase
     private ProblemDetailsHandler ProblemDetailsHandler { get; set; } = null!;
     
     private Dictionary<int, string> _orgs = new ();
+    
+    private CancellationTokenSource _tokenSource = new();
 
     protected override async Task OnInitializedAsync()
     {
-        var result = await DeclarationsService.GetDictionaries();
+        var result = await DeclarationsService.GetDictionaries(_tokenSource.Token);
 
         if (!result.Success)
         {
@@ -49,7 +51,7 @@ public partial class NewsEditDialog : ComponentBase
             return;
         }
         
-        var result = await NewsService.DeleteNews(NewsObj.Id!.Value);
+        var result = await NewsService.DeleteNews(NewsObj.Id!.Value, _tokenSource.Token);
 
         if (!result.Success)
         {
@@ -65,7 +67,7 @@ public partial class NewsEditDialog : ComponentBase
     {
         if (NewsObj.Id == null)
         {
-            var result = await NewsService.CreateNews(NewsObj);
+            var result = await NewsService.CreateNews(NewsObj, _tokenSource.Token);
 
             if (!result.Success)
             {
@@ -75,7 +77,7 @@ public partial class NewsEditDialog : ComponentBase
         }
         else
         {
-            var result = await NewsService.UpdateNews(NewsObj.Id.Value, NewsObj);
+            var result = await NewsService.UpdateNews(NewsObj.Id.Value, NewsObj, _tokenSource.Token);
 
             if (!result.Success)
             {
@@ -98,5 +100,12 @@ public partial class NewsEditDialog : ComponentBase
         {
             NewsObj.OrganisationIds.Remove(orgId);
         }
+    }
+
+    public void Dispose()
+    {
+        _tokenSource.Cancel();
+        _tokenSource.Dispose();
+        Snackbar.Dispose();
     }
 }

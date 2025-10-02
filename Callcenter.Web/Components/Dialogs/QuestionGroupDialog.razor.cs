@@ -1,10 +1,11 @@
-﻿using Callcenter.Web.Services;
+﻿using System.Net.Http.Headers;
+using Callcenter.Web.Services;
 using Microsoft.AspNetCore.Components;
 using MudBlazor;
 
 namespace Callcenter.Web.Components.Dialogs;
 
-public partial class QuestionGroupDialog : ComponentBase
+public partial class QuestionGroupDialog : ComponentBase, IDisposable
 {
     [CascadingParameter]
     private IMudDialogInstance MudDialog { get; set; } = null!;
@@ -16,7 +17,7 @@ public partial class QuestionGroupDialog : ComponentBase
     public string? QuestionGroupName { get; set; }
     
     [Parameter]
-    public Func<QuestionGroupEventArgs, Task<bool>> OnSubmit { get; set; }
+    public Func<QuestionGroupEventArgs, CancellationToken, Task<bool>> OnSubmit { get; set; }
 
     [Inject] public DeclarationsService Service { get; set; } = null!;
     
@@ -24,6 +25,8 @@ public partial class QuestionGroupDialog : ComponentBase
     
     [Inject] public ProblemDetailsHandler ProblemDetailsHandler { get; set; } = null!;
 
+    private CancellationTokenSource _tokenSource = new();
+    
     private void Cancel() => MudDialog.Cancel();
 
     private async Task Submit()
@@ -34,10 +37,17 @@ public partial class QuestionGroupDialog : ComponentBase
             Name = QuestionGroupName
         };
 
-        var success = await OnSubmit(args);
+        var success = await OnSubmit(args, _tokenSource.Token);
         
         if(success)
             MudDialog.Close(DialogResult.Ok(QuestionGroupName));
+    }
+
+    public void Dispose()
+    {
+        _tokenSource.Cancel();
+        _tokenSource.Dispose();
+        Snackbar.Dispose();
     }
 }
 

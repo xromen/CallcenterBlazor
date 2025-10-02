@@ -8,7 +8,7 @@ using MudBlazor;
 
 namespace Callcenter.Web.Components.Dialogs;
 
-public partial class SelectQuestionDialog : ComponentBase
+public partial class SelectQuestionDialog : ComponentBase, IDisposable
 {
     [CascadingParameter] private IMudDialogInstance MudDialog { get; set; } = null!;
 
@@ -26,6 +26,8 @@ public partial class SelectQuestionDialog : ComponentBase
     private bool _isLoading = true;
     private bool _isAnswerEditing = false;
     private void Cancel() => MudDialog.Cancel();
+    
+    private CancellationTokenSource _tokenSource = new();
 
     protected override async Task OnInitializedAsync()
     {
@@ -38,7 +40,7 @@ public partial class SelectQuestionDialog : ComponentBase
     {
         _isLoading = true;
         
-        var groupsResult = await Service.GetQuestionGroups();
+        var groupsResult = await Service.GetQuestionGroups(_tokenSource.Token);
 
         _isLoading = false;
 
@@ -71,7 +73,7 @@ public partial class SelectQuestionDialog : ComponentBase
         {
             _isAnswerEditing = false;
             
-            var response = await Service.ChangeQuestionAnswer(_selectedQuestion.Id, _selectedQuestion.Answer);
+            var response = await Service.ChangeQuestionAnswer(_selectedQuestion.Id, _selectedQuestion.Answer, _tokenSource.Token);
 
             if (response.Success)
             {
@@ -94,7 +96,7 @@ public partial class SelectQuestionDialog : ComponentBase
         if (!confirmed)
             return;
         
-        var response = await Service.DeleteQuestion(_selectedQuestion.Id);
+        var response = await Service.DeleteQuestion(_selectedQuestion.Id, _tokenSource.Token);
 
         if (response.Success)
         {
@@ -149,9 +151,9 @@ public partial class SelectQuestionDialog : ComponentBase
         var dialog = await DialogService.ShowAsync<QuestionDialog>("Создание вопроса", parameters);
     }
 
-    private async Task<bool> CreateQuestion(QuestionDto question)
+    private async Task<bool> CreateQuestion(QuestionDto question, CancellationToken cancellationToken)
     {
-        var response = await Service.CreateQuestion(question.GroupId, question.Name, question.Answer);
+        var response = await Service.CreateQuestion(question.GroupId, question.Name, question.Answer, cancellationToken);
 
         if (!response.Success)
         {
@@ -165,7 +167,7 @@ public partial class SelectQuestionDialog : ComponentBase
         return true;
     }
 
-    private async Task<bool> CreateQuestionGroup(QuestionGroupEventArgs args)
+    private async Task<bool> CreateQuestionGroup(QuestionGroupEventArgs args, CancellationToken cancellationToken)
     {
         if (string.IsNullOrWhiteSpace(args.Name))
         {
@@ -173,7 +175,7 @@ public partial class SelectQuestionDialog : ComponentBase
             return false;
         }
 
-        var response = await Service.CreateQuestionGroup(args.Name);
+        var response = await Service.CreateQuestionGroup(args.Name, cancellationToken);
 
         if (!response.Success)
         {
@@ -188,7 +190,7 @@ public partial class SelectQuestionDialog : ComponentBase
         return true;
     }
     
-    private async Task<bool> RenameQuestionGroup(QuestionGroupEventArgs args)
+    private async Task<bool> RenameQuestionGroup(QuestionGroupEventArgs args, CancellationToken cancellationToken)
     {
         if (!args.Id.HasValue)
         {
@@ -202,7 +204,7 @@ public partial class SelectQuestionDialog : ComponentBase
             return false;
         }
         
-        var response = await Service.RenameQuestionGroup(args.Id.Value, args.Name);
+        var response = await Service.RenameQuestionGroup(args.Id.Value, args.Name, cancellationToken);
 
         if (!response.Success)
         {
@@ -212,5 +214,13 @@ public partial class SelectQuestionDialog : ComponentBase
         
         Snackbar.Add("Группа успешно переименована", Severity.Success);
         return true;
+    }
+
+    public void Dispose()
+    {
+        _tokenSource.Cancel();
+        _tokenSource.Dispose();
+        _mudTable.Dispose();
+        Snackbar.Dispose();
     }
 }

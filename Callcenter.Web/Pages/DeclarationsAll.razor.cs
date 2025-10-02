@@ -9,9 +9,8 @@ using MudBlazor;
 
 namespace Callcenter.Web.Pages;
 
-public partial class DeclarationsAll : ComponentBase
+public partial class DeclarationsAll : ComponentBase, IDisposable
 {
-    
     [Inject] DeclarationsService Service { get; set; }
     
     [Inject] ProblemDetailsHandler ProblemDetailsHandler { get; set; }
@@ -23,13 +22,11 @@ public partial class DeclarationsAll : ComponentBase
     private int selectedRowNumber = -1;
     private FlexDataGrid<DeclarationDto> _mudDataGrid;
     private List<IFilterDefinition<DeclarationDto>> _filters = new();
+    
+    private CancellationTokenSource _tokenSource = new();
 
     private bool _isLoading = false;
 
-    protected override void OnInitialized()
-    {
-        
-    }
     private void RowClickEvent(DataGridRowClickEventArgs<DeclarationDto> args)
     {
         if (args.MouseEventArgs.Detail > 1)
@@ -78,7 +75,7 @@ public partial class DeclarationsAll : ComponentBase
             })
             .ToArray();
 
-        var result = await Service.SearchAll(paginate, filters, orders);
+        var result = await Service.SearchAll(paginate, filters, orders, _tokenSource.Token);
         
         if (!result.Success)
         {
@@ -106,7 +103,6 @@ public partial class DeclarationsAll : ComponentBase
 
         try
         {
-            await Task.Delay(4000);
             var filters = _filters.Select(c => new FilterRequestDto()
                 {
                     Field = c.Column?.PropertyName,
@@ -115,7 +111,7 @@ public partial class DeclarationsAll : ComponentBase
                 })
                 .ToArray();
 
-            var file = await Service.AllExcelExport(filters, null);
+            var file = await Service.AllExcelExport(filters, null, _tokenSource.Token);
 
             if (!file.Success)
             {
@@ -138,8 +134,7 @@ public partial class DeclarationsAll : ComponentBase
 
         try
         {
-            await Task.Delay(4000);
-            var file = await Service.AllExcelExportFull();
+            var file = await Service.AllExcelExportFull(_tokenSource.Token);
 
             if (!file.Success)
             {
@@ -154,5 +149,11 @@ public partial class DeclarationsAll : ComponentBase
         {
             _isLoading = false;
         }
+    }
+
+    public void Dispose()
+    {
+        _tokenSource.Cancel();
+        _tokenSource.Dispose();
     }
 }

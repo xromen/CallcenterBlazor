@@ -5,7 +5,7 @@ using MudBlazor;
 
 namespace Callcenter.Web.Components.Dialogs;
 
-public partial class SupervisorCloseDialog : ComponentBase
+public partial class SupervisorCloseDialog : ComponentBase, IDisposable
 {
     [CascadingParameter] private IMudDialogInstance MudDialog { get; set; } = null!;
     
@@ -17,6 +17,8 @@ public partial class SupervisorCloseDialog : ComponentBase
     [Inject] ProblemDetailsHandler ProblemDetailsHandler { get; set; }
     
     private string? _notes;
+    
+    private CancellationTokenSource _tokenSource = new();
 
     private Task SupervisorClose(MouseEventArgs arg) => SendRequest(false);
 
@@ -24,7 +26,7 @@ public partial class SupervisorCloseDialog : ComponentBase
 
     private async Task SendRequest(bool isBad)
     {
-        var result = await Service.SupervisorClose(DeclarationId, _notes, isBad);
+        var result = await Service.SupervisorClose(DeclarationId, _notes, isBad, _tokenSource.Token);
 
         if (!result.Success)
         {
@@ -34,5 +36,11 @@ public partial class SupervisorCloseDialog : ComponentBase
         {
             MudDialog.Close();
         }
+    }
+
+    public void Dispose()
+    {
+        _tokenSource.Cancel();
+        _tokenSource.Dispose();
     }
 }

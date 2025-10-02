@@ -5,7 +5,7 @@ using MudBlazor;
 
 namespace Callcenter.Web.Components.Dialogs;
 
-public partial class QuestionDialog : ComponentBase
+public partial class QuestionDialog : ComponentBase, IDisposable
 {
     [CascadingParameter]
     private IMudDialogInstance MudDialog { get; set; } = null!;
@@ -14,7 +14,7 @@ public partial class QuestionDialog : ComponentBase
     public List<QuestionGroupDto> AvailableGroups { get; set; }
     
     [Parameter]
-    public Func<QuestionDto, Task<bool>> OnSubmit { get; set; }
+    public Func<QuestionDto, CancellationToken, Task< bool>> OnSubmit { get; set; }
 
     [Inject] public DeclarationsService Service { get; set; } = null!;
     
@@ -25,6 +25,8 @@ public partial class QuestionDialog : ComponentBase
     private int? _groupId;
     private string? _questionName;
     private string? _questionAnswer;
+    
+    private CancellationTokenSource _tokenSource = new();
     
     private void Cancel() => MudDialog.Cancel();
 
@@ -49,9 +51,16 @@ public partial class QuestionDialog : ComponentBase
             Answer = _questionAnswer
         };
 
-        var success = await OnSubmit(args);
+        var success = await OnSubmit(args, _tokenSource.Token);
         
         if(success)
             MudDialog.Close(DialogResult.Ok(true));
+    }
+
+    public void Dispose()
+    {
+        _tokenSource.Cancel();
+        _tokenSource.Dispose();
+        Snackbar.Dispose();
     }
 }

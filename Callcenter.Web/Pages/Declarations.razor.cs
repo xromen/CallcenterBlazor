@@ -10,7 +10,7 @@ using MudBlazor;
 
 namespace Callcenter.Web.Pages;
 
-public partial class Declarations : ComponentBase
+public partial class Declarations : ComponentBase, IDisposable
 {
     [Inject] private IDialogService Dialog { get; set; } = null!;
     
@@ -27,6 +27,8 @@ public partial class Declarations : ComponentBase
     private long _answerSendCount = 0;
     private long _needsReworkCount = 0;
     private long _smoRedirectCount = 0;
+    
+    private CancellationTokenSource _tokenSource = new();
 
     private string GetPanelStyleByStatusId(int statusId) =>
         statusId switch
@@ -48,14 +50,14 @@ public partial class Declarations : ComponentBase
 
     protected override async Task OnInitializedAsync()
     {
-        await LoadItems();
+        await LoadItems(_tokenSource.Token);
     }
 
-    private async Task LoadItems()
+    private async Task LoadItems(CancellationToken cancellationToken)
     {
         _isLoading = true;
         
-        var declarationsResult = await Service.GetList(_paginateModel.PageSize, _paginateModel.Page, _searchNumber.ToString());
+        var declarationsResult = await Service.GetList(_paginateModel.PageSize, _paginateModel.Page, _searchNumber.ToString(), cancellationToken);
 
         if (!declarationsResult.Success)
         {
@@ -78,14 +80,14 @@ public partial class Declarations : ComponentBase
     private async Task SelectedPageChanged(int obj)
     {
         _paginateModel.Page = obj;
-        await LoadItems();
+        await LoadItems(_tokenSource.Token);
     }
 
     private async Task PageSizeChanged(IEnumerable<int> obj)
     {
         _paginateModel.PageSize = obj.First();
         _paginateModel.Page = 1;
-        await LoadItems();
+        await LoadItems(_tokenSource.Token);
     }
 
     private async Task SendCard(DeclarationListDto declarationList)
@@ -98,7 +100,7 @@ public partial class Declarations : ComponentBase
 
         if (!result.Canceled)
         {
-            await LoadItems();
+            await LoadItems(_tokenSource.Token);
         }
     }
 
@@ -110,7 +112,7 @@ public partial class Declarations : ComponentBase
             return;
         }
         
-        await LoadItems();
+        await LoadItems(_tokenSource.Token);
     }
 
     private int? _searchNumber = null;
@@ -120,7 +122,7 @@ public partial class Declarations : ComponentBase
         
         if (arg == null)
         {
-            await LoadItems();
+            await LoadItems(_tokenSource.Token);
         }
     }
 
@@ -131,7 +133,7 @@ public partial class Declarations : ComponentBase
         if(!confirmed)
             return;
         
-        var result = await Service.Remove(id);
+        var result = await Service.Remove(id, _tokenSource.Token);
 
         if (!result.Success)
         {
@@ -140,6 +142,13 @@ public partial class Declarations : ComponentBase
         }
         
         Snackbar.Add("Карточка успешно отправлена на удаление", Severity.Success);
-        await LoadItems();
+        await LoadItems(_tokenSource.Token);
+    }
+
+    public void Dispose()
+    {
+        _tokenSource.Cancel();
+        _tokenSource.Dispose();
+        Snackbar.Dispose();
     }
 }

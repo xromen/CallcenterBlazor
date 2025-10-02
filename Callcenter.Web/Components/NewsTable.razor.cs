@@ -7,15 +7,16 @@ using Microsoft.AspNetCore.Components.Web;
 
 namespace Callcenter.Web.Components;
 
-public partial class NewsTable : ComponentBase
+public partial class NewsTable : ComponentBase, IDisposable
 {
-    [Parameter]
-    public EventCallback<NewsClickEventArgs> OnRowClick { get; set; }
-    
+    [Parameter] public EventCallback<NewsClickEventArgs> OnRowClick { get; set; }
+
     [Inject] public NewsService Service { get; set; } = null!;
-    
+
     [Inject] public ProblemDetailsHandler ProblemDetailsHandler { get; set; } = null!;
-    
+
+    private CancellationTokenSource _tokenSource = new();
+
     private PaginateModel<NewsDto> _news = new()
     {
         PageSize = 5
@@ -23,19 +24,19 @@ public partial class NewsTable : ComponentBase
 
     protected override async Task OnInitializedAsync()
     {
-        await LoadNews();
+        await LoadNews(_tokenSource.Token);
     }
 
-    public async Task LoadNews()
+    public async Task LoadNews(CancellationToken ct)
     {
-        var result = await Service.GetNews(_news.Page, _news.PageSize);
+        var result = await Service.GetNews(_news.Page, _news.PageSize, ct);
 
         if (!result.Success)
         {
             ProblemDetailsHandler.Handle(result.Error!);
             return;
         }
-        
+
         _news.ItemsCount = result.Data!.TotalItems;
         _news.Items = result.Data!.Items;
     }
@@ -43,8 +44,8 @@ public partial class NewsTable : ComponentBase
     private Task SelectedPageChanged(int page)
     {
         _news.Page = page;
-        
-        return LoadNews();
+
+        return LoadNews(_tokenSource.Token);
     }
 
     private async Task RowClickEvent(MouseEventArgs arg, NewsDto dto)
@@ -54,6 +55,12 @@ public partial class NewsTable : ComponentBase
             MouseEventArgs = arg,
             Item = dto
         });
+    }
+
+    public void Dispose()
+    {
+        _tokenSource.Cancel();
+        _tokenSource.Dispose();
     }
 }
 

@@ -5,11 +5,13 @@ using Microsoft.AspNetCore.Components;
 
 namespace Callcenter.Web.Pages;
 
-public partial class News : ComponentBase
+public partial class News : ComponentBase, IDisposable
 {
     [Inject] public NewsService Service { get; set; } = null!;
     
     [Inject] public ProblemDetailsHandler ProblemDetailsHandler { get; set; } = null!;
+    
+    private CancellationTokenSource _tokenSource = new();
 
     private PaginateModel<NewsDto> _news = new()
     {
@@ -18,12 +20,12 @@ public partial class News : ComponentBase
 
     protected override async Task OnInitializedAsync()
     {
-        await LoadNews();
+        await LoadNews(_tokenSource.Token);
     }
 
-    private async Task LoadNews()
+    private async Task LoadNews(CancellationToken cancellationToken)
     {
-        var result = await Service.GetNews(_news.Page, _news.PageSize);
+        var result = await Service.GetNews(_news.Page, _news.PageSize, cancellationToken);
 
         if (!result.Success)
         {
@@ -39,6 +41,12 @@ public partial class News : ComponentBase
     {
         _news.Page = page;
         
-        return LoadNews();
+        return LoadNews(_tokenSource.Token);
+    }
+
+    public void Dispose()
+    {
+        _tokenSource.Cancel();
+        _tokenSource.Dispose();
     }
 }

@@ -10,7 +10,7 @@ using MudBlazor;
 
 namespace Callcenter.Web.Components.Dialogs;
 
-public partial class UserEditDialog : ComponentBase
+public partial class UserEditDialog : ComponentBase, IDisposable
 {
     [Parameter] 
     public int? UserId { get; set; }
@@ -32,10 +32,12 @@ public partial class UserEditDialog : ComponentBase
 
     private Dictionary<int, string> _orgs = new();
     private List<UserGroupDto> _userGroups = new();
+    
+    private CancellationTokenSource _tokenSource = new();
 
     protected override async Task OnInitializedAsync()
     {
-        var dictResult = await DeclarationsService.GetDictionaries();
+        var dictResult = await DeclarationsService.GetDictionaries(_tokenSource.Token);
 
         if (!dictResult.Success)
         {
@@ -45,7 +47,7 @@ public partial class UserEditDialog : ComponentBase
         
         _orgs = dictResult.Data!.Organisations;
         
-        var userGroupsResult = await AccountsService.GetUserGroups();
+        var userGroupsResult = await AccountsService.GetUserGroups(_tokenSource.Token);
         
         if (!userGroupsResult.Success)
         {
@@ -57,7 +59,7 @@ public partial class UserEditDialog : ComponentBase
 
         if (UserId.HasValue)
         {
-            var userResult = await AccountsService.GetById(UserId.Value);
+            var userResult = await AccountsService.GetById(UserId.Value, _tokenSource.Token);
             
             if (!userResult.Success)
             {
@@ -83,7 +85,7 @@ public partial class UserEditDialog : ComponentBase
         if(!confirmed)
             return;
         
-        var result = await AccountsService.Delete(UserId.Value);
+        var result = await AccountsService.Delete(UserId.Value, _tokenSource.Token);
 
         if (!result.Success)
         {
@@ -101,11 +103,11 @@ public partial class UserEditDialog : ComponentBase
         
         if (UserId.HasValue)
         {
-            result = await AccountsService.Update(UserId.Value, _user);
+            result = await AccountsService.Update(UserId.Value, _user, _tokenSource.Token);
         }
         else
         {
-            result = await AccountsService.Create(_user);
+            result = await AccountsService.Create(_user, _tokenSource.Token);
         }
         
         if (!result.Success)
@@ -122,5 +124,12 @@ public partial class UserEditDialog : ComponentBase
     {
         _user.OrgId = id;
         _user.GroupId = null;
+    }
+
+    public void Dispose()
+    {
+        _tokenSource.Cancel();
+        _tokenSource.Dispose();
+        Snackbar.Dispose();
     }
 }

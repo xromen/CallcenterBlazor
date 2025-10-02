@@ -9,41 +9,43 @@ using UserDto = Callcenter.Shared.UserDto;
 
 namespace Callcenter.Web.Components.Dialogs;
 
-public partial class SendCardDialog : ComponentBase
+public partial class SendCardDialog : ComponentBase, IDisposable
 {
     [Parameter] public int DeclarationId { get; set; }
-    
-    [CascadingParameter]
-    private IMudDialogInstance MudDialog { get; set; }
-    
+
+    [CascadingParameter] private IMudDialogInstance MudDialog { get; set; }
+
     [Inject] private ISnackbar Snackbar { get; set; }
-    
+
     [Inject] private DeclarationsService Service { get; set; }
-    
+
     [Inject] private ProblemDetailsHandler ProblemDetailsHandler { get; set; }
-    
+
     private Dictionary<int, string> _organisations = new Dictionary<int, string>();
     private List<UserDto> _users = new List<UserDto>();
 
     private int? _selectedOrgId;
     private int? _selectedOperatorLevel;
     private int? _selectedUserId;
-    
-    private bool IsSendDisabled => _selectedOrgId.HasValue || _selectedOperatorLevel.HasValue ||  _selectedUserId.HasValue;
+
+    private CancellationTokenSource _tokenSource = new();
+
+    private bool IsSendDisabled =>
+        _selectedOrgId.HasValue || _selectedOperatorLevel.HasValue || _selectedUserId.HasValue;
 
     protected override async Task OnInitializedAsync()
     {
-        var result = await Service.GetUsersToSend();
+        var result = await Service.GetUsersToSend(_tokenSource.Token);
 
         if (!result.Success)
         {
             ProblemDetailsHandler.Handle(result.Error!);
             return;
         }
-        
+
         _users = result.Data!;
         _organisations = result.Data!.GroupBy(c => c.OrgId).ToDictionary(g => g.Key, g => g.First().OrgName);
-        
+
         await base.OnInitializedAsync();
     }
 
@@ -51,14 +53,18 @@ public partial class SendCardDialog : ComponentBase
 
     private async Task Send()
     {
-        var result = await Service.SendDeclaration(DeclarationId, _selectedOrgId!.Value, _selectedOperatorLevel!.Value, _selectedUserId!.Value);
+        var result = await Service.SendDeclaration(DeclarationId,
+            _selectedOrgId!.Value,
+            _selectedOperatorLevel!.Value,
+            _selectedUserId!.Value, 
+            _tokenSource.Token);
 
         if (!result.Success)
         {
             ProblemDetailsHandler.Handle(result.Error!);
             MudDialog.Cancel();
         }
-        
+
         Snackbar.Add("Карточка отправлена", Severity.Success);
         MudDialog.Close();
     }
@@ -69,7 +75,7 @@ public partial class SendCardDialog : ComponentBase
         {
             _selectedOrgId = orgId;
         }
-        
+
         _selectedOperatorLevel = null;
         _selectedUserId = null;
     }
@@ -78,5 +84,12 @@ public partial class SendCardDialog : ComponentBase
     {
         _selectedOperatorLevel = obj;
         _selectedUserId = null;
+    }
+
+    public void Dispose()
+    {
+        _tokenSource.Cancel();
+        _tokenSource.Dispose();
+        Snackbar.Dispose();
     }
 }

@@ -31,6 +31,16 @@ public partial class MainLayout : LayoutComponentBase, IDisposable
     private List<UserNotificationDto> _userNotifications = new();
     private bool _notificationsVisible = false;
     
+    private CancellationTokenSource? _tokenSource = new();
+    private CancellationToken _token
+    {
+        get
+        {
+            _tokenSource ??= new();
+            return _tokenSource.Token;
+        }
+    }
+
     private bool _zoomedIn = false;
 
     private const string _zoomedInStyle = @"
@@ -72,13 +82,16 @@ public partial class MainLayout : LayoutComponentBase, IDisposable
     public void Dispose()
     {
         NavigationManager.LocationChanged -= LocationChangedAsync;
+        _tokenSource.Cancel();
+        _tokenSource.Dispose();
+        _tokenSource = null;
     }
 
     protected override async Task OnInitializedAsync()
     {
         var authState = await AuthStateTask;
 
-        _zoomedIn = await LocalStorageService.GetItemAsync<bool?>("zoomed") ?? false;
+        _zoomedIn = await LocalStorageService.GetItemAsync<bool?>("zoomed", _token) ?? false;
         
         _userFullName = authState.User.FindFirst("FullName")?.Value;
         _userGroup = authState.User.FindFirst("Group")?.Value;
@@ -98,7 +111,7 @@ public partial class MainLayout : LayoutComponentBase, IDisposable
 
     private async ValueTask LoadNotifications()
     {
-        var result = await AccountsService.GetUserNotifications();
+        var result = await AccountsService.GetUserNotifications(_token);
 
         if (!result.Success)
         {
@@ -114,12 +127,12 @@ public partial class MainLayout : LayoutComponentBase, IDisposable
     {
         _zoomedIn = value;
         
-        await LocalStorageService.SetItemAsync("zoomed", value);
+        await LocalStorageService.SetItemAsync("zoomed", value, _token);
     }
 
     private async Task NotificationClick(UserNotificationDto notification)
     {
-        var result = await AccountsService.ReadUserNotification(notification.Id);
+        var result = await AccountsService.ReadUserNotification(notification.Id, _token);
 
         if (!result.Success)
         {

@@ -12,7 +12,7 @@ using UserDto = Callcenter.Shared.UserDto;
 
 namespace Callcenter.Web.Pages;
 
-public partial class Admin : ComponentBase
+public partial class Admin : ComponentBase, IDisposable
 {
     [Inject] private IDialogService Dialog { get; set; } = null!;
     
@@ -25,6 +25,8 @@ public partial class Admin : ComponentBase
     [Inject] private ProblemDetailsHandler ProblemDetailsHandler { get; set; } = null!;
     
     [Inject] IJSRuntime Js { get; set; }
+    
+    private CancellationTokenSource _tokenSource = new();
     
     private bool _isLoading = false;
     
@@ -45,16 +47,16 @@ public partial class Admin : ComponentBase
         {
             //Пользователи
             case 1:
-                await UsersLoad();
+                await UsersLoad(_tokenSource.Token);
                 break;
         }
         
         _isLoading = false;
     }
 
-    private async Task UsersLoad()
+    private async Task UsersLoad(CancellationToken ct)
     {
-        var result = await AccountsService.Get();
+        var result = await AccountsService.Get(ct);
 
         if (!result.Success)
         {
@@ -76,7 +78,7 @@ public partial class Admin : ComponentBase
 
         if (!result.Canceled)
         {
-            await _newsTable.LoadNews();
+            await _newsTable.LoadNews(_tokenSource.Token);
         }
     }
 
@@ -89,7 +91,7 @@ public partial class Admin : ComponentBase
 
         if (!result.Canceled)
         {
-            await _newsTable.LoadNews();
+            await _newsTable.LoadNews(_tokenSource.Token);
         }
     }
 
@@ -103,7 +105,7 @@ public partial class Admin : ComponentBase
 
         if (!result.Canceled)
         {
-            await UsersLoad();
+            await UsersLoad(_tokenSource.Token);
         }
     }
 
@@ -116,7 +118,7 @@ public partial class Admin : ComponentBase
 
         if (!result.Canceled)
         {
-            await UsersLoad();
+            await UsersLoad(_tokenSource.Token);
         }
     }
 
@@ -141,7 +143,7 @@ public partial class Admin : ComponentBase
         _isLoading = true;
         try
         {
-            var result = await ReportsService.GetOmsPerformanceCriteriaForm(_reportOmsMonth.Value);
+            var result = await ReportsService.GetOmsPerformanceCriteriaForm(_reportOmsMonth.Value, _tokenSource.Token);
 
             if (!result.Success)
             {
@@ -175,7 +177,7 @@ public partial class Admin : ComponentBase
         try
         {
             var result = await report(DateOnly.FromDateTime(_reportFrom.Value),
-                DateOnly.FromDateTime(_reportTo.Value), CancellationToken.None);
+                DateOnly.FromDateTime(_reportTo.Value), _tokenSource.Token);
 
             if (!result.Success)
             {
@@ -195,5 +197,13 @@ public partial class Admin : ComponentBase
     private Task MakeAllComplaints(MouseEventArgs arg)
     {
         return MakeReportFromTo(ReportsService.GetAllComplaintsForm, "Все жалобы по МО.xlsx");
+    }
+
+    public void Dispose()
+    {
+        _tokenSource.Cancel();
+        _tokenSource.Dispose();
+        _newsTable.Dispose();
+        Snackbar.Dispose();
     }
 }

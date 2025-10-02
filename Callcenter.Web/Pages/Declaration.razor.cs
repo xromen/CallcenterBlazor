@@ -14,7 +14,7 @@ using MudBlazor;
 
 namespace Callcenter.Web.Pages;
 
-public partial class Declaration : ComponentBase
+public partial class Declaration : ComponentBase, IDisposable
 {
     [Parameter] public int? Id { get; set; }
 
@@ -46,6 +46,8 @@ public partial class Declaration : ComponentBase
     private int? _typeContactForm;
     private bool _isLoading = true;
     private bool _isSaving = false;
+    
+    private CancellationTokenSource _tokenSource = new();
 
     private List<IBrowserFile> _uploadedFiles = new();
 
@@ -54,7 +56,7 @@ public partial class Declaration : ComponentBase
         _isLoading = true;
 
         var authState = await AuthenticationStateTask;
-        var dictsResult = await Service.GetDictionaries();
+        var dictsResult = await Service.GetDictionaries(_tokenSource.Token);
 
         if (!dictsResult.Success)
         {
@@ -67,7 +69,7 @@ public partial class Declaration : ComponentBase
 
         if (Id.HasValue)
         {
-            var declarationResult = await Service.GetById(Id.Value);
+            var declarationResult = await Service.GetById(Id.Value, _tokenSource.Token);
 
             if (!declarationResult.Success)
             {
@@ -82,11 +84,6 @@ public partial class Declaration : ComponentBase
                     _typeContactForm = Dictionaries.VerbalContactForms.ContainsKey(Model.ContactFormId.Value) ? 1 :
                         Dictionaries.WritingContactForms.ContainsKey(Model.ContactFormId.Value) ? 2 : null;
                 }
-
-                // if (Model.InsuredMoId.HasValue)
-                // {
-                //     Model.InsuredMo = (await SearchInsuredMo(Model.InsuredMoId.ToString())).FirstOrDefault();
-                // }
             }
         }
         else
@@ -116,7 +113,7 @@ public partial class Declaration : ComponentBase
                     break;
                 }
                 
-                var result = await Service.GetHistory(Id!.Value);
+                var result = await Service.GetHistory(Id!.Value, _tokenSource.Token);
                 if (!result.Success)
                 {
                     ProblemDetailsHandler.Handle(result.Error!);
@@ -215,7 +212,7 @@ public partial class Declaration : ComponentBase
         try
         {
             //Валидация
-            var errors = await ValidateModel();
+            var errors = await ValidateModel(_tokenSource.Token);
             
             if (errors.Any(c => c.IsError))
             {
@@ -234,7 +231,7 @@ public partial class Declaration : ComponentBase
             if (Id.HasValue)
             {
                 //Обновляем
-                var response = await Service.UpdateDeclaration(Id!.Value, Model.Adapt<DeclarationDto>());
+                var response = await Service.UpdateDeclaration(Id!.Value, Model.Adapt<DeclarationDto>(), _tokenSource.Token);
 
                 if (!response.Success)
                 {
@@ -245,7 +242,7 @@ public partial class Declaration : ComponentBase
             else
             {
                 //Создаем новую
-                var result = await Service.Add(Model);
+                var result = await Service.Add(Model, _tokenSource.Token);
                 
                 if (!result.Success)
                 {
@@ -256,12 +253,10 @@ public partial class Declaration : ComponentBase
 
             foreach (var file in _uploadedFiles)
             {
-                await Service.UploadFile(Model.Id, file);
+                await Service.UploadFile(Model.Id, file, _tokenSource.Token);
             }
 
             Snackbar.Add("Карточка успешно сохранена", Severity.Success);
-
-            await Task.Delay(500);
 
             Navigation.NavigateTo("/declarations");
         }
@@ -307,7 +302,7 @@ public partial class Declaration : ComponentBase
         await Dialog.ShowAsync<SupervisorCommentsDialog>("Комментарии руководителя", parameters, options);
     }
 
-    private async Task<List<ValidationMessage>> ValidateModel()
+    private async Task<List<ValidationMessage>> ValidateModel(CancellationToken cancellationToken)
     {
         var errors = new List<ValidationMessage>();
         if (Model.TypeId == null)
@@ -374,7 +369,7 @@ public partial class Declaration : ComponentBase
         if (Id == null && !string.IsNullOrWhiteSpace(Model.FirstName) && !string.IsNullOrWhiteSpace(Model.SecName) &&
             Model.BirthDate.HasValue)
         {
-            var result = await Service.FindDeclarationsByFio(Model.FirstName, Model.SecName, Model.BirthDate.Value);
+            var result = await Service.FindDeclarationsByFio(Model.FirstName, Model.SecName, Model.BirthDate.Value, cancellationToken);
 
             if (!result.Success)
             {
@@ -389,7 +384,7 @@ public partial class Declaration : ComponentBase
         
         if (Id == null && !string.IsNullOrWhiteSpace(Model.EjogNumber))
         {
-            var result = await Service.FindDeclarationsByEjogNumber(Model.EjogNumber);
+            var result = await Service.FindDeclarationsByEjogNumber(Model.EjogNumber, cancellationToken);
 
             if (!result.Success)
             {
@@ -404,5 +399,14 @@ public partial class Declaration : ComponentBase
         }
 
         return errors;
+    }
+
+    public void Dispose()
+    {
+        _form.Dispose();
+        _tokenSource.Cancel();
+        _tokenSource.Dispose();
+        AuthenticationStateTask.Dispose();
+        Snackbar.Dispose();
     }
 }

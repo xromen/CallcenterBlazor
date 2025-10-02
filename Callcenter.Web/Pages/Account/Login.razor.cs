@@ -9,7 +9,7 @@ using MudBlazor;
 
 namespace Callcenter.Web.Pages.Account;
 
-public partial class Login : ComponentBase
+public partial class Login : ComponentBase, IDisposable
 {
     [SupplyParameterFromForm]
     private InputModel Input { get; set; } = null!;
@@ -27,6 +27,8 @@ public partial class Login : ComponentBase
     private ISnackbar Snackbar { get; set; } = null!;
     
     private bool _isLoading = false;
+    
+    private CancellationTokenSource _tokenSource = new();
 
     public async Task LoginUserAsync(EditContext context)
     {
@@ -35,7 +37,7 @@ public partial class Login : ComponentBase
         {
             var user = new UserDto(Input.Login, Input.Password);
 
-            await AuthenticationService.LoginAsync(user)
+            await AuthenticationService.LoginAsync(user, _tokenSource.Token)
                 .TapError(message => Snackbar.Add($"Ошибка во время входа {message}", Severity.Error))
                 .Map(() => ReturnUrl ?? "")
                 .Tap(x => NavigationManager.ReturnTo(x));
@@ -61,5 +63,12 @@ public partial class Login : ComponentBase
         [DataType(DataType.Password)]
         [Display(Name = "Пароль")]
         public string Password { get; set; } = string.Empty;
+    }
+
+    public void Dispose()
+    {
+        _tokenSource.Cancel();
+        _tokenSource.Dispose();
+        Snackbar.Dispose();
     }
 }
