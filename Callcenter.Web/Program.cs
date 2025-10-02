@@ -1,3 +1,4 @@
+using System;
 using System.Globalization;
 using Blazored.LocalStorage;
 using Callcenter.Web.Mappings;
@@ -7,10 +8,12 @@ using Callcenter.Web.Services.Interfaces;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
+using Microsoft.JSInterop;
 using MudBlazor;
 using MudBlazor.Services;
 using MudBlazor.Translations;
 using Refit;
+using Serilog;
 
 namespace Callcenter.Web;
 
@@ -18,6 +21,12 @@ public class Program
 {
     public static async Task Main(string[] args)
     {
+        Log.Logger = new LoggerConfiguration()
+            .MinimumLevel.Debug()
+            .Enrich.WithProperty("InstanceId", Guid.NewGuid().ToString("n"))
+            .WriteTo.BrowserConsole()
+            .CreateLogger();
+
         CultureInfo.DefaultThreadCurrentCulture = new CultureInfo("ru-RU");
         CultureInfo.DefaultThreadCurrentUICulture = new CultureInfo("ru-RU");
         
@@ -42,13 +51,16 @@ public class Program
         builder.Services.AddScoped<AuthenticationService>();
         builder.Services.AddScoped<RefreshTokenService>();
 
+        Log.Logger.Information(builder.HostEnvironment.BaseAddress);
+
         builder.Services.AddTransient<RefreshTokenHandler>();
-        builder.Services.AddHttpClient<AuthenticationService>(client => client.BaseAddress = new Uri(apiUri));
-        builder.Services.AddHttpClient<JwtParser>(client => client.BaseAddress = new Uri(apiUri));
+        builder.Services.AddHttpClient<AuthenticationService>(client => client.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress.TrimEnd('/') + "/api/"));
+        builder.Services.AddHttpClient<JwtParser>(client => client.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress.TrimEnd('/') + "/api/"));
         builder.Services.AddRefitClient<IApiClient>()
             .ConfigureHttpClient(c =>
                 {
-                    c.BaseAddress = new Uri(apiUri.TrimEnd('/'));
+                    c.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress.TrimEnd('/') + "/api");
+                    //c.BaseAddress = new Uri(apiUri.TrimEnd('/'));
                     c.Timeout = TimeSpan.FromDays(1);
                 }
             )
